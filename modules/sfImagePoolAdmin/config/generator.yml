@@ -1,0 +1,37 @@
+generator:
+  class: sfDoctrineGenerator
+  param:
+    model_class:           sfImagePoolImage
+    theme:                 admin
+    non_verbose_templates: true
+    with_show:             false
+    singular:              ~
+    plural:                ~
+    route_prefix:          sf_image_pool_image
+    with_doctrine_route:   true
+    actions_base_class:    sfActions
+            
+    config:
+      actions: ~
+      fields:  ~
+      list:
+        sort:              [ created_at, desc ]
+        title:             Image Pool
+        max_per_page:      48
+        batch_actions:     {} # no checkboxes for actions
+      filter:
+        display:
+          - original_filename
+          - title
+          - caption
+          - created_at
+          - updated_at
+          - tag
+          
+      form:    ~
+      edit:
+        title:             'Edit image'
+        display:           [_filename, credit, caption, _tagging] # with image preview
+      new:
+        title:             'Add an image'
+        display:           [filename, credit, caption, _tagging]  # without preview

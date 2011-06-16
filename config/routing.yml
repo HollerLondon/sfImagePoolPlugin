@@ -1,0 +1,57 @@
+<?php require_once(dirname(__FILE__) . '/sfImagePoolPluginConfiguration.class.php'); ?>
+
+# generic upload action for uploading an image and setting
+# tags, but not associating with any object.
+sf_image_pool_upload:
+    url:                              /sfImagePoolAdmin/upload
+    class:                            sfRequestRoute
+    param:                            { module: sfImagePoolAdmin, action: upload }
+    requirements:                     { sf_method: [post] }
+    extra_parameters_as_query_string: true
+  
+# for uploading a custom crop
+sf_image_pool_upload_crop:
+    url:                  /sfImagePoolAdmin/:id/upload-crop
+    class:                sfDoctrineRoute
+    options:              { model: sfImagePoolImage, type: object }
+    param:                { module: sfImagePoolAdmin, action: uploadCrop }
+    requirements:         { sf_method: [get, put, post] }
+
+sf_image_pool_deleteused:
+    url:                  /sfImagePoolAdmin/:id/delete-used
+    class:                sfDoctrineRoute
+    options:              { model: sfImagePoolImage, type: object }
+    param:                { module: sfImagePoolAdmin, action: deleteUsed }
+    requirements:         { sf_method: [delete] }
+
+sf_image_pool_image:
+  class:                  sfDoctrineRouteCollection
+  options:
+    model:                sfImagePoolImage
+    module:               sfImagePoolAdmin
+    prefix_path:          /sfImagePoolAdmin
+    column:               id
+    with_wildcard_routes: true
+
+sf_image_pool_chooser:
+    url:                  /sfImagePool/chooser/:page
+    param:                { module: sfImagePoolAdmin, action: chooser, page: 1, no_javascript: false}
+    
+sf_image_pool_browse:
+    url:                  /sfImagePool/browse/:page
+    param:                { module: sfImagePoolAdmin, action: chooser, page: 1 }
+    
+# for performing an image operation and then storing the file
+image:
+    url:                  <?php printf("%s/:method/:width/:height/:filename\n", sfImagePoolPluginConfiguration::getBaseUrl()) ?>
+    class:                sfDoctrineRoute
+    options:              { model: sfImagePoolImage, type: object }
+    param:                { module: sfImagePool, action: image, method: scale, no_session: true }
+    requirements:
+        sf_method:        [get]
+        width:            "\d{1,4}"
+        height:           "\d{1,4}"
+        filename:         "[\w\-\.]+\.(jpe?g|gif|png)"
+        method:           "crop|scale"
+        
+        

@@ -1,0 +1,13 @@
+all:
+  sf_image_pool:
+    cache_lifetime:     7776000 # three months
+    chooser_per_page:   24
+    mimes:              [image/jpeg, image/jpg, image/png, image/pjpeg, 'image/x-png']
+    maxfilesize:        5242880
+    folder:             image-pool
+    placeholders:       false
+    sharpen:            true
+    
+    # include controller in generated image urls?
+    # (true disables caching)
+    use_script_name:    false
