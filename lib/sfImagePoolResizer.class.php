@@ -8,14 +8,17 @@ class sfImagePoolResizer
     {
         $this->checkMethod($method);
         
+        
         // expected values for method are 'scale' and 'crop', see plugin routing.yml
         // for default values.
-        $this->image   = $image;
-        $this->method  = $method;
-        $this->scale   = ($method == 'scale') ? true : false;
-        $this->options = ($this->scale) ? array() : array('method' => 'shave_all');
-        $this->width   = $width;
-        $this->height  = $height;
+        $this->image      = $image;
+        $this->method     = $method;
+        $this->scale      = ($method == 'scale') ? true : false;
+        $default_options  = sfConfig::get('app_sf_image_pool_adapter_options',array());
+        $options          = ($this->scale) ? array() : array('method' => 'shave_all');
+        $this->options    = array_merge($default_options, $options);
+        $this->width      = $width;
+        $this->height     = $height;
         
         $this->thumb = new sfThumbnail(
             $this->width,
@@ -23,7 +26,7 @@ class sfImagePoolResizer
             $this->scale,
             true,                                // Inflate
             90,                                  // JPEG Quality
-            'mySfImageMagickAdapter',            // Adapter
+            sfConfig::get('app_image_pool_adapter','ImagePoolImageMagickAdapter'), // Adapter
             $this->options
         );
         

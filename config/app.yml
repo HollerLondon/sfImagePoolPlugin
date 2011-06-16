@@ -6,8 +6,13 @@ all:
     maxfilesize:        5242880
     folder:             image-pool
     placeholders:       false
-    sharpen:            true
     
     # include controller in generated image urls?
     # (true disables caching)
     use_script_name:    false
+    adapter:            ImagePoolImageMagickAdapter
+    use_script_name:    true
+    adapter_options:
+      sharpen:      true
+      # convert:      nice -n19 /usr/bin/convert
+    

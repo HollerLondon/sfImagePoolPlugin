@@ -1,8 +1,6 @@
 <?php
-class mySfImageMagickAdapter extends sfImageMagickAdapter
+class ImagePoolImageMagickAdapter extends sfImageMagickAdapter
 {
-  public $sharpen = true;
-  
   public function save($thumbnail, $thumbDest, $targetMime = null)
   {
     $command = '';
@@ -118,10 +116,13 @@ class mySfImageMagickAdapter extends sfImageMagickAdapter
       $command .= '!';
     }
 
-    if ($this->quality && $targetMime == 'image/jpeg')
+    if(is_null($targetMime) || $targetMime == 'image/jpeg')
     {
-      $command .= ' -quality '.$this->quality.'% ';
-      if($this->sharpen)
+      if ($this->quality )
+      {
+        $command .= sprintf(' -quality %u%% ',$this->quality);
+      }
+      if(isset($this->options['sharpen']))
       {
         $command .= ' -unsharp 1.5x1.2+0.7+0.10 ';
       }
@@ -142,7 +143,7 @@ class mySfImageMagickAdapter extends sfImageMagickAdapter
     $output = (($mime = array_search($targetMime, $this->mimeMap))?$mime.':':'').$output;
 
     $cmd = $this->magickCommands['convert'].' '.$command.' '.escapeshellarg($this->image).$extract.' '.escapeshellarg($output);
-
+    
     (is_null($thumbDest))?passthru($cmd):exec($cmd);
   }
 }
