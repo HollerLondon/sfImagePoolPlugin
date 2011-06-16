@@ -8,7 +8,7 @@
  * 
  * @return string IMG tag including attributes
  */
-function sf_image_pool_image($invoker, $dimensions = 200, $method = 'crop', $attributes = array(), $absolute = false)
+function pool_image_tag($invoker, $dimensions = 200, $method = 'crop', $attributes = array(), $absolute = false)
 {
   // remove Symfony escaping if applied
   if($invoker instanceof sfOutputEscaper)
@@ -40,7 +40,7 @@ function sf_image_pool_image($invoker, $dimensions = 200, $method = 'crop', $att
 
   $attributes = _sf_image_pool_build_attrs($image, array($w,$h), $method, $attributes);
   
-  return image_tag(sf_image_pool_image_url($image,array($w,$h),$method,$absolute),$attributes);
+  return image_tag(pool_image_uri($image,array($w,$h),$method,$absolute),$attributes);
 }
 
 function _sf_image_pool_build_attrs($invoker, $dimensions, $method, $attributes = array())
@@ -94,7 +94,7 @@ function _sf_image_pool_build_attrs($invoker, $dimensions, $method, $attributes 
   return $attributes;
 }
 
-function sf_image_pool_image_url($image, $dimensions = 200, $method = 'crop', $absolute = false)
+function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute = false)
 {
   if(is_array($dimensions))
   {
