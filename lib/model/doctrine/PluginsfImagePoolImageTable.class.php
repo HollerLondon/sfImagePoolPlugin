@@ -28,6 +28,13 @@ class PluginsfImagePoolImageTable extends Doctrine_Table
     {
         $pager = new sfDoctrinePager($this->getClassnameToReturn(), $per_page);
         
+        $im = new sfImagePoolImage;
+        
+        if(!$im->option('tagging'))
+        {
+          $tagged_object = $tag = null;
+        }
+        $im->free(true);
         if (isset($tagged_object) && $tag = $tagged_object->getTagRestriction()) 
         {
           $query = TagTable::getObjectTaggedWithQuery(

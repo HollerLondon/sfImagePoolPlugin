@@ -177,7 +177,7 @@ class sfImagePoolable extends Doctrine_Template
       $image = $this->getPoolImages($object)->getFeatured();
 
       // return url for the image
-      return sf_image_pool_image_url($image, $dimensions, $method, $absolute);
+      return pool_image_uri($image, $dimensions, $method, $absolute);
     }
     
     public function setImages($images = array(),Doctrine_Record $object = null)

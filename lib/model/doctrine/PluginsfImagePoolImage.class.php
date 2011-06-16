@@ -16,7 +16,27 @@ abstract class PluginsfImagePoolImage extends BasesfImagePoolImage
     // used by the sfImagePoolHelper
     const MISSING     = 'missing';
     const PLACEHOLDER = 'placeholder';
-
+    
+    public function setup()
+    {
+      parent::setup();
+      
+      if($this->option('tagging'))
+      {
+        if(!class_exists('Taggable'))
+        {
+          throw new sfPluginDependencyException("sfDoctrineActAsTaggable is required to use image pool tagging");
+        }
+    
+        $taggable0 = new Taggable;
+        if(!$taggable0 instanceof Doctrine_Template)
+        {
+          throw new sfPluginDependencyException("Taggable is not a Doctrine_Template");
+        }
+        $this->actAs($taggable0);
+      }
+    }
+    
     /**
      *  
      *

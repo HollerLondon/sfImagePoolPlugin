@@ -2,7 +2,7 @@
 
 <h2>Delete this image?</h2>
 
-<?php echo sf_image_pool_image($image, '300') ?>
+<?php echo pool_image_tag($image, '300') ?>
 <p><?php echo $image['original_filename'] ?></p>
 
 <?php if(count($models)): ?>

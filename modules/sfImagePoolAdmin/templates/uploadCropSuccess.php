@@ -6,7 +6,7 @@
 <div class="sf_admin_form">
 <?php echo $form->renderFormTag(url_for('sf_image_pool_upload_crop', $image)) ?>
     <fieldset>
-        <p><?php echo sf_image_pool_image($image, '200', 'scale', array('class' => 'image-preview')) ?></p>
+        <p><?php echo pool_image_tag($image, '200', 'scale', array('class' => 'image-preview')) ?></p>
         <?php echo $form ?>
         
         <div>

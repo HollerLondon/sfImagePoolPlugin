@@ -17,7 +17,7 @@ if ($sf_data->offsetExists('tag')) {
 <?php foreach($pager->getResults() as $i): ?>
   <div class="pool-image">
     <label>
-      <?php echo sf_image_pool_image($i, '100', 'crop', array('title' => $i['filename'], 'rel' => $i['id'])) ?>
+      <?php echo pool_image_tag($i, '100', 'crop', array('title' => $i['filename'], 'rel' => $i['id'])) ?>
     </label>
   </div>
 <?php endforeach ?>

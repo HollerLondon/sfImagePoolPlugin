@@ -37,7 +37,7 @@ abstract class PluginsfImagePoolImageForm extends BasesfImagePoolImageForm
             'path'       => $this->getUploadDir()
         )), array('mime_type' => 'Please upload either a JPG or PNG file', 'max_size' => sprintf('Files cannot exceed %sMb in size', round($max_size_bytes / 1024 / 1024))));
         
-        if($this->getOption('use_tags', true))
+        if($this->getObject()->option('tagging') && $this->getOption('use_tags', true))
         {
           // namespace, key, widget-label
           $this->setTagWidget('Category');
@@ -221,7 +221,7 @@ abstract class PluginsfImagePoolImageForm extends BasesfImagePoolImageForm
     {
         parent::doUpdateObject($values);
         
-        if(is_array($this->tag_fields) && count($this->tag_fields))
+        if($this->getObject()->option('tagging') && is_array($this->tag_fields) && !empty($this->tag_fields))
         {
             $this->applyTags();
         }

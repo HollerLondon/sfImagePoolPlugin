@@ -3,7 +3,7 @@
 <div id="imageChooser" class="<?php echo $multiple ? 'multiple' : '' ?>">
     <div id="selectedImage">
     <?php foreach($images as $i): ?>
-      <?php echo sf_image_pool_image($i, '100', 'crop',array('id'=>'sf_image_pool_image_'+$i->getPrimaryKey())) ?>
+      <?php echo pool_image_tag($i, '100', 'crop',array('id'=>'sf_image_pool_image_'+$i->getPrimaryKey())) ?>
       <input type="hidden" name="<?php echo $name ?>[]" value="<?php echo $i->getPrimaryKey() ?>" />
     <?php endforeach ?>
     </div>

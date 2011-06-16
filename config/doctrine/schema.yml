@@ -3,7 +3,11 @@ options:
   charset:  utf8
 
 sfImagePoolImage:
-    actAs:                 [Taggable, Timestampable, Sluggable]
+    options:
+      tagging:  false
+    actAs:
+      - Timestampable
+      - Sluggable
     columns:
         id:                { type: integer, primary: true, autoincrement: true }
         original_filename: { type: string(255), notnull: true } 
@@ -13,7 +17,7 @@ sfImagePoolImage:
         caption:           { type: string }
         mime_type:         { type: string(40) }
     indexes:
-        filename_idx:
+        pool_image_filename_idx:
             fields:        [filename]
             type:          unique
 
@@ -55,7 +59,7 @@ sfImagePoolLookup:
             class:         sfImagePoolImage
     # tell doctrine not to setup contraints at the db level (export tables only)
     attributes: 
-        export:            [tables]
+      export:              [tables]
     indexes:
-      model_idx:
-        fields:             [ imaged_model, imaged_model_id ]
+      imaged_model_idx:
+        fields:            [ imaged_model, imaged_model_id ]

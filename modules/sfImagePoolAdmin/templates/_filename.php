@@ -4,7 +4,7 @@
 <div class="sf_admin_form_row sf_admin_text sf_admin_form_field_filename">
     <?php echo $form['filename']->renderLabel() ?>
     <div class="content">
-        <?php echo sf_image_pool_image($form->getObject(), '200', 'scale', array('class' => 'image-preview')) ?>
+        <?php echo pool_image_tag($form->getObject(), '200', 'scale', array('class' => 'image-preview')) ?>
         <br /><br />
         
         <?php echo $form['filename']->renderError() ?>

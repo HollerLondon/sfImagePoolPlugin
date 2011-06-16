@@ -11,7 +11,7 @@
             <?php echo $helper->linkToDelete($i, array('params' => array(), 'confirm' => 'Are you sure?', 'class_suffix' => 'delete', 'label' => 'Delete')) ?>
         </div>
         
-        <?php echo sf_image_pool_image($i, '100', 'crop') ?>
+        <?php echo pool_image_tag($i, '100', 'crop') ?>
         <div class="filename" title="<?php echo $i['original_filename'] ?>"><?php echo $i['original_filename'] ?></div>
     </li>
 <?php endforeach ?>
