@@ -1,4 +1,4 @@
-<?php use_helper('sfImagePool') ?>
+<?php use_helper('ImagePool') ?>
 
 <div id="imageChooser" class="<?php echo $multiple ? 'multiple' : '' ?>">
     <div id="selectedImage">

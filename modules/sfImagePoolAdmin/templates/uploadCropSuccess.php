@@ -1,4 +1,4 @@
-<?php use_helper('sfImagePool') ?>
+<?php use_helper('ImagePool') ?>
 
 <h2>Upload Custom Crop</h2>
 <p>Your upload will override any automatic crop that would be performed to the same dimensions (as your image).</p>

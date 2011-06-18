@@ -1,4 +1,4 @@
-<?php use_helper('sfImagePool') ?>
+<?php use_helper('ImagePool') ?>
 
 <?php 
 // Send through extra optional parameters to AJAX

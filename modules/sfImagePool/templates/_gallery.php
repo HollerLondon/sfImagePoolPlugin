@@ -1,4 +1,4 @@
-<?php use_helper('sfImagePool') ?>
+<?php use_helper('ImagePool') ?>
 
 <?php if($object->allowSelectMultiple()): ?>
     <?php if(count($object->getPoolImages()->getUnfeatured()) > 1): ?>

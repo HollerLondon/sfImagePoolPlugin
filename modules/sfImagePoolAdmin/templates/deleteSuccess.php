@@ -1,4 +1,4 @@
-<?php use_helper('sfImagePool') ?>
+<?php use_helper('ImagePool') ?>
 
 <h2>Delete this image?</h2>
 

@@ -1,4 +1,4 @@
-<?php use_helper('sfImagePool') ?>
+<?php use_helper('ImagePool') ?>
 
 <?php if($object->allowSelectMultiple()): ?>
     <div class="featured-image"><?php echo pool_image_tag($object->getFeaturedImage(), '720x250', 'crop') ?></div>

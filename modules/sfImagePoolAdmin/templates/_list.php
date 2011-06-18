@@ -1,4 +1,4 @@
-<?php use_helper('sfImagePool') ?>
+<?php use_helper('ImagePool') ?>
 
 <?php if($pager->getNbResults()): ?>
 <ul id="sf_image_pool_images">

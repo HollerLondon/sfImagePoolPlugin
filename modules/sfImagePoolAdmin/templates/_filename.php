@@ -1,4 +1,4 @@
-<?php use_helper('sfImagePool') ?>
+<?php use_helper('ImagePool') ?>
 <?php use_stylesheet('/sfImagePoolPlugin/css/sfImagePool.css') ?>
 
 <div class="sf_admin_form_row sf_admin_text sf_admin_form_field_filename">
