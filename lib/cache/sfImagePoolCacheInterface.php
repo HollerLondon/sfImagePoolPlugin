@@ -25,4 +25,10 @@ interface sfImagePoolCacheInterface
    */
   public function sendCachingHttpHeaders();
   
+  /**
+   * Defines actions to be done after the thumbnail is created and prepared for sending to browser
+   * e.g: sending to cloud
+   */
+  public function commit();
+  
 } // END interface sfImagePoolCache

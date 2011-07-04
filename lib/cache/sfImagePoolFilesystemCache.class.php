@@ -11,4 +11,9 @@ class sfImagePoolFilesystemCache extends sfImagePoolCache implements sfImagePool
   {
     
   }
+  
+  public function commit()
+  {
+    
+  }
 } // END class 

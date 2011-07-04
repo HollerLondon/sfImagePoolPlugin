@@ -41,13 +41,13 @@ class BasesfImagePoolActions extends sfActions
           // on the filesystem it'll just be fetched from the browser cache.
           if($cache->sendCachingHttpHeaders())
           {
-            $response->setContentType('image/jpeg');
+            $response->setContentType($thumb->getMime()); 
 
             $response->addCacheControlHttpHeader('public');
             $response->addCacheControlHttpHeader('max_age',$cache->getLifetime());
           
             $response->setHttpHeader('Last-Modified', date('D, j M Y, H:i:s'));
-            $response->setHttpHeader('Expires', date('D, j M Y, H:i:s', strtotime(sprintf('+ %u second', $cache['lifetime']))));
+            $response->setHttpHeader('Expires', date('D, j M Y, H:i:s', strtotime(sprintf('+ %u second', $cache->getLifetime()))));
             $response->setHttpHeader('Content-Length', strlen($image_data));
           }
           

@@ -38,4 +38,5 @@ abstract class sfImagePoolCache
   {
     return $this->options['lifetime'];
   }
+  
 } // END class 

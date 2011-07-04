@@ -126,14 +126,12 @@ abstract class PluginsfImagePoolImage extends BasesfImagePoolImage
             // filter out Base and Table classes
             if(!strstr($class, 'Base') && !strstr($class, 'Table'))
             {
-                $model = new $class();
-                
                 // check for presence of sfImagePoolable behaviour
-                if($model->hasRelation('sfImagePoolImage'))
+                if( Doctrine_Core::getTable($class)->hasTemplate('sfImagePoolable'))
                 {
-                    $models[$class] = Doctrine_Core::getTable($class)
+                    $models[$class] = Doctrine_Core::getTable('sfImagePoolLookup')
                         ->createQuery()
-                        ->where('sf_image_pool_image_id IS NOT NULL')
+                        ->where('imaged_model = ?', $class)
                         ->count();
                 }
             }

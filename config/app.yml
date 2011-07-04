@@ -2,7 +2,6 @@ all:
   sf_image_pool:
     cache_lifetime:     7776000 # three months
     chooser_per_page:   24
-
     
     mimes:              [image/jpeg, image/jpg, image/png, image/pjpeg, 'image/x-png']
 
@@ -23,10 +22,14 @@ all:
     adapter_options:
       sharpen:      true
       # You can prefix the "convert" command with nice -n19 to make it a bit more CPU friendly
-      # convert:      nice -n19 /usr/bin/convert
+      # convert:        nice -n19 /usr/bin/convert
+      
     # How should we cache files?
     cache:
-      class:        sfImagePoolFilesystemCache
-      # class:      sfImagePoolRackCloudCache
-      # class:      sfImagePoolAmazonS3Cache
-      lifetime:     7776000 # 4 weeks
+      class:            sfImagePoolFilesystemCache
+      # class:          sfImagePoolRackCloudCache
+      # class:          sfImagePoolAmazonS3Cache
+      lifetime:         7776000 # 4 weeks
+    # cache adapter options
+    cache_adapter:      {}
+    

@@ -9,9 +9,11 @@
     <h3>Careful!</h3>
     <p>This will affect:</p>
     
-    <?php foreach($models as $model_name => $usage_count): ?>
-        <?php printf('%s %s', $usage_count, strtolower(sfInflector::humanize($model_name))) ?>
-    <?php endforeach ?>
+    <ul>
+      <?php foreach($models as $model_name => $usage_count): ?>
+        <li><?php echo $usage_count; ?> <?php echo strtolower(sfInflector::humanize($model_name)) . (1 != $usage_count ? 's' : ''); ?></li>
+      <?php endforeach ?>
+    </ul>
     
 <?php endif ?>
 
