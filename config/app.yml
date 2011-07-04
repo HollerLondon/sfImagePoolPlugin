@@ -2,10 +2,18 @@ all:
   sf_image_pool:
     cache_lifetime:     7776000 # three months
     chooser_per_page:   24
+
+    
     mimes:              [image/jpeg, image/jpg, image/png, image/pjpeg, 'image/x-png']
+
+    # Maximum upload size to accept
     maxfilesize:        5242880
+    
+    # Folder within the web/ folder to store crops
     folder:             image-pool
-    placeholders:       false
+
+    placeholders:       false # If true, use file placeholder.jpg if an image can't be found
+    use_placeholdit:    false # if true, returns handy placeholder images from placehold.it
     
     # include controller in generated image urls?
     # (true disables caching)
@@ -14,5 +22,11 @@ all:
     use_script_name:    true
     adapter_options:
       sharpen:      true
+      # You can prefix the "convert" command with nice -n19 to make it a bit more CPU friendly
       # convert:      nice -n19 /usr/bin/convert
-    
+    # How should we cache files?
+    cache:
+      class:        sfImagePoolFilesystemCache
+      # class:      sfImagePoolRackCloudCache
+      # class:      sfImagePoolAmazonS3Cache
+      lifetime:     7776000 # 4 weeks

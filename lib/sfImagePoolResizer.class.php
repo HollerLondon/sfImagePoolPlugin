@@ -42,7 +42,7 @@ class sfImagePoolResizer
      *
      * @return sfThumbnail
      */
-    public function save()
+    public function save($save_path)
     {
         $this->thumb->save($this->getNewImagePath());
         return $this->thumb;
@@ -68,7 +68,7 @@ class sfImagePoolResizer
         {
             if(!mkdir($folder_path, 0777, true))
             {
-                throw new Exception(sprintf('Could not create "%s"', $folder_path));
+                throw new sfImagePoolException(sprintf('Could not create "%s"', $folder_path));
             }
         }
         
@@ -82,7 +82,7 @@ class sfImagePoolResizer
     {
         if(!in_array($method, array('scale', 'crop')))
         {
-            throw new Exception(sprintf('"%s" is not a valid method', $method));
+            throw new sfImagePoolException(sprintf('"%s" is not a valid method', $method));
         }
     }
 }
