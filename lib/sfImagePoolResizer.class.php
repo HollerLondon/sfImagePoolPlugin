@@ -1,6 +1,63 @@
 <?php
 class sfImagePoolResizer
 {
+  /**
+   * Array of parameters passed to sfThumbnail
+   *
+   * @var array
+   **/
+  private $params = array();
+  
+  /**
+   * Image to resize
+   *
+   * @var sfImagePoolImage
+   **/
+  private $image;
+  
+  /**
+   * crop or scale
+   *
+   * @var string
+   **/
+  private $method = 'crop';
+  
+  /**
+   * options passed to the sfThumbnail adapter
+   *
+   * @var array
+   **/
+  private $options = array();
+  
+  /**
+   * Width
+   *
+   * @var int
+   **/
+  private $width;
+  
+  /**
+   * Height
+   *
+   * @var int
+   **/
+  private $height;
+  
+  /**
+   * True if self::$method is 'scale'
+   *
+   * @var boolean
+   * @see self::$method
+   **/
+  private $scale = false;
+  
+  /**
+   * Instance of sfThumbnail from sfThumbnailPlugin
+   *
+   * @var sfThumbnail
+   **/
+  private $thumb;
+  
     /**
      * Construct a new Resizer instance
      *
@@ -8,12 +65,10 @@ class sfImagePoolResizer
      * @param string $method "crop" or "scale" 
      * @param integer $width 
      * @param integer $height 
-     * @return array Parameters pass to sfThumbnail. 0 => width, 1 => height, 2 => method, 3 => allow scale up, 4=> jpg quality, 5 => Thumbnail adapter, 6 => adapter options
      */
     public function __construct(sfImagePoolImage $image, $method, $width, $height)
     {
         $this->checkMethod($method);
-        
         
         // expected values for method are 'scale' and 'crop', see plugin routing.yml
         // for default values.
@@ -30,7 +85,7 @@ class sfImagePoolResizer
         // sfThumbnail, but we can't use call_user_func_array to call a 
         // constructor. Reflection to the rescue!
         // http://www.php.net/manual/en/function.call-user-func-array.php#74427
-        $params = array(
+        $this->params = array(
             $this->width,
             $this->height,
             $this->scale,
@@ -39,12 +94,22 @@ class sfImagePoolResizer
             sfConfig::get('app_image_pool_adapter','ImagePoolImageMagickAdapter'), // Adapter
             $this->options
         );
-
         $reflectionObj  = new ReflectionClass('sfThumbnail');
-        $this->thumb    = $reflectionObj->newInstanceArgs($params);
+        $this->thumb    = $reflectionObj->newInstanceArgs($this->params);
         
         $this->thumb->loadFile($this->image->getPathToOriginalFile());
         return $params;
+    }
+    
+    /**
+     * Get the sfThumbnail parameters
+     *
+     * @return array Parameters pass to sfThumbnail. 0 => width, 1 => height, 2 => method, 3 => allow scale up, 4=> jpg quality, 5 => Thumbnail adapter, 6 => adapter options
+     * @author Ben Lancaster
+     **/
+    public function getParams()
+    {
+      return $this->params;
     }
     
     /**

@@ -29,8 +29,6 @@ class BasesfImagePoolActions extends sfActions
           // create thumbnail
           $resizer = new sfImagePoolResizer($sf_pool_image, $thumb_method, $width, $height);
           
-          $resizer->sharpen = sfConfig::get('app_sf_image_pool_sharpen',true);
-
           $thumb   = $resizer->save($cache->getDestination());
         
           // get thumbnail data and spit out
