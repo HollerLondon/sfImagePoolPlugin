@@ -1,4 +1,11 @@
 <?php
+/**
+ * Custom sfThumbnail adapter for sfImagePoolPlugin
+ *
+ * @package symfony
+ * @subpackage sfImagePoolPlugin
+ * @author Ben Lancaster
+ */
 class ImagePoolImageMagickAdapter extends sfImageMagickAdapter
 {
   public function save($thumbnail, $thumbDest, $targetMime = null)

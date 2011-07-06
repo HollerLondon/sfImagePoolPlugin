@@ -1,4 +1,11 @@
 <?php
+/**
+ * Interface for sfThumbnail
+ *
+ * @package symfony
+ * @subpackage sfImagePoolPlugin
+ * @author Ben Lancaster
+ */
 class sfImagePoolResizer
 {
   /**

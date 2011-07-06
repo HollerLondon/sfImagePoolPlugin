@@ -1,4 +1,11 @@
 <?php
+/**
+ * Base class for all Image Pool actions
+ *
+ * @package symfony
+ * @subpackage sfImagePoolPlugin
+ * @author Ben Lancaster
+ */
 class BasesfImagePoolActions extends sfActions
 {
     
