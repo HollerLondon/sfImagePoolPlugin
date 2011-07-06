@@ -12,21 +12,30 @@ abstract class sfImagePoolCache
    *
    * @var object sfImagePoolImage
    **/
-  private $image;
+  protected $image;
   
   /**
    * Caching options
-   *
-   * @var string
+   * 
+   * @var string[]
    */
-  private $options = array(
+  protected $options = array(
     'lifetime'    => 7776000,
   );
   
-  public function __construct(sfImagePoolImage $image, $options = array())
+  /**
+   * Options returned from sfImagePoolResizer - e.g width, height, etc
+   *
+   * @see sfImagePoolResizer::getParams()
+   * @var array
+   */
+  protected $resizer_options = array();
+  
+  public function __construct(sfImagePoolImage $image, $options = array(), $resizer_options = array())
   {
-    $this->options = array_merge($this->options, $options);
-    $this->image   = $image;
+    $this->options          = array_merge($this->options, $options);
+    $this->resizer_options  = array_merge($this->resizer_options, $resizer_options);
+    $this->image            = $image;
   }
   
   public function sendCachingHttpHeaders()

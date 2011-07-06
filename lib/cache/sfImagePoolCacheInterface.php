@@ -7,7 +7,17 @@
  **/
 interface sfImagePoolCacheInterface
 {
-  public function __construct(sfImagePoolImage $image, $options = array());
+  /**
+   * Create new cache handler object
+   * 
+   * @var sfImagePoolImage $image
+   * @var array $options
+   * @var array $resizer_options  Parameters received from sfImagePoolResizer 
+   *                              0 => width, 1 => height, 2 => method, 3 => allow scale up, 4 => jpg quality, 5 => Thumbnail adapter, 6 => adapter options
+   *                              
+   * @author Jo Carter
+   */
+  public function __construct(sfImagePoolImage $image, $options = array(), $resizer_options = array());
 
   /**
    * Returns the destination for the given image
@@ -28,6 +38,8 @@ interface sfImagePoolCacheInterface
   /**
    * Defines actions to be done after the thumbnail is created and prepared for sending to browser
    * e.g: sending to cloud
+   * 
+   * @author Jo Carter
    */
   public function commit();
   

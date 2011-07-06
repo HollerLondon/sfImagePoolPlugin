@@ -11,7 +11,7 @@
 function pool_image_tag($invoker, $dimensions = 200, $method = 'crop', $attributes = array(), $absolute = false)
 {
   // remove Symfony escaping if applied
-  if($invoker instanceof sfOutputEscaper)
+  if ($invoker instanceof sfOutputEscaper)
   {
       $invoker = $invoker->getRawValue();
   }
@@ -21,13 +21,13 @@ function pool_image_tag($invoker, $dimensions = 200, $method = 'crop', $attribut
       ? $invoker
       : $invoker->getFeaturedImage();
 
-  if(is_array($dimensions))
+  if (is_array($dimensions))
   {
     $w  = $dimensions[0];
     $h  = $dimensions[1];
   }
   // parse dimensions string for width and height
-  elseif(strpos(strtolower($dimensions), 'x') !== false)
+  else if (strpos(strtolower($dimensions), 'x') !== false)
   {
       list($w, $h) = explode('x', $dimensions);
   }
@@ -39,7 +39,7 @@ function pool_image_tag($invoker, $dimensions = 200, $method = 'crop', $attribut
   }
 
   $attributes = _sf_image_pool_build_attrs($image, array($w,$h), $method, $attributes);
-  
+
   return image_tag(pool_image_uri($image,array($w,$h),$method,$absolute),$attributes);
 }
 
@@ -65,7 +65,7 @@ function _sf_image_pool_build_attrs($invoker, $dimensions, $method, $attributes 
   }
 
   // set alt tag if not already set. if image's caption is empty, use original filename.
-  if(!isset($attributes['alt']))
+  if (!isset($attributes['alt']))
   {
     $attributes['alt'] = $invoker['caption'];
   }
@@ -96,13 +96,15 @@ function _sf_image_pool_build_attrs($invoker, $dimensions, $method, $attributes 
 
 function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute = false)
 {
-  if(is_array($dimensions))
+  $offsite = false;
+  
+  if (is_array($dimensions))
   {
     $width  = $dimensions[0];
     $height = $dimensions[1];
   }
   // parse dimensions string for width and height
-  elseif(strpos(strtolower($dimensions), 'x') !== false)
+  else if (strpos(strtolower($dimensions), 'x') !== false)
   {
       list($width, $height) = explode('x', $dimensions);
   }
@@ -114,14 +116,29 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
   }
   
   // if we have an empty sfImagePool instance then output a placeholder
-  if(!$image['filename'])
+  if (!$image['filename'])
   {
     $image['filename'] = 'placeholder.jpg';
   }
   
-  if(!function_exists('url_for'))
+  if (!function_exists('url_for'))
   {
     sfApplicationConfiguration::getActive()->loadHelpers(array('Url'));
+  }
+  
+  $cache_options = sfConfig::get('app_sf_image_pool_cache');
+
+  if (true == $cache_options['off_site'] && !empty($cache_options['off_site_uri'])) 
+  {
+    // check whether crop exists - if it doesn't business as usual
+    $class = $cache_options['class'];
+    $crop = sfImagePoolCropTable::getInstance()->findCrop($image, $width, $height, $class::CROP_IDENTIFER);
+    
+    if ($crop)
+    {
+      $absolute = false;
+      $offsite = true;
+    }
   }
   
   $url = url_for(sprintf('@image?width=%s&height=%s&filename=%s&method=%s', $width, $height, $image['filename'], $method), $absolute);
@@ -130,9 +147,14 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
   // its good to have this option independent of the global Symfony
   // setting as we may be generating URLs to insert into the db and which
   // should not therefore have any controller referenced.
-  if(!sfConfig::get('app_sf_image_pool_use_script_name', false))
+  if (!sfConfig::get('app_sf_image_pool_use_script_name', false) || $offsite)
   {
     $url = preg_replace('%\w+(_dev)?\.php/%', '', $url);
+  }
+  
+  if ($offsite)
+  {
+    $url = str_replace(sfImagePoolPluginConfiguration::getBaseUrl(), $cache_options['off_site_uri'], $url);
   }
   
   return $url;

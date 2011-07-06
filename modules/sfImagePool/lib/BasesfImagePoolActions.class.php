@@ -8,7 +8,6 @@
  */
 class BasesfImagePoolActions extends sfActions
 {
-    
     /**
      * Generate, cache and display the given image
      */
@@ -21,20 +20,20 @@ class BasesfImagePoolActions extends sfActions
         $height        = $request->getParameter('height');
         
         $cache_options = sfConfig::get('app_sf_image_pool_cache',array());
-        $class         = $cache_options['class'];
-        
-        $cache = new $class($sf_pool_image,$cache_options);
+        $cache_class   = $cache_options['class'];
         
         try
         {
           // check file exists on the filesystem
-          if(!file_exists($sf_pool_image->getPathToOriginalFile()))
+          if (!file_exists($sf_pool_image->getPathToOriginalFile()))
           {
             throw new sfImagePoolException(sprintf('%s does not exist', $sf_pool_image->getPathToOriginalFile()));
           }
           
           // create thumbnail
           $resizer = new sfImagePoolResizer($sf_pool_image, $thumb_method, $width, $height);
+          
+          $cache   = new $cache_class($sf_pool_image,$cache_options,$resizer->getParams());
           
           $thumb   = $resizer->save($cache->getDestination());
         
@@ -44,7 +43,7 @@ class BasesfImagePoolActions extends sfActions
         
           // set headers so when image is requested again, if it exists
           // on the filesystem it'll just be fetched from the browser cache.
-          if($cache->sendCachingHttpHeaders())
+          if ($cache->sendCachingHttpHeaders())
           {
             $response->setContentType($thumb->getMime()); 
 
@@ -66,9 +65,9 @@ class BasesfImagePoolActions extends sfActions
         }
 
         // thumbnail could not be generated so let's spit out a thumbnail instead 
-        catch(sfImagePoolException $e)
+        catch (sfImagePoolException $e)
         {
-          if(sfConfig::get('app_sf_image_pool_placeholders',false))
+          if (sfConfig::get('app_sf_image_pool_placeholders',false))
           {
             $dest = sfConfig::get('app_sf_image_pool_use_placeholdit', false)
               ? sprintf('http://placehold.it/%ux%u',$width,$height,urlencode($e->getMessage()))

@@ -8,63 +8,63 @@
  */
 class sfImagePoolResizer
 {
-  /**
-   * Array of parameters passed to sfThumbnail
-   *
-   * @var array
-   **/
-  private $params = array();
-  
-  /**
-   * Image to resize
-   *
-   * @var sfImagePoolImage
-   **/
-  private $image;
-  
-  /**
-   * crop or scale
-   *
-   * @var string
-   **/
-  private $method = 'crop';
-  
-  /**
-   * options passed to the sfThumbnail adapter
-   *
-   * @var array
-   **/
-  private $options = array();
-  
-  /**
-   * Width
-   *
-   * @var int
-   **/
-  private $width;
-  
-  /**
-   * Height
-   *
-   * @var int
-   **/
-  private $height;
-  
-  /**
-   * True if self::$method is 'scale'
-   *
-   * @var boolean
-   * @see self::$method
-   **/
-  private $scale = false;
-  
-  /**
-   * Instance of sfThumbnail from sfThumbnailPlugin
-   *
-   * @var sfThumbnail
-   **/
-  private $thumb;
-  
+    /**
+     * Array of parameters passed to sfThumbnail
+     *
+     * @var array
+     **/
+    private $params = array();
+    
+    /**
+     * Image to resize
+     *
+     * @var sfImagePoolImage
+     **/
+    private $image;
+    
+    /**
+     * crop or scale
+     *
+     * @var string
+     **/
+    private $method = 'crop';
+    
+    /**
+     * options passed to the sfThumbnail adapter
+     *
+     * @var array
+     **/
+    private $options = array();
+    
+    /**
+     * Width
+     *
+     * @var int
+     **/
+    private $width;
+    
+    /**
+     * Height
+     *
+     * @var int
+     **/
+    private $height;
+    
+    /**
+     * True if self::$method is 'scale'
+     *
+     * @var boolean
+     * @see self::$method
+     **/
+    private $scale = false;
+    
+    /**
+     * Instance of sfThumbnail from sfThumbnailPlugin
+     *
+     * @var sfThumbnail
+     **/
+    private $thumb;
+    
     /**
      * Construct a new Resizer instance
      *
@@ -101,60 +101,35 @@ class sfImagePoolResizer
             sfConfig::get('app_image_pool_adapter','ImagePoolImageMagickAdapter'), // Adapter
             $this->options
         );
+        
         $reflectionObj  = new ReflectionClass('sfThumbnail');
         $this->thumb    = $reflectionObj->newInstanceArgs($this->params);
         
         $this->thumb->loadFile($this->image->getPathToOriginalFile());
-        return $params;
     }
     
     /**
      * Get the sfThumbnail parameters
      *
-     * @return array Parameters pass to sfThumbnail. 0 => width, 1 => height, 2 => method, 3 => allow scale up, 4=> jpg quality, 5 => Thumbnail adapter, 6 => adapter options
+     * @return array Parameters passed to sfThumbnail. 0 => width, 1 => height, 2 => method, 3 => allow scale up, 4 => jpg quality, 5 => Thumbnail adapter, 6 => adapter options
      * @author Ben Lancaster
      **/
     public function getParams()
     {
-      return $this->params;
+        return $this->params;
     }
     
     /**
      * Return saved sfThumbnail object 
      *
+     * @param $save_path   Save path - sent through from sfImagePoolCache{type}
+     * @see   sfImagePoolCacheInterface::getDestination()
      * @return sfThumbnail
      */
     public function save($save_path)
     {
-        $this->thumb->save($this->getNewImagePath());
+        $this->thumb->save($save_path);
         return $this->thumb;
-    }
-    
-    /**
-     * Create path to new image on filesystem. Creates folders
-     * if they don't exist.
-     *
-     * @return string
-     */
-    protected function getNewImagePath()
-    {
-        $folder_path = implode(DIRECTORY_SEPARATOR, array(
-            sfImagePoolPluginConfiguration::getBaseDir(),
-            $this->method,
-            $this->width,
-            $this->height,
-        ));
-        
-        // if folder not found for this resize, then attempt to create it.
-        if(!file_exists($folder_path))
-        {
-            if(!mkdir($folder_path, 0777, true))
-            {
-                throw new sfImagePoolException(sprintf('Could not create "%s"', $folder_path));
-            }
-        }
-        
-        return $folder_path . DIRECTORY_SEPARATOR . $this->image['filename'];
     }
     
     /**
@@ -162,7 +137,7 @@ class sfImagePoolResizer
      */
     protected function checkMethod($method)
     {
-        if(!in_array($method, array('scale', 'crop')))
+        if (!in_array($method, array('scale', 'crop')))
         {
             throw new sfImagePoolException(sprintf('"%s" is not a valid method', $method));
         }

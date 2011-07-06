@@ -18,6 +18,8 @@ class sfImagePoolPluginConfiguration extends sfPluginConfiguration
         {
             mkdir(self::getBaseDir(), 0777);
         }
+        
+        $this->connectTests();
     }
     
     /**

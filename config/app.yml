@@ -14,11 +14,9 @@ all:
     placeholders:       false # If true, use file placeholder.jpg if an image can't be found
     use_placeholdit:    false # if true, returns handy placeholder images from placehold.it
     
-    # include controller in generated image urls?
-    # (true disables caching)
+    # include controller in generated image urls? (true disables caching)
     use_script_name:    false
     adapter:            ImagePoolImageMagickAdapter
-    use_script_name:    true
     adapter_options:
       sharpen:      true
       # You can prefix the "convert" command with nice -n19 to make it a bit more CPU friendly
@@ -30,6 +28,8 @@ all:
       # class:          sfImagePoolRackCloudCache
       # class:          sfImagePoolAmazonS3Cache
       lifetime:         7776000 # 4 weeks
+      # off-site caching?  i.e should we check crop table for offsite url?
+      off_site:         false
     # cache adapter options
     cache_adapter:      {}
     
