@@ -7,7 +7,7 @@
  * @author jocarter
  *
  */
-class sfImagePoolRackCloudCache extends sfImagePoolCache implements sfImagePoolCacheInterface
+class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sfImagePoolCacheInterface
 {
   /**
    * Rackspace cloud files container
@@ -17,11 +17,22 @@ class sfImagePoolRackCloudCache extends sfImagePoolCache implements sfImagePoolC
   private $container;
   
   /**
+   * Array of Rackspace Cloud Files options
+   *
+   * @var array
+   **/
+  protected static $adapter_options = array(
+    'auth_host'         => 'UK',
+    'adapter_options'   => array(),
+  );
+  
+  /**
    * Identifier for use with sfImagePoolCrop table
    * 
    * @var string
    */
-  const CROP_IDENTIFER = 'RACKSPACE';
+  const CROP_IDENTIFER = 'rackspace';
+  const IS_REMOTE      = true;
   
   public function __construct(sfImagePoolImage $image, $options = array(), $resizer_options = array())
   {
@@ -40,8 +51,19 @@ class sfImagePoolRackCloudCache extends sfImagePoolCache implements sfImagePoolC
    */
   public static function setup($options)
   {
+    $required_fields = array('container','api_key','username');
     $adapter_options = $options['adapter_options'];
-
+    
+    foreach($required_fields as $f)
+    {
+      if(!array_key_exists($f, $adapter_options))
+      {
+        throw new InvalidArgumentException(sprintf("Missing option '%s' is required",$f));
+      }
+    }
+    
+    $adapter_options = array_merge(self::$adapter_options, $adapter_options);
+    
     $auth = new CF_Authentication($adapter_options['username'], $adapter_options['api_key'], null, ('UK' == $adapter_options['auth_host'] ? UK_AUTHURL : US_AUTHURL));
     $auth->authenticate();
     $conn = new CF_Connection($auth);

@@ -16,4 +16,25 @@ class PluginsfImagePoolCropTable extends Doctrine_Table
     {
         return Doctrine_Core::getTable('PluginsfImagePoolCrop');
     }
+    
+    /*
+     * Find a crop of an image
+     * 
+     * @param sfImagePoolImage $image
+     * @param int $width
+     * @param int $height
+     * @param string $identifier
+     */
+    public function findCrop(sfImagePoolImage $image, $width, $height, $identifier = NULL)
+    {
+      $q = $this->createQuery('c')
+                ->where('c.sf_image_id = ? AND width = ? AND height = ?', array($image->getPrimaryKey(), $width, $height));
+
+      if ($identifier)
+      {
+        $q->addWhere('location = ?', $identifier);
+      }
+
+      return $q->fetchOne();
+    }    
 }

@@ -7,6 +7,9 @@
  **/
 class sfImagePoolFilesystemCache extends sfImagePoolCache implements sfImagePoolCacheInterface
 {
+  const CROP_IDENTIFIER = 'filesystem';
+  const IS_REMOTE       = false;
+  
   /**
    * Return path to new image on filesystem. Creates folders if they don't exist.
    *

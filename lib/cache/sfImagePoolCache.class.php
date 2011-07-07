@@ -7,6 +7,9 @@
  **/
 abstract class sfImagePoolCache
 {
+  const CROP_IDENTIFER = 'local';
+  const IS_REMOTE      = false;
+
   /**
    * Image pool object to work on
    *

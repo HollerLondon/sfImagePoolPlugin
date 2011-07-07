@@ -7,6 +7,7 @@
  **/
 interface sfImagePoolCacheInterface
 {
+  
   /**
    * Create new cache handler object
    * 

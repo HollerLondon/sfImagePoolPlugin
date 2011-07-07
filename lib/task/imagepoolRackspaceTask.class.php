@@ -16,11 +16,11 @@ class imagepoolRackspaceTask extends sfBaseTask
       // add your own options here
     ));
 
-    $this->namespace        = 'imagepool';
-    $this->name             = 'rackspace';
-    $this->briefDescription = 'Sets up Rackspace cloud file caching';
+    $this->namespace        = 'rackspace';
+    $this->name             = 'initialise';
+    $this->briefDescription = 'Sets up Rackspace Cloud Files caching';
     $this->detailedDescription = <<<EOF
-The [imagepool:rackspace|INFO] task sets up Rackspace cloud file caching options.
+The [imagepool:rackspace|INFO] task sets up Rackspace Cloud Files caching options.
 Call it with:
 
   [php symfony imagepool:rackspace|INFO]
@@ -38,8 +38,7 @@ EOF;
     
     $this->logSection('setup', 'Starting setup...');
     
-    $cache_options['class'] = 'sfImagePoolRackCloudCache';
-    $cache_options['off_site'] = true;
+    $cache_options['class'] = 'sfImagePoolRackspaceCloudFilesCache';
     
     // set up caching class
     if (!isset($cache_options['adapter_options'])) 
@@ -49,17 +48,17 @@ EOF;
     
     if (!isset($cache_options['adapter_options']['username']) || empty($cache_options['adapter_options']['username']))
     {
-      $cache_options['adapter_options']['username'] = $this->ask('What is your Rackspace username?');
+      $cache_options['adapter_options']['username'] = $this->ask('What is your Rackspace Cloud username?');
     }
     
     if (!isset($cache_options['adapter_options']['api_key']) || empty($cache_options['adapter_options']['api_key']))
     {
-      $cache_options['adapter_options']['api_key'] = $this->ask('What is your Rackspace API key?');
+      $cache_options['adapter_options']['api_key'] = $this->ask('What is your Rackspace Cloud API key?');
     }
     
     if (!isset($cache_options['adapter_options']['auth_host']) || empty($cache_options['adapter_options']['auth_host']))
     {
-      $host_uk = $this->askConfirmation('Are you a UK Rackspace customer?');
+      $host_uk = $this->askConfirmation('Are you a UK Rackspace Cloud customer? (y/N)','QUESTION',false);
       $cache_options['adapter_options']['auth_host'] = ($host_uk ? 'UK' : 'US');
     }
     
@@ -70,7 +69,7 @@ EOF;
     
     if (!isset($cache_options['adapter_options']['container_uri']) || empty($cache_options['adapter_options']['container_uri']))
     {
-      $container = sfImagePoolRackCloudCache::setup($cache_options);
+      $container = sfImagePoolRackspaceCloudFilesCache::setup($cache_options);
       $cache_options['off_site_uri'] = $container->cdn_uri;
     }
     
