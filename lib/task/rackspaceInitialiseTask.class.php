@@ -1,19 +1,13 @@
 <?php
 
-class imagepoolRackspaceTask extends sfBaseTask
+class rackspaceInitialiseTask extends sfBaseTask
 {
   protected function configure()
   {
-    // // add your own arguments here
-    // $this->addArguments(array(
-    //   new sfCommandArgument('my_arg', sfCommandArgument::REQUIRED, 'My argument'),
-    // ));
-
     $this->addOptions(array(
       new sfCommandOption('application', null, sfCommandOption::PARAMETER_REQUIRED, 'The application name', 'backend'),
       new sfCommandOption('env', null, sfCommandOption::PARAMETER_REQUIRED, 'The environment', 'dev'),
       new sfCommandOption('connection', null, sfCommandOption::PARAMETER_REQUIRED, 'The connection name', 'doctrine'),
-      // add your own options here
     ));
 
     $this->namespace        = 'rackspace';
