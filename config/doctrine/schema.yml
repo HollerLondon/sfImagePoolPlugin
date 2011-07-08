@@ -27,8 +27,10 @@ sfImagePoolCrop:
         sf_image_id:       { type: integer }  
         width:             { type: integer(4), notnull: true }
         height:            { type: integer(4), notnull: true }
-        # off-site location identifier - see @sfImagePoolCache{type}
-        location:           { type: varchar(10), notnull: false }
+        # off-site location identifier - @see sfImagePoolCache::CROP_IDENTIFER
+        location:          { type: varchar(10), notnull: false }
+        # because off site will storing crops and scales - we need to distinguish
+        is_crop:           { type: boolean, notnull: true, default: true } 
     relations:
         Image:
             local:         sf_image_id
@@ -39,7 +41,7 @@ sfImagePoolCrop:
             class:         sfImagePoolImage
     indexes:
         unique_crop_idx:
-            fields:        [sf_image_id, width, height]
+            fields:        [sf_image_id, width, height, is_crop]
             type:          unique
         image_location:
             fields:        [ location ]

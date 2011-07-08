@@ -7,7 +7,6 @@
  **/
 interface sfImagePoolCacheInterface
 {
-  
   /**
    * Create new cache handler object
    * 
@@ -40,8 +39,10 @@ interface sfImagePoolCacheInterface
    * Defines actions to be done after the thumbnail is created and prepared for sending to browser
    * e.g: sending to cloud
    * 
+   * @var boolean $redirect Whether to redirect or not after the file has been committed (if false then return URL instead)
+   * 
    * @author Jo Carter
    */
-  public function commit();
+  public function commit($redirect = true);
   
 } // END interface sfImagePoolCache

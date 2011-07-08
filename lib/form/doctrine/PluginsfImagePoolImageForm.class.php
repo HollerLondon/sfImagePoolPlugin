@@ -55,6 +55,8 @@ abstract class PluginsfImagePoolImageForm extends BasesfImagePoolImageForm
     /**
      * Deal with returning the 'image' field to contain a string, and not
      * an sfValidatedFile object, which Doctrine turns its nose up at.
+     * 
+     * @todo Add in caching
      */
     public function updateObject($values = null)
     {
@@ -94,6 +96,8 @@ abstract class PluginsfImagePoolImageForm extends BasesfImagePoolImageForm
     /**
      * Find all files in the sfImagePool filesystem with the given
      * name (i.e. all the resized versions) and delete them.
+     * 
+     * @todo - link to cache class
      */
     public function deleteCached($filename)
     {

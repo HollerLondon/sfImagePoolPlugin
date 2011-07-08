@@ -22,8 +22,7 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
    * @var array
    **/
   protected static $adapter_options = array(
-    'auth_host'         => 'UK',
-    'adapter_options'   => array(),
+    'auth_host'         => 'UK'
   );
   
   /**
@@ -102,7 +101,7 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
                                   $this->image['filename'];
   }
   
-  public function commit()
+  public function commit($redirect = true)
   {
     // save to cloud
     $object_name = implode(DIRECTORY_SEPARATOR, array(
@@ -118,16 +117,33 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
     // clean up temp file
     unlink($this->getDestination());
     
-    // create image crop
-    $imageCrop = new sfImagePoolCrop();
+    // check if crop exists
+    $imageCrop = sfImagePoolCropTable::getInstance()->findCrop($this->image, $this->resizer_options[0], $this->resizer_options[1], self::CROP_IDENTIFER, !($this->resizer_options[2]));
+    
+    if (!$imageCrop) 
+    {
+      // create image crop
+      $imageCrop = new sfImagePoolCrop();
+    }
+    
+    // add/ update details
     $imageCrop->Image = $this->image;
     $imageCrop->width = $this->resizer_options[0];
     $imageCrop->height = $this->resizer_options[1];
     $imageCrop->location = self::CROP_IDENTIFER;
+    $imageCrop->is_crop = !($this->resizer_options[2]);
     $imageCrop->save();
     
     // controller redirect 301 to cdn
     $url = $this->options['off_site_uri'] . DIRECTORY_SEPARATOR . $object_name;
-    sfContext::getInstance()->getController()->redirect($url, 0, 301);
+    
+    if ($redirect)
+    {
+      sfContext::getInstance()->getController()->redirect($url, 0, 301);
+    }
+    else
+    {
+      return $url;
+    }
   }
 } // END class 

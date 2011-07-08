@@ -139,6 +139,8 @@ class sfImagePoolUtil
    * 
    * This method should be called after the call to isValid() returns true.
    * 
+   * @todo Investigate this and add in the caching elements
+   * 
    * @return Object Form's saved and updated object. 
    */
   static public function processImageField($form, $field_name = 'image')
@@ -146,7 +148,7 @@ class sfImagePoolUtil
     $file = $form->getValue($field_name);
     
     // if image uploaded then create image pool entry and associate
-    // with the hotspot we're creating.
+    // with the model we're creating.
     if($file = $form->getValue($field_name))
     {
       // if the field name on the form is an embedded sfImagePoolForm
@@ -210,6 +212,8 @@ class sfImagePoolUtil
    * 
    * This common logic is abstracted out so it can easily be used by other plugins
    * that require image upload but need to handle the actual upload logic themselves.
+   * 
+   * @todo Add in caching
    * 
    * @param array $upload
    * @param mixed $tags
@@ -303,7 +307,7 @@ class sfImagePoolUtil
       $errors[] = $message;
     }
 
-    // if there aren't any stabndard php upload errors then we can do some checks of our own
+    // if there aren't any standard php upload errors then we can do some checks of our own
     // as the file will actually have been uploaded. 
     elseif(!in_array($uploaded_file['type'], $accepted_types))
     {

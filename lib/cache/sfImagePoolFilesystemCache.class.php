@@ -36,8 +36,8 @@ class sfImagePoolFilesystemCache extends sfImagePoolCache implements sfImagePool
     return $folder_path . DIRECTORY_SEPARATOR . $this->image['filename'];
   }
   
-  public function commit()
+  public function commit($redirect = true)
   {
-    
+    if (!$redirect) return $this->getDestination(); 
   }
 } // END class 

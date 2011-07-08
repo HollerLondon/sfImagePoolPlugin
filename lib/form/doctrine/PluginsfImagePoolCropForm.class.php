@@ -45,26 +45,22 @@ abstract class PluginsfImagePoolCropForm extends BasesfImagePoolCropForm
         {
             $object = parent::updateObject();   
             
+            $cache_options = sfConfig::get('app_sf_image_pool_cache',array());
+            $cache_class   = $cache_options['class'];
+            
             list($width, $height, $type, $attr) = getimagesize($file->getTempName());
-            $target_folder_path = implode(DIRECTORY_SEPARATOR, array(sfImagePoolPluginConfiguration::getBaseDir(), 'crop', $width, $height));
             
-            // if folder not found for this resize, then attempt to create it.
-            if(!file_exists($target_folder_path))
-            {
-                if(!mkdir($target_folder_path, 0777, true))
-                {
-                    throw new Exception(sprintf('Could not create "%s"', $target_folder_path));
-                }
-            }  
-    
-            $save_path = $target_folder_path . DIRECTORY_SEPARATOR . $object['Image']['filename'];
-            $file->save($save_path);
+            $cache   = new $cache_class($object->getImage(),$cache_options,array($width, $height, false));
             
-            $this->new_file = $save_path;
+            $file->save($cache->getDestination());
             
             // now set the object's width and height columns, which weren't part of the upload form
             $object['width']  = $width;
             $object['height'] = $height;
+            $object['is_crop'] = true;
+            $object['location'] = $cache_class::CROP_IDENTIFER;
+            
+            $this->new_file = $cache->commit(false);
         }
         else
         {
@@ -75,7 +71,7 @@ abstract class PluginsfImagePoolCropForm extends BasesfImagePoolCropForm
     }     
     
     /**
-     * @retuen string Path to the newly uploaded file
+     * @return string Path to the newly uploaded file
      */
     public function getPathToUpload()
     {

@@ -25,10 +25,10 @@ class PluginsfImagePoolCropTable extends Doctrine_Table
      * @param int $height
      * @param string $identifier
      */
-    public function findCrop(sfImagePoolImage $image, $width, $height, $identifier = NULL)
+    public function findCrop(sfImagePoolImage $image, $width, $height, $is_crop = true, $identifier = NULL)
     {
       $q = $this->createQuery('c')
-                ->where('c.sf_image_id = ? AND width = ? AND height = ?', array($image->getPrimaryKey(), $width, $height));
+                ->where('c.sf_image_id = ? AND width = ? AND height = ? AND is_crop = ?', array($image->getPrimaryKey(), $width, $height, $is_crop));
 
       if ($identifier)
       {

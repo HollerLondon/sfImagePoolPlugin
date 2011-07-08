@@ -133,7 +133,8 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
   if ($class::IS_REMOTE && !empty($cache_options['off_site_uri'])) 
   {
     // check whether crop exists - if it doesn't business as usual
-    $crop = sfImagePoolCropTable::getInstance()->findCrop($image, $width, $height, $class::CROP_IDENTIFER);
+    $is_crop = ('crop' == $method);
+    $crop = sfImagePoolCropTable::getInstance()->findCrop($image, $width, $height, $is_crop, $class::CROP_IDENTIFER);
     
     if ($crop)
     {
