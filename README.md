@@ -144,15 +144,15 @@ The plugin handles all image association when saving a form that has the sfImage
 
 To add a HTML editor (see Requirements) with image pool for image insertion, use the following method (or take the code on the method and add to it) - in the form class
 
-class SomethingForm extends BaseSomethingForm
-{
-    public function configure()
+    class SomethingForm extends BaseSomethingForm
     {
-        $widgetName = 'summary';  
-        $restrictToTag = '';
-        sfImagePoolUtil::addImagePoolMooEditable($this, $widgetName, $restrictToTag);
+        public function configure()
+        {
+            $widgetName = 'summary';  
+            $restrictToTag = '';
+            sfImagePoolUtil::addImagePoolMooEditable($this, $widgetName, $restrictToTag);
+        }
     }
-}
    
    
 ### 6 .htaccess tweaks ###
@@ -200,37 +200,37 @@ plugin's sfImagePoolPluginConfiguration class. If changed the above rule would a
 
 The following options may be overridden in your app.yml files:
 
-  sf_image_pool:
-    cache_lifetime:     7776000 # three months
-    chooser_per_page:   24
-    
-    mimes:              [image/jpeg, image/jpg, image/png, image/pjpeg, 'image/x-png']
-
-    # Maximum upload size to accept
-    maxfilesize:        5242880
-    
-    # Folder within the web/ folder to store crops
-    folder:             image-pool
-
-    placeholders:       false # If true, use file placeholder.jpg if an image can't be found
-    use_placeholdit:    false # if true, returns handy placeholder images from placehold.it
-    
-    # include controller in generated image URLs?
-    use_script_name:    false
-    adapter:            ImagePoolImageMagickAdapter
-    adapter_options:
-      sharpen:      true
-      # You can prefix the "convert" command with nice -n19 to make it a bit more CPU friendly
-      # convert:        nice -n19 /usr/bin/convert
+    sf_image_pool:
+      cache_lifetime:     7776000 # three months
+      chooser_per_page:   24
       
-    # How should we cache files?
-    cache:
-      class:            sfImagePoolFilesystemCache
-      # class:          sfImagePoolRackspaceCloudFilesCache
-      # class:          sfImagePoolAmazonS3Cache
-      lifetime:         7776000 # 4 weeks
-    # cache adapter options
-    cache_adapter:      {}
+      mimes:              [image/jpeg, image/jpg, image/png, image/pjpeg, 'image/x-png']
+  
+      # Maximum upload size to accept
+      maxfilesize:        5242880
+      
+      # Folder within the web/ folder to store crops
+      folder:             image-pool
+  
+      placeholders:       false # If true, use file placeholder.jpg if an image can't be found
+      use_placeholdit:    false # if true, returns handy placeholder images from placehold.it
+      
+      # include controller in generated image URLs?
+      use_script_name:    false
+      adapter:            ImagePoolImageMagickAdapter
+      adapter_options:
+        sharpen:      true
+        # You can prefix the "convert" command with nice -n19 to make it a bit more CPU friendly
+        # convert:        nice -n19 /usr/bin/convert
+        
+      # How should we cache files?
+      cache:
+        class:            sfImagePoolFilesystemCache
+        # class:          sfImagePoolRackspaceCloudFilesCache
+        # class:          sfImagePoolAmazonS3Cache
+        lifetime:         7776000 # 4 weeks
+      # cache adapter options
+      cache_adapter:      {}
  
     
 ### 8. Include images in templates ###
