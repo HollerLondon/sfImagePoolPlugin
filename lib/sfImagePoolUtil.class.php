@@ -65,6 +65,8 @@ class sfImagePoolUtil
    * Use this as a basis for any textarea which requires MooEditable + ImagePool as config
    * options are REQUIRED
    * 
+   * @TODO: Test thoroughly with new MooEditable JS
+   * 
    * @uses sfMooToolsFormExtraPlugin (REQUIRED)
    * @author Jo Carter <jocarter@holler.co.uk>
    * 
