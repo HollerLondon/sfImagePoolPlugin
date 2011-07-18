@@ -115,22 +115,12 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
       $height = $width = $dimensions;
   }
   
-  // if we have an empty sfImagePool instance then output a placeholder
-  if (!$image['filename'])
-  {
-    $image['filename'] = 'placeholder.jpg';
-  }
-  
-  if (!function_exists('url_for'))
-  {
-    sfApplicationConfiguration::getActive()->loadHelpers(array('Url'));
-  }
-  
   $cache_options = sfConfig::get('app_sf_image_pool_cache');
 
   $class = $cache_options['class'];
 
-  if ($class::IS_REMOTE && !empty($cache_options['off_site_uri'])) 
+  // If remote and remote uri set, plus image exists
+  if ($class::IS_REMOTE && !empty($cache_options['off_site_uri']) && $image) 
   {
     // check whether crop exists - if it doesn't business as usual
     $is_crop = ('crop' == $method);
@@ -141,6 +131,24 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
       $absolute = false;
       $offsite = true;
     }
+  }
+  
+  // if we have an empty sfImagePool instance (ie. no image) then output a placeholder
+  if (!$image['filename'])
+  {
+    $image['filename'] = 'placeholder.jpg';
+    
+    // If offsite then should have cached placeholder too
+    if ($class::IS_REMOTE && !empty($cache_options['off_site_uri']))
+    {
+      $absolute = false;
+      $offsite = true;
+    }
+  }
+  
+  if (!function_exists('url_for'))
+  {
+    sfApplicationConfiguration::getActive()->loadHelpers(array('Url'));
   }
   
   $url = url_for(sprintf('@image?width=%s&height=%s&filename=%s&method=%s', $width, $height, $image['filename'], $method), $absolute);
