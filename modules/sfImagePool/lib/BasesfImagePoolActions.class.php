@@ -19,9 +19,6 @@ class BasesfImagePoolActions extends sfActions
         $width         = $request->getParameter('width');
         $height        = $request->getParameter('height');
         
-        $cache_options = sfConfig::get('app_sf_image_pool_cache',array());
-        $cache_class   = $cache_options['class'];
-        
         try
         {
           // check file exists on the filesystem
@@ -33,7 +30,7 @@ class BasesfImagePoolActions extends sfActions
           // create thumbnail
           $resizer = new sfImagePoolResizer($sf_pool_image, $thumb_method, $width, $height);
           
-          $cache   = new $cache_class($sf_pool_image,$cache_options,$resizer->getParams());
+          $cache   = sfImagePoolCache::getInstance($sf_pool_image, array(), $resizer->getParams());
           
           $thumb   = $resizer->save($cache->getDestination());
         
@@ -48,7 +45,7 @@ class BasesfImagePoolActions extends sfActions
             $response->setContentType($thumb->getMime()); 
 
             $response->addCacheControlHttpHeader('public');
-            $response->addCacheControlHttpHeader('max_age',$cache->getLifetime());
+            $response->addCacheControlHttpHeader('max_age', $cache->getLifetime());
           
             $response->setHttpHeader('Last-Modified', date('D, j M Y, H:i:s'));
             $response->setHttpHeader('Expires', date('D, j M Y, H:i:s', strtotime(sprintf('+ %u second', $cache->getLifetime()))));

@@ -10,10 +10,10 @@ interface sfImagePoolCacheInterface
   /**
    * Create new cache handler object
    * 
-   * @var sfImagePoolImage $image
-   * @var array $options
-   * @var array $resizer_options  Parameters received from sfImagePoolResizer 
-   *                              0 => width, 1 => height, 2 => method, 3 => allow scale up, 4 => jpg quality, 5 => Thumbnail adapter, 6 => adapter options
+   * @param sfImagePoolImage $image The image you are creating the cache adapter for
+   * @param array $options          The caching options, these are set by default to the ones in the config if not defined/ overwritten
+   * @var array $resizer_options    Parameters received from sfImagePoolResizer 
+   *                                0 => width, 1 => height, 2 => method, 3 => allow scale up, 4 => jpg quality, 5 => Thumbnail adapter, 6 => adapter options
    *                              
    * @author Jo Carter
    */
@@ -44,5 +44,12 @@ interface sfImagePoolCacheInterface
    * @author Jo Carter
    */
   public function commit($redirect = true);
+  
+  /**
+   * Defines actions to be done when handling deletion of an sfImagePoolImage
+   * 
+   * @author Jo Carter
+   */
+  //public function delete();
   
 } // END interface sfImagePoolCache

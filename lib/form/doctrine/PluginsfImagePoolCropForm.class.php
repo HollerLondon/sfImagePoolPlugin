@@ -41,24 +41,21 @@ abstract class PluginsfImagePoolCropForm extends BasesfImagePoolCropForm
     public function updateObject($values = null)
     {
         // if a new file is uploaded
-        if($file = $this->getValue('cropped_image'))
+        if ($file = $this->getValue('cropped_image'))
         {
             $object = parent::updateObject();   
             
-            $cache_options = sfConfig::get('app_sf_image_pool_cache',array());
-            $cache_class   = $cache_options['class'];
-            
             list($width, $height, $type, $attr) = getimagesize($file->getTempName());
             
-            $cache   = new $cache_class($object->getImage(),$cache_options,array($width, $height, false));
+            $cache  = sfImagePoolCache::getInstance($object->getImage(), array(), array($width, $height, false));
             
             $file->save($cache->getDestination());
             
             // now set the object's width and height columns, which weren't part of the upload form
-            $object['width']  = $width;
-            $object['height'] = $height;
-            $object['is_crop'] = true;
-            $object['location'] = $cache_class::CROP_IDENTIFER;
+            $object['width']      = $width;
+            $object['height']     = $height;
+            $object['is_crop']    = true;
+            $object['location']   = $cache::CROP_IDENTIFER;
             
             $this->new_file = $cache->commit(false);
         }
