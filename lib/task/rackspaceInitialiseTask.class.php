@@ -14,10 +14,10 @@ class rackspaceInitialiseTask extends sfBaseTask
     $this->name             = 'initialise';
     $this->briefDescription = 'Sets up Rackspace Cloud Files caching';
     $this->detailedDescription = <<<EOF
-The [imagepool:rackspace|INFO] task sets up Rackspace Cloud Files caching options.
+The [rackspace:initialise|INFO] task sets up Rackspace Cloud Files caching options.
 Call it with:
 
-  [php symfony imagepool:rackspace|INFO]
+  [php symfony rackspace:initialise|INFO]
 EOF;
   }
 

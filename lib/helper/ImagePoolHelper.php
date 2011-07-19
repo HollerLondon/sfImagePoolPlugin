@@ -134,6 +134,7 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
   }
   
   // if we have an empty sfImagePool instance (ie. no image) then output a placeholder
+  // @TODO: Proper handling of placeholders as per config - return false if no image and no placeholders
   if (!$image['filename'])
   {
     $image['filename'] = 'placeholder.jpg';

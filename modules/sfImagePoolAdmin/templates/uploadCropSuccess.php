@@ -7,8 +7,9 @@
 <?php echo $form->renderFormTag(url_for('sf_image_pool_upload_crop', $image)) ?>
     <fieldset>
         <p><?php echo pool_image_tag($image, '200', 'scale', array('class' => 'image-preview')) ?></p>
-        <?php echo $form ?>
-        
+        <table>
+          <?php echo $form ?>
+        </table>
         <div>
             <input type="submit" value="Upload" />
             <br />

@@ -42,7 +42,7 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
   }
   
   /**
-   * Set up Rackspace cloud files - used by imagepool:rackspace task as well as constructor
+   * Set up Rackspace cloud files - used by rackspace:initialise task as well as constructor
    * 
    * @see imagepoolRackspaceTask::execute()
    * @var array $options
