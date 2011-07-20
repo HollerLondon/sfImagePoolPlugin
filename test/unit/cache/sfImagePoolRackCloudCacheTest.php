@@ -1,23 +1,63 @@
 <?php
-require_once realpath(dirname(__FILE__).'/../../../../../test/bootstrap/unit.php');
+require_once realpath(dirname(__FILE__).'/../../bootstrap/unit.php');
 
-//Load in project configuration and enable database
-$this->configuration = ProjectConfiguration::getApplicationConfiguration('backend', 'test', true);
-new sfDatabaseManager($this->configuration);
-
-$t = new lime_test(3);
+$t = new lime_test(7);
 
 $adapter_options = sfConfig::get('app_sf_image_pool_cache');
-// Make it a test container which we'll be clearing at the end
-$adapter_options['adapter_options']['container'] .= ' Test';
 
-$image = new sfImagePoolImage();
-$image->original_filename = 'test.png';
-$t->isa_ok($image, 'sfImagePoolImage', 'Image created');
-
-$cacheAdapter = new sfImagePoolRackCloudCache($image, $adapter_options, array());
-$t->isa_ok($cacheAdapter, 'sfImagePoolRackCloudCache', 'Cache class created');
-
-$container = $cacheAdapter->getContainer();
-$t->is($container->name, $adapter_options['adapter_options']['container'], 'Container created or already exists');
-
+// Test will fail if no config options
+if (isset($adapter_options['options']) && !empty($adapter_options['options']))
+{
+  // Create an image
+  $image = new sfImagePoolImage();
+  $image->original_filename = 'test.png';
+  $image->filename = 'test.png';
+  $image->mime_type = 'image/png';
+  $image->save();
+  
+  $t->isa_ok($image, 'sfImagePoolImage', 'Image created');
+  
+  $thumbnail_options = array('width'=>300,'height'=>300,'scale'=>false);
+  
+  // Create cache
+  $cache = sfImagePoolCache::getInstance($image, $adapter_options, $thumbnail_options);
+  $t->isa_ok($cache, 'sfImagePoolRackspaceCloudFilesCache', 'Cache class created');
+  
+  $container = $cache->getContainer();
+  $t->is($container->name, $adapter_options['options']['container'], 'Container created or already exists');
+  
+  // copy test file in place
+  copy($_test_dir.DIRECTORY_SEPARATOR.'data'.DIRECTORY_SEPARATOR.'images'.DIRECTORY_SEPARATOR.'test.png', $cache->getDestination());
+  
+  $url = $cache->commit(false);
+  
+  $imageCrop = sfImagePoolCropTable::getInstance()->findCrop($image, $thumbnail_options['width'], $thumbnail_options['height'], !$thumbnail_options['scale'], $cache::CROP_IDENTIFIER);
+    
+  $t->isa_ok($imageCrop, 'sfImagePoolCrop', 'Crop created');
+  
+  $objectName = $cache->getCloudName();
+  $object = $container->get_object($objectName);
+  
+  $t->isa_ok($object, 'CF_Object', 'Image created on Rackspace cloud');
+  
+  $image->delete();
+  
+  $image = sfImagePoolImageTable::getInstance()->findOneByFilename('test.png');
+  
+  $t->is($image, false, 'Image deleted from database');
+  
+  try 
+  {
+    $object2 = $container->get_object($objectName);
+    $t->fail('Object not deleted from cloud');
+  }
+  catch (NoSuchObjectException $e)
+  {
+    $t->pass('Object deleted from cloud');
+  }
+}
+else
+{
+  $t->fail('Please ensure you have set up your Rackspace cache options - use the rackspace:initialise task to accomplish this or see the README');
+  $t->skip('Skipping tests', 6);
+}

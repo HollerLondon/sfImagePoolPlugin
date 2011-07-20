@@ -99,7 +99,7 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
    * @author Jo Carter
    * @param array $resizer_options  Allows overriding of the width, height, scaling options
    */
-  protected function getCloudName($resizer_options = array())
+  public function getCloudName($resizer_options = array())
   {
     $resizer_options = array_merge($this->resizer_options, $resizer_options);
     
@@ -125,7 +125,7 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
     unlink($this->getDestination());
     
     // check if crop exists
-    $imageCrop = sfImagePoolCropTable::getInstance()->findCrop($this->image, $this->resizer_options['width'], $this->resizer_options['height'], self::CROP_IDENTIFIER, !($this->resizer_options['scale']));
+    $imageCrop = sfImagePoolCropTable::getInstance()->findCrop($this->image, $this->resizer_options['width'], $this->resizer_options['height'], !($this->resizer_options['scale']), self::CROP_IDENTIFIER);
     
     if (!$imageCrop) 
     {
