@@ -29,4 +29,11 @@ class PluginsfImagePoolLookupTable extends Doctrine_Table
           ->andWhere('imaged_model = ?', get_class($object))
           ->execute();
     }
+    
+    public function getModelCount($class, $id)
+    {
+      return $this->createQuery()
+                  ->where('imaged_model = ? AND sf_image_id = ?', array($class, $id))
+                  ->count();
+    }
 }

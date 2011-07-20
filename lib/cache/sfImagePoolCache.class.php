@@ -7,7 +7,20 @@
  **/
 abstract class sfImagePoolCache
 {
+  /**
+   * Identifier for use with sfImagePoolCrop table
+   * Overwrite in individual implementations
+   * 
+   * @var string
+   */
   const CROP_IDENTIFER = 'local';
+  
+  /**
+   * Whether the file is stored remotely
+   * Overwrite in individual implementations
+   * 
+   * @var boolean
+   */
   const IS_REMOTE      = false;
 
   /**
@@ -84,4 +97,24 @@ abstract class sfImagePoolCache
     return $this->options['lifetime'];
   }
   
+  /**
+   * Delete files in image pool folder - including all thumbnails
+   * This is used by all cache implementations as the original file is stored on the filesystem
+   * The main delete is only used to remove files if no crop sent through
+   * 
+   * @author Jo Carter
+   */
+  public function delete(sfImagePoolCrop $crop = null)
+  {
+    if (!is_null($crop))
+    {
+      $search_root    = sfImagePoolPluginConfiguration::getBaseDir();
+      $files_iterator = sfFinder::type('file')->name($this->image['filename'])->in($search_root);
+      
+      foreach ($files_iterator as $f)
+      {
+        unlink($f);
+      }
+    }
+  }
 } // END class 

@@ -12,5 +12,14 @@
  */
 abstract class PluginsfImagePoolCrop extends BasesfImagePoolCrop
 {
-
+    /**
+     * Call sfImagePoolCache implementation to take care of deleting files
+     * This handles all caching implementations
+     */
+    public function postDelete($event)
+    {
+        $crop = $event->getInvoker();
+        $cache = sfImagePoolCache::getInstance($crop->getImage());
+        $cache->delete($crop);
+    }
 }

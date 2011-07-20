@@ -9,63 +9,63 @@ sfImagePoolImage:
       - Timestampable
       - Sluggable
     columns:
-        id:                { type: integer, primary: true, autoincrement: true }
-        original_filename: { type: string(255), notnull: true } 
-        filename:          { type: string(100), notnull: true }
-        credit:            { type: string(255) }
-        title:             { type: string(255) }
-        caption:           { type: string }
-        mime_type:         { type: string(40) }
+      id:                { type: integer, primary: true, autoincrement: true }
+      original_filename: { type: string(255), notnull: true } 
+      filename:          { type: string(100), notnull: true }
+      credit:            { type: string(255) }
+      title:             { type: string(255) }
+      caption:           { type: string }
+      mime_type:         { type: string(40) }
     indexes:
-        pool_image_filename_idx:
-            fields:        [filename]
-            type:          unique
+      pool_image_filename_idx:
+        fields:        [filename]
+        type:          unique
 
 sfImagePoolCrop:
     columns:
-        id:                { type: integer, primary: true, autoincrement: true }
-        sf_image_id:       { type: integer }  
-        width:             { type: integer(4), notnull: true }
-        height:            { type: integer(4), notnull: true }
-        # off-site location identifier - @see sfImagePoolCache::CROP_IDENTIFER
-        location:          { type: varchar(10), notnull: false }
-        # because off site will storing crops and scales - we need to distinguish
-        is_crop:           { type: boolean, notnull: true, default: true } 
+      id:                { type: integer, primary: true, autoincrement: true }
+      sf_image_id:       { type: integer }  
+      width:             { type: integer(4), notnull: true }
+      height:            { type: integer(4), notnull: true }
+      # off-site location identifier - @see sfImagePoolCache::CROP_IDENTIFER
+      location:          { type: varchar(10), notnull: false }
+      # because off site will storing crops and scales - we need to distinguish
+      is_crop:           { type: boolean, notnull: true, default: true } 
     relations:
-        Image:
-            local:         sf_image_id
-            foreign:       id
-            type:          one
-            onDelete:      cascade
-            foreignAlias:  Crops
-            class:         sfImagePoolImage
+      Image:           
+        local:         sf_image_id
+        foreign:       id
+        type:          one
+        #cascade:       [delete]  # @see PluginsfImagePoolImage::setup() - calls postDelete of this object when parent image deleted (doctrine level rather than DB)
+        foreignAlias:  Crops
+        class:         sfImagePoolImage
     indexes:
-        unique_crop_idx:
-            fields:        [sf_image_id, width, height, is_crop]
-            type:          unique
-        image_location:
-            fields:        [ location ]
+      unique_crop_idx:
+        fields:        [ sf_image_id, width, height, is_crop ]
+        type:          unique
+      image_location:
+        fields:        [ location ]
 
 sfImagePoolLookup:
     columns:
-        id:                { type: integer, primary: true, autoincrement: true }
-        sf_image_id:       { type: integer, notnull: true }
-        imaged_model:      { type: string(30), notnull: true }
-        imaged_model_id:   { type: integer }
-        is_featured:       { type: boolean, default: false }
+      id:                { type: integer, primary: true, autoincrement: true }
+      sf_image_id:       { type: integer, notnull: true }
+      imaged_model:      { type: string(30), notnull: true }
+      imaged_model_id:   { type: integer }
+      is_featured:       { type: boolean, default: false }
     indexes:
-        model_id_idx:
-            fields:        [imaged_model, imaged_model_id]
+      model_id_idx:
+        fields:        [ imaged_model, imaged_model_id ]
     relations:
-        Image:
-            local:         sf_image_id
-            foreign:       id
-            type:          one
-            onDelete:      cascade
-            class:         sfImagePoolImage
+      Image:
+        local:         sf_image_id
+        foreign:       id
+        type:          one
+        onDelete:      cascade
+        class:         sfImagePoolImage
     # tell doctrine not to setup contraints at the db level (export tables only)
     attributes: 
-      export:              [tables]
+      export:              [ tables ]
     indexes:
       imaged_model_idx:
         fields:            [ imaged_model, imaged_model_id ]

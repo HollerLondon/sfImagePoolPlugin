@@ -2,10 +2,7 @@
 /**
  * Rackspace Cloud Files caching adapter
  * 
- * Used 
- * Enter description here ...
  * @author jocarter
- *
  */
 class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sfImagePoolCacheInterface
 {
@@ -25,11 +22,6 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
     'auth_host'         => 'UK'
   );
   
-  /**
-   * Identifier for use with sfImagePoolCrop table
-   * 
-   * @var string
-   */
   const CROP_IDENTIFER = 'rackspace';
   const IS_REMOTE      = true;
   
@@ -101,15 +93,30 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
                                   $this->image['filename'];
   }
   
+  /**
+   * Get the filename (to be) stored on the cloud
+   * 
+   * @author Jo Carter
+   * @param array $resizer_options  Allows overriding of the width, height, scaling options
+   */
+  protected function getCloudName($resizer_options = array())
+  {
+    $resizer_options = array_merge($this->resizer_options, $resizer_options);
+    
+    $object_name = implode(DIRECTORY_SEPARATOR, array(
+        ($resizer_options[2] ? 'scale' : 'crop'),
+        $resizer_options[0],
+        $resizer_options[1],
+        $this->image['filename']
+    ));
+    
+    return $object_name;
+  }
+  
   public function commit($redirect = true)
   {
     // save to cloud
-    $object_name = implode(DIRECTORY_SEPARATOR, array(
-        ($this->resizer_options[2] ? 'scale' : 'crop'),
-        $this->resizer_options[0],
-        $this->resizer_options[1],
-        $this->image['filename']
-    ));
+    $object_name = $this->getCloudName();
     
     $this->object = $this->container->create_object($object_name);
     $this->object->load_from_filename($this->getDestination()); 
@@ -144,6 +151,20 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
     else
     {
       return $url;
+    }
+  }
+  
+  public function delete(sfImagePoolCrop $crop = null)
+  {
+    parent::delete($crop);
+    
+    // Then deal with stuff on the edge - delete crop from edge
+    if ($crop)
+    {
+      $resizer_options = array($crop->width, $crop->height, !$crop->is_crop);
+      $object_name = $this->getCloudName($resizer_options);
+      
+      $this->container->delete_object($object_name);
     }
   }
 } // END class 
