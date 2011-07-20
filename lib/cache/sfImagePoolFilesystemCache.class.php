@@ -19,9 +19,9 @@ class sfImagePoolFilesystemCache extends sfImagePoolCache implements sfImagePool
   {
     $folder_path = implode(DIRECTORY_SEPARATOR, array(
         sfImagePoolPluginConfiguration::getBaseDir(),
-        ($this->resizer_options[2] ? 'scale' : 'crop'),
-        $this->resizer_options[0],
-        $this->resizer_options[1],
+        ($this->resizer_options['scale'] ? 'scale' : 'crop'),
+        $this->resizer_options['width'],
+        $this->resizer_options['height'],
     ));
     
     // if folder not found for this resize, then attempt to create it.

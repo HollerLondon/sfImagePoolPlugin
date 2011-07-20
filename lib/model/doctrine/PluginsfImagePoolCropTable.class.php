@@ -36,5 +36,5 @@ class PluginsfImagePoolCropTable extends Doctrine_Table
       }
 
       return $q->fetchOne();
-    }    
+    }   
 }

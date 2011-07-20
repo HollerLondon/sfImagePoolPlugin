@@ -13,7 +13,7 @@ abstract class sfImagePoolCache
    * 
    * @var string
    */
-  const CROP_IDENTIFER = 'local';
+  const CROP_IDENTIFIER = 'local';
   
   /**
    * Whether the file is stored remotely
@@ -21,7 +21,7 @@ abstract class sfImagePoolCache
    * 
    * @var boolean
    */
-  const IS_REMOTE      = false;
+  const IS_REMOTE       = false;
 
   /**
    * Image pool object to work on
@@ -33,7 +33,7 @@ abstract class sfImagePoolCache
   /**
    * Caching options
    * 
-   * @var string[]
+   * @var array
    */
   protected $options = array(
     'lifetime'    => 7776000,
@@ -117,4 +117,25 @@ abstract class sfImagePoolCache
       }
     }
   }
+   
+  /** 
+   * Checks if there's a processed version of the requested image already
+   *
+   * @return mixed false if not, or the URI to the resource if available
+   * @author Ben Lancaster
+   **/
+  protected function alreadyExists()
+  {
+    return Doctrine_Core::getTable('sfImagePoolCrop')
+      ->createQuery('c')
+      ->select('id')
+      ->innerJoin('c.Image')
+      ->where('c.sf_image_id = ?',$this->image['id'])
+      ->andWhere('c.width = ?', $this->resizer_options['width'])
+      ->andWhere('c.height = ?', $this->resizer_options['height'])
+      ->andWhere('c.is_crop = ?',!$this->resizer_options['scale'])
+      ->andWhere('c.location != ?',sfImagePoolCache::CROP_IDENTIFIER)
+      ->execute(null,Doctrine_Core::HYDRATE_SINGLE_SCALAR);
+  }
+  
 } // END class 

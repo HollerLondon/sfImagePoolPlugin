@@ -124,7 +124,7 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
   {
     // check whether crop exists - if it doesn't business as usual
     $is_crop = ('crop' == $method);
-    $crop = sfImagePoolCropTable::getInstance()->findCrop($image, $width, $height, $is_crop, $class::CROP_IDENTIFER);
+    $crop = sfImagePoolCropTable::getInstance()->findCrop($image, $width, $height, $is_crop, $class::CROP_IDENTIFIER);
     
     if ($crop)
     {

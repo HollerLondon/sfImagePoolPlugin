@@ -55,7 +55,7 @@ abstract class PluginsfImagePoolCropForm extends BasesfImagePoolCropForm
             $object['width']      = $width;
             $object['height']     = $height;
             $object['is_crop']    = true;
-            $object['location']   = $cache::CROP_IDENTIFER;
+            $object['location']   = $cache::CROP_IDENTIFIER;
             
             $this->new_file = $cache->commit(false);
         }

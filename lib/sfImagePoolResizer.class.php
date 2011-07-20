@@ -116,7 +116,10 @@ class sfImagePoolResizer
      **/
     public function getParams()
     {
-        return $this->params;
+      $keys = array('width','height','scale','inflate','quality','adapter','adapter_options');
+      $with_keys = array_combine($keys,$this->params);
+      return array_merge($with_keys,$this->params);
+      return $this->params;
     }
     
     /**

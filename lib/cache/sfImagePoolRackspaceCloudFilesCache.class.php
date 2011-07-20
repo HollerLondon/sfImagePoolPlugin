@@ -22,7 +22,7 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
     'auth_host'         => 'UK'
   );
   
-  const CROP_IDENTIFER = 'rackspace';
+  const CROP_IDENTIFIER = 'rackspace';
   const IS_REMOTE      = true;
   
   public function __construct(sfImagePoolImage $image, $options = array(), $resizer_options = array())
@@ -36,14 +36,14 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
   /**
    * Set up Rackspace cloud files - used by rackspace:initialise task as well as constructor
    * 
-   * @see imagepoolRackspaceTask::execute()
-   * @var array $options
+   * @see rackspaceInitialiseTask::execute()
+   * @var array $options    Passed through from __construct
    * @return CF_Container
    */
   public static function setup($options)
   {
     $required_fields = array('container','api_key','username');
-    $adapter_options = $options['adapter_options'];
+    $adapter_options = $options['options'];
     
     foreach($required_fields as $f)
     {
@@ -87,9 +87,9 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
   {
     // Store in temp directory
     return sys_get_temp_dir() . DIRECTORY_SEPARATOR . 
-                                  ($this->resizer_options[2] ? 'scale' : 'crop') . '_' . 
-                                  $this->resizer_options[0]  . '_' . 
-                                  $this->resizer_options[1] . '_' . 
+                                  ($this->resizer_options['scale'] ? 'scale' : 'crop') . '_' . 
+                                  $this->resizer_options['width']  . '_' . 
+                                  $this->resizer_options['height'] . '_' . 
                                   $this->image['filename'];
   }
   
@@ -103,10 +103,10 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
   {
     $resizer_options = array_merge($this->resizer_options, $resizer_options);
     
-    $object_name = implode(DIRECTORY_SEPARATOR, array(
-        ($resizer_options[2] ? 'scale' : 'crop'),
-        $resizer_options[0],
-        $resizer_options[1],
+    $object_name = implode('/', array(
+        ($resizer_options['scale'] ? 'scale' : 'crop'),
+        $resizer_options['width'],
+        $resizer_options['height'],
         $this->image['filename']
     ));
     
@@ -125,7 +125,7 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
     unlink($this->getDestination());
     
     // check if crop exists
-    $imageCrop = sfImagePoolCropTable::getInstance()->findCrop($this->image, $this->resizer_options[0], $this->resizer_options[1], self::CROP_IDENTIFER, !($this->resizer_options[2]));
+    $imageCrop = sfImagePoolCropTable::getInstance()->findCrop($this->image, $this->resizer_options['width'], $this->resizer_options['height'], self::CROP_IDENTIFIER, !($this->resizer_options['scale']));
     
     if (!$imageCrop) 
     {
@@ -134,15 +134,26 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
     }
     
     // add/ update details
-    $imageCrop->Image = $this->image;
-    $imageCrop->width = $this->resizer_options[0];
-    $imageCrop->height = $this->resizer_options[1];
-    $imageCrop->location = self::CROP_IDENTIFER;
-    $imageCrop->is_crop = !($this->resizer_options[2]);
-    $imageCrop->save();
+    $imageCrop->Image     = $this->image;
+    $imageCrop->width     = $this->resizer_options['width'];
+    $imageCrop->height    = $this->resizer_options['height'];
+    $imageCrop->location  = self::CROP_IDENTIFIER;
+    $imageCrop->is_crop   = !($this->resizer_options['scale']);
     
     // controller redirect 301 to cdn
     $url = $this->options['off_site_uri'] . DIRECTORY_SEPARATOR . $object_name;
+
+    // There's a chance that save() will fail because the crop already exists
+    // in the database (race condition). So, if it does fail, let's try and grab it. If it 
+    // failed and it doesn't exist, then re-throw the exception
+    try
+    {
+      $imageCrop->save();
+    }
+    catch (Doctrine_Connection_Exception $e)
+    {
+      if ($e->getPortableCode() != Doctrine_Core::ERR_ALREADY_EXISTS) throw $e;
+    }
     
     if ($redirect)
     {
@@ -161,7 +172,7 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
     // Then deal with stuff on the edge - delete crop from edge
     if ($crop)
     {
-      $resizer_options = array($crop->width, $crop->height, !$crop->is_crop);
+      $resizer_options = array('width'=>$crop->width, 'height'=>$crop->height, 'scale'=>(!$crop->is_crop));
       $object_name = $this->getCloudName($resizer_options);
       
       $this->container->delete_object($object_name);
