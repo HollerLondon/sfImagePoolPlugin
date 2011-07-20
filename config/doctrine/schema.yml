@@ -41,7 +41,7 @@ sfImagePoolCrop:
             class:         sfImagePoolImage
     indexes:
         unique_crop_idx:
-            fields:        [sf_image_id, width, height, is_crop]
+            fields:        [ sf_image_id, width, height, is_crop ]
             type:          unique
         image_location:
             fields:        [ location ]

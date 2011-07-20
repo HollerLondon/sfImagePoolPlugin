@@ -1,54 +1,63 @@
 sfImagePoolPlugin
 =================
 
-@author:    Ben Lancaster (<benlancaster@holler.co.uk>)  
-@author:    Jo Carter (<jocarter@holler.co.uk>)
-
-@version:   2.0
-
-
 Introduction
 ------------
 
-A plugin that provides a image pool for attaching one or more images to an object. Images can then be resized/cropped on the fly and are cached 
-on the filesystem (or on the edge, depending on preference). Images can be tagged, and a model's use of images restricted to a specific tag. 
-Custom crops may be uploaded, which are then used instead of an automatically generated crop for those dimensions.
+A plugin that provides a global pool of images. Images can be associated with
+one or more Doctrine_Record objects. Images can then be resized/cropped on the
+fly and are cached on the filesystem (or on the edge, depending on preference).
+Images in the pool can be tagged, and a model's use of images restricted to a
+specific tag. Custom crops may be uploaded, which are then used instead of an
+automatically generated crop for those dimensions.
 
 The plugin is comprised of:
 
- * `sfImagePoolable` Doctrine behaviour
+ * `sfImagePoolable` Doctrine template (aka behaviour)
  * Admin generator module `sfImagePoolAdmin` for adding and removing the to the image pool, editing images (tags, name, caption, description) and uploading custom crops.
  * `sfImagePool` module for image transformations and output
  * `sfImagePoolHelper` for easy inclusion of a model's image(s) in templates
  * `sfWidgetFormImagePoolChooser` widget for selecting images and a featured image (when multiple images are being selected)
  * Plugin for `sfMooToolsFormExtraPlugin` to enable image pool images to be added into a rich text area
+ * An improved sfThumbnail Adapter for ImageMagick which will optionally sharpen images as they're sized
 
-
-Requirements
+Dependencies
 ------------
-
-### Default
 
  * Doctrine 1.x
  * Symfony 1.3/1.4
  * [sfThumbnailPlugin](http://www.symfony-project.org/plugins/sfThumbnailPlugin)
- * ImageMagick
- * MooTools More:
+   * A image manipulation library depending on which sfThumbnail adapter you choose. Defaults to `ImagePoolImageMagickAdapter`
+ * MooTools Core 1.3.x
+ * MooTools More 1.3.x:
   * Fx.Reveal
   
-### Dependant on settings
+Optional Dependencies
+--------------------
 
  * [sfDoctrineActAsTaggablePlugin](http://www.symfony-project.org/plugins/sfDoctrineActAsTaggablePlugin) (but only if tagging: true) in the options section of the model definition for sfImagePoolImage in schema.yml
- * [sfMooToolsFormExtraPlugin](https://github.com/HollerLondon/sfMooToolsFormExtraPlugin) - if images in rich text areas are required - see 5.
+ * [sfMooToolsFormExtraPlugin](https://github.com/HollerLondon/sfMooToolsFormExtraPlugin) - sfImagePoolPlugin includes an `sfImaegPoolPlugin` Image Chooser for [MooEditable](http://cheeaun.github.com/mooeditable/), and `sfMooToolsFormExtraPlugin` provides a MooEditable Symfony form widget - see 5.
   
 Setup
 -----
 
 ### 1. Enable the plugin ###
 
-In `ProjectConfiguration`
+In `ProjectConfiguration`:
+  
+    <?php
+    require_once dirname(__FILE__).'/../lib/vendor/symfony/lib/autoload/sfCoreAutoload.class.php';
+    sfCoreAutoload::register();
 
-
+    class ProjectConfiguration extends sfProjectConfiguration
+    {
+      private $cache;
+      public function setup()
+      {
+        $this->enablePlugin('sfImagePoolPlugin');
+      }
+    }
+  
 ### 2. Enable modules ###
 
 Typically, `sfImagePoolAdmin` in the backend app, and `sfImagePool` in all apps where you need to output images.
@@ -71,7 +80,6 @@ It's probably a good idea to enable the `ImagePoolHelper` for all apps by defaul
      .settings:
       standard_helpers: [ ImagePool ]
       
-      
 ### 3. Add behaviour to model(s) in schema.yml ###
 
 #### Enable tagging (optional)
@@ -84,7 +92,7 @@ Decide whether tagging should be enabled (requires `sfDoctrineActAsTaggablePlugi
 
 #### Add behaviour
 
-    ModelName:
+    MyModel:
       actAs: [sfImagePoolable]
       ...
     
@@ -93,14 +101,14 @@ Decide whether tagging should be enabled (requires `sfDoctrineActAsTaggablePlugi
 You can specify whether the model should be allowed to have multiple images, or just a single image (default) by using the multiple option. The first image selected for the model
 will become the 'featured' image.
 
-    ModelName:
+    MyModel:
       actAs:
         sfImagePoolable: { multiple: true }    
         ...
     
 To restrict a model's use of images to those with the tag `foo`, use the tag option.
 
-    ModelName:
+    MyModel:
       actAs:
         sfImagePoolable: { tag: foo }    
         ...
@@ -108,12 +116,11 @@ To restrict a model's use of images to those with the tag `foo`, use the tag opt
 To have associated images and files deleted when your object is deleted, set shared_images option to false (default is true). When true and your object is deleted, 
 only the lookup entries are deleted, images objects and files are left untouched (i.e. remain "in the pool").
 
-    ModelName:
+    MyModel:
       actAs:
         sfImagePoolable: { shared_images: false }    
         ...
  
-    
 ### 4. Modify forms to use the image chooser widget ###
 
 #### Add the widget
@@ -121,7 +128,7 @@ only the lookup entries are deleted, images objects and files are left untouched
 To associate images with a model, the sfWidgetFormImagePoolChooser widget must be added to the model's form. The validator is required so that Symfony doesn't 
 reject the values submitted by the additional widget.
 
-    class SomethingForm extends BaseSomethingForm
+    class MyModelForm extends BaseMyModelForm
     {
       public function configure()
       {
@@ -133,7 +140,7 @@ reject the values submitted by the additional widget.
 
 #### Ensure images are associated, extend sfImagePoolableBaseForm
 
-The plugin handles all image association when saving a form that has the sfImageChooserWidget widget embedded. To setup simply alter your BaseFormDoctrine class:
+The plugin handles all image association when saving a form that has the sfImageChooserWidget widget embedded. To setup, alter your BaseFormDoctrine class to extend from sfImagePoolableBaseForm:
 
     abstract class BaseFormDoctrine extends sfImagePoolableBaseForm
     {
@@ -144,44 +151,42 @@ The plugin handles all image association when saving a form that has the sfImage
 
 To add a HTML editor (see Requirements) with image pool for image insertion, use the following method (or take the code on the method and add to it) - in the form class
 
-    class SomethingForm extends BaseSomethingForm
+    class MyModelForm extends BaseMyModelForm
     {
-        public function configure()
-        {
-            $widgetName = 'summary';  
-            $restrictToTag = '';
-            sfImagePoolUtil::addImagePoolMooEditable($this, $widgetName, $restrictToTag);
-        }
+      public function configure()
+      {
+        $widgetName = 'summary';  
+        $restrictToTag = '';
+        sfImagePoolUtil::addImagePoolMooEditable($this, $widgetName, $restrictToTag);
+      }
     }
    
    
 ### 6 .htaccess tweaks ###
 
-@TODO: Add Nginx config - http://wiki.nginx.org/HttpRewriteModule
-
 We need to set the mod_rewrite rules to serve the local copy if it exists, or route the request through the controller to generate the crop (and then cache it):
     
     <IfModule mod_rewrite.c>
       RewriteEngine On
-    
+  
       # uncomment the following line, if you are having trouble
       # getting no_script_name to work
       RewriteBase /
-    
+  
       # Don't route files ending in .something
       RewriteCond %{REQUEST_URI} \..+$
       RewriteCond %{REQUEST_URI} !\.html$
       RewriteCond %{REQUEST_URI} !image-pool
       RewriteRule .* - [L]
-      
+    
       # we check if the .html version is here (caching)
       RewriteRule ^$ index.html [QSA]
       RewriteRule ^([^.]+)$ $1.html [QSA]
-    
+  
       # no, so we redirect to our front web controller
       RewriteCond %{REQUEST_FILENAME} !-f
       RewriteRule ^(.*)$ index.php [QSA,L]
-    
+  
     </IfModule>
 
 Additionally, to improve performance, dynamically resized and cropped images are created once and then served from the filesystem (if caching on filesystem). 
@@ -193,45 +198,49 @@ To ensure this works when accessing the website via controllers, add the followi
 *Note*: the 'image-pool' part of the rewrite rule above refers to the default location where uploaded/transformed images are saved. This can be configured in the 
 plugin's sfImagePoolPluginConfiguration class. If changed the above rule would also need changing.   
 
-
 ### 7. Customise plugin options ###
-
-@TODO: Update with new caching options
 
 The following options may be overridden in your app.yml files:
 
-    sf_image_pool:
-      cache_lifetime:     7776000 # three months
-      chooser_per_page:   24
+    all:
+      sf_image_pool:
+        cache_lifetime:     7776000 # three months
+        chooser_per_page:   24
+    
+        mimes:              [image/jpeg, image/jpg, image/png, image/pjpeg, 'image/x-png']
+
+        # Maximum upload size to accept
+        maxfilesize:        5242880
+    
+        # Folder within the web/ folder to store crops
+        folder:             image-pool
+
+        placeholders:       false # If true, use file placeholder.jpg if an image can't be found
+        use_placeholdit:    false # if true, returns handy placeholder images from http://placehold.it
+    
+        # include controller in generated image URLs?
+        use_script_name:    true
+        adapter:            ImagePoolImageMagickAdapter
+        # adapter:            sfGDAdapter
+        adapter_options:
+          # Sharpen scaled/cropped images - only works for ImagePoolImageMagickAdapter
+          sharpen:      true
+          # Sharpening is CPU-intensive, so you can prefix the "convert" command
+          # with nice -n19 to make sure other processes get priority over the CPU
+          # convert:        nice -n19 /usr/bin/convert
       
-      mimes:              [image/jpeg, image/jpg, image/png, image/pjpeg, 'image/x-png']
-  
-      # Maximum upload size to accept
-      maxfilesize:        5242880
-      
-      # Folder within the web/ folder to store crops
-      folder:             image-pool
-  
-      placeholders:       false # If true, use file placeholder.jpg if an image can't be found
-      use_placeholdit:    false # if true, returns handy placeholder images from placehold.it
-      
-      # include controller in generated image URLs?
-      use_script_name:    false
-      adapter:            ImagePoolImageMagickAdapter
-      adapter_options:
-        sharpen:      true
-        # You can prefix the "convert" command with nice -n19 to make it a bit more CPU friendly
-        # convert:        nice -n19 /usr/bin/convert
-        
-      # How should we cache files?
-      cache:
-        class:            sfImagePoolFilesystemCache
-        # class:          sfImagePoolRackspaceCloudFilesCache
-        # class:          sfImagePoolAmazonS3Cache
-        lifetime:         7776000 # 4 weeks
-      # cache adapter options
-      cache_adapter:      {}
- 
+        # How should we cache files?
+        cache:
+          lifetime:         7776000 # 4 weeks
+          class:            sfImagePoolFilesystemCache
+          # RACKSPACE CLOUD FILES ADAPTER:
+          # class:          sfImagePoolRackspaceCloudFilesCache
+          # options:
+          #   username:     ~ # Your Username
+          #   container:    ~ # Name for the container
+          #   api_key:      ~
+          #   auth_host:    UK # UK or US, depending on where your account is based
+          # off_site_uri: ~ # The Base URI for the container
     
 ### 8. Include images in templates ###
 
@@ -239,28 +248,28 @@ Use the `ImagePoolHelper` to output a single image associated with an object. In
 
 #### Basic
 
-    use_helper('ImagePool');
+    use_helper('Asset, Url, ImagePool');
     echo pool_image_tag($object);
     
-#### Transformed
+#### With transformations
 
-Original images are retained so you may product resized or cropped versions on the fly:. To output an image fit to 250px by 150px:
+Original images are retained so you may product resized or cropped versions on the fly. To scale an image so its longes edge fits within 250px by 150px:
 
-    echo pool_image_tag($object, '200x150');
+    echo pool_image_tag($imagepoolable_object_or_sfImagePoolImage, '200x150');
     
 This is the same as
 
-    echo pool_image_tag($object, '200x150', 'scale');
+    echo pool_image_tag($imagepoolable_object_or_sfImagePoolImage, '200x150', 'scale');
     
 scale is the default transform method. If this doesn't product a good result, try using crop. To crop an image to 500x325:
 
-    echo pool_image_tag($object, '500x325', 'crop');
+    echo pool_image_tag($imagepoolable_object_or_sfImagePoolImage, '500x325', 'crop');
     
 #### Image parameters
 
-The sfImagePoolHelper accepts an array of arguments:
+The fourth parameter of `pool_image_tag` is an optional array of html attributes for the resulting image tag (a là `image_tag()`).
 
-    echo pool_image_tag($object, '500x325', 'crop', array('alt' => 'Alt text here', 'title' => 'Title here', 'class' => 'class-name'));
+    echo pool_image_tag($imagepoolable_object_or_sfImagePoolImage, '500x325', 'crop', array('alt' => 'Alt text here', 'title' => 'Title here', 'class' => 'class-name'));
     
 If no `alt` parameter is given, the image's caption will be used. In the backend only, if no `title` parameter is given, the image's original filename will be used. 
 If the transform method is `crop` then the <img> tag's `width` and `height` attributes will be set accordingly. These are not set when using the `scale` method, as the `scale` 
@@ -269,14 +278,13 @@ method fits the image to the specified dimensions and will not necessarily match
 
 ### Overriding Automatic Crops
 
-Sometimes an automatic crop will not focus on the correct area of an image. These crops may be overridden by uploading a custom replacement via the 
-`sfImagePoolAdmin` module. The size of your crop will be detected and it will automatically be output instead of an automatic crop.
+Automatic may crops produce undesirable results (e.g. heads chopped off when cropping a portrait image to landscape). These crops may be overridden by uploading a custom replacement via the 
+`sfImagePoolAdmin` module. The `image` action of `sfImagePool` will use always use manual crops in place of automatic ones if there's one available at the requested dimensions.
 
 For example:
 
  * Upload a brand new image
  * Output in a template using the crop method at 300x200 is producing a bad crop for this image
- * Create a manual 300x200 crop using Photoshop
+ * Manually create a crop at 300x200 in your editor of choice
  * Find the original image in `sfImagePoolAdmin` module, upload your manual crop
  * Plugin will no longer create an image for crops at 300x200, but will use your image.
- 

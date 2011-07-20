@@ -45,13 +45,13 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
    * Set up Rackspace cloud files - used by rackspace:initialise task as well as constructor
    * 
    * @see imagepoolRackspaceTask::execute()
-   * @var array $options
+   * @var array $params
    * @return CF_Container
    */
-  public static function setup($options)
+  public static function setup($params)
   {
     $required_fields = array('container','api_key','username');
-    $adapter_options = $options['adapter_options'];
+    $adapter_options = $params['options'];
     
     foreach($required_fields as $f)
     {
@@ -104,7 +104,7 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
   public function commit($redirect = true)
   {
     // save to cloud
-    $object_name = implode(DIRECTORY_SEPARATOR, array(
+    $object_name = implode('/', array(
         ($this->resizer_options[2] ? 'scale' : 'crop'),
         $this->resizer_options[0],
         $this->resizer_options[1],
@@ -127,15 +127,26 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
     }
     
     // add/ update details
-    $imageCrop->Image = $this->image;
-    $imageCrop->width = $this->resizer_options[0];
-    $imageCrop->height = $this->resizer_options[1];
-    $imageCrop->location = self::CROP_IDENTIFER;
-    $imageCrop->is_crop = !($this->resizer_options[2]);
-    $imageCrop->save();
+    $imageCrop->Image     = $this->image;
+    $imageCrop->width     = $this->resizer_options[0];
+    $imageCrop->height    = $this->resizer_options[1];
+    $imageCrop->location  = self::CROP_IDENTIFER;
+    $imageCrop->is_crop   = !($this->resizer_options[2]);
     
     // controller redirect 301 to cdn
     $url = $this->options['off_site_uri'] . DIRECTORY_SEPARATOR . $object_name;
+
+    // There's a chance that save() will fail because the crop already exists
+    // in the database. So, if it does fail, let's try and grab it. If it 
+    // failed and it doesn't exist, then re-throw the exception
+    try
+    {
+      $imageCrop->save();
+    }
+    catch(Doctrine_Connection_Exception $e)
+    {
+      if($e->getPortableCode() != Doctrine_Core::ERR_ALREADY_EXISTS) throw $e;
+    }
     
     if ($redirect)
     {
