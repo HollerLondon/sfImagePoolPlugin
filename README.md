@@ -4,12 +4,9 @@ sfImagePoolPlugin
 Introduction
 ------------
 
-A plugin that provides a global pool of images. Images can be associated with
-one or more Doctrine_Record objects. Images can then be resized/cropped on the
-fly and are cached on the filesystem (or on the edge, depending on preference).
-Images in the pool can be tagged, and a model's use of images restricted to a
-specific tag. Custom crops may be uploaded, which are then used instead of an
-automatically generated crop for those dimensions.
+A plugin that provides a global pool of images. Images can be associated with one or more Doctrine_Record objects. Images can then be resized/cropped on the
+fly and are cached on the filesystem (or on the edge, depending on preference). Images in the pool can be tagged, and a model's use of images restricted to a
+specific tag. Custom crops may be uploaded, which are then used instead of an automatically generated crop for those dimensions.
 
 The plugin is comprised of:
 
@@ -45,18 +42,14 @@ Setup
 
 In `ProjectConfiguration`:
   
-    <?php
-    require_once dirname(__FILE__).'/../lib/vendor/symfony/lib/autoload/sfCoreAutoload.class.php';
-    sfCoreAutoload::register();
-
     class ProjectConfiguration extends sfProjectConfiguration
     {
-      private $cache;
       public function setup()
       {
-        $this->enablePlugin('sfImagePoolPlugin');
+        $this->enablePlugin('sfDoctrinePlugin', 'sfImagePoolPlugin');
       }
     }
+    ...
   
 ### 2. Enable modules ###
 
@@ -288,3 +281,13 @@ For example:
  * Manually create a crop at 300x200 in your editor of choice
  * Find the original image in `sfImagePoolAdmin` module, upload your manual crop
  * Plugin will no longer create an image for crops at 300x200, but will use your image.
+ 
+ 
+Testing
+-------
+
+Please note that for test environments the option `tagging` is overwritten in `PluginsfImagePoolImage` to be set as `false` - this is to ensure
+that tests do not depend on additional plugins being installed.
+
+The `sfImagePoolRackCloudCache` test requires Rackspace Cloud credentials, therefore this test can only be run successfully in projects
+with these credentials in `app.yml`.

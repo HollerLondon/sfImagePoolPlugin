@@ -20,6 +20,30 @@ abstract class PluginsfImagePoolImage extends BasesfImagePoolImage
     const DEFAULT_FILENAME = 'placeholder.png';
     
     /**
+     * Overriding the values returned for 'tagging' if the parent project has it enabled
+     * This is for testing only - 'tagging' needs to be turned off
+     * 
+     * @author Jo Carter
+     * @return mixed
+     */
+    public function option($name, $value = null)
+    {
+      $return = parent::option($name, $value);
+      
+      if ('test' == sfConfig::get('sf_environment'))
+      {
+        if ('tagging' == $name && is_null($value)) // a get not a set
+        {
+          return false;
+        }
+      }
+      
+      if ($value === null && !is_array($name)) {
+         return $return;
+      }
+    }
+    
+    /**
      * Set up image to have or not have tagging depending on the project settings
      * Option to be set in the schema.yml - see README
      * 
@@ -38,8 +62,8 @@ abstract class PluginsfImagePoolImage extends BasesfImagePoolImage
              'cascade' => array(
              0 => 'delete',
           )));
-      
-      if ($this->option('tagging'))
+          
+      if (true === $this->option('tagging'))
       {
         if (!class_exists('Taggable'))
         {

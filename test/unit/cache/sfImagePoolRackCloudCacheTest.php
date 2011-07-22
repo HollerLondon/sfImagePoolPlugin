@@ -1,11 +1,12 @@
 <?php
 require_once realpath(dirname(__FILE__).'/../../bootstrap/unit.php');
 
-$t = new lime_test(7);
+$t = new lime_test(7, new lime_output_color());
 
 $adapter_options = sfConfig::get('app_sf_image_pool_cache');
 
 // Test will fail if no config options
+// Rackspace do not have testing credentials available for the API so this test requires Rackspace account details
 if (isset($adapter_options['options']) && !empty($adapter_options['options']))
 {
   // Create an image

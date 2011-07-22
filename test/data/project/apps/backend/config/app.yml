@@ -1,0 +1,40 @@
+all:
+  sf_image_pool:
+    cache_lifetime:     7776000 # three months
+    chooser_per_page:   24
+    
+    mimes:              [image/jpeg, image/jpg, image/png, image/pjpeg, 'image/x-png']
+
+    # Maximum upload size to accept
+    maxfilesize:        5242880
+    
+    # Folder within the web/ folder to store crops
+    folder:             image-pool
+
+    placeholders:       false # If true, use file placeholder.jpg if an image can't be found
+    use_placeholdit:    false # if true, returns handy placeholder images from http://placehold.it
+    
+    # include controller in generated image URLs?
+    use_script_name:    true
+    adapter:            ImagePoolImageMagickAdapter
+    # adapter:            sfGDAdapter
+    adapter_options:
+      # Sharpen scaled/cropped images - only works for ImagePoolImageMagickAdapter
+      sharpen:      true
+      # Sharpening is CPU-intensive, so you can prefix the "convert" command
+      # with nice -n19 to make sure other processes get priority over the CPU
+      # convert:        nice -n19 /usr/bin/convert
+      
+    # How should we cache files?
+    cache:
+      lifetime:         7776000 # 4 weeks
+      class:            sfImagePoolFilesystemCache
+      # RACKSPACE CLOUD FILES ADAPTER:
+      # class:          sfImagePoolRackspaceCloudFilesCache
+      # options:
+      #   username:     ~ # Your Username
+      #   container:    ~ # Name for the container
+      #   api_key:      ~
+      #   auth_host:    UK # UK or US, depending on where your account is based
+      # off_site_uri: ~ # The Base URI for the container
+    

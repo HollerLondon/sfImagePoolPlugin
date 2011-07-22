@@ -1,0 +1,13 @@
+ImageArticle:
+  options:
+    symfony:
+      form:         false
+      filter:       false
+      
+  columns:
+    name:           string(255)
+    
+  actAs:  
+    sfImagePoolable:   
+      multiple:        true
+      shared_images:   false
