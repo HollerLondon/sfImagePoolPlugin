@@ -1,10 +1,11 @@
 <?php
-require_once realpath(dirname(__FILE__).'/../../../../../../test/bootstrap/Doctrine.php');
+require_once dirname(__FILE__).'/../../bootstrap/bootstrap.php';
 
-$t = new lime_test();
+$t = new lime_test(6, new lime_output_color());
 
 // Create a new random images to work with
 $images = array();
+
 for($i = 0; $i < 5; $i++)
 {
   $im = new sfImagePoolImage;
@@ -14,7 +15,9 @@ for($i = 0; $i < 5; $i++)
 }
 
 // Create a new image-poolable object
-$obj = new Submission;
+$obj = new ImageArticle;
+
+
 $obj->setImages($images);
 
 $t->is(count($obj->getPoolImages()->getInsertDiff()),5,"5 images flagged for insert");
