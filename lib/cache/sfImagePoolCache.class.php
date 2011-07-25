@@ -108,13 +108,7 @@ abstract class sfImagePoolCache
   {
     if (!is_null($crop))
     {
-      $search_root    = sfImagePoolPluginConfiguration::getBaseDir();
-      $files_iterator = sfFinder::type('file')->name($this->image['filename'])->in($search_root);
-      
-      foreach ($files_iterator as $f)
-      {
-        unlink($f);
-      }
+      $count = sfImagePoolUtil::deleteImageFile($this->image['filename']);
     }
   }
    

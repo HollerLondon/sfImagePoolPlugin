@@ -2,18 +2,18 @@
 class sfImagePoolUtil
 {
   /**
-   * Deletes an image, and all cached crops and scales.
+   * Deletes an image, and all cached crops and scales within the image-pool folder.
    * 
+   * @param string $filename Filename to delete
    * @return integer Number of files deleted
    */
   static public function deleteImageFile($filename)
   {
     $search_root    = sfImagePoolPluginConfiguration::getBaseDir();
     $files_iterator = sfFinder::type('file')->name($filename)->in($search_root);
-
     $count = 0;
     
-    foreach($files_iterator as $f)
+    foreach ($files_iterator as $f)
     {
       unlink($f);
       $count++;
@@ -25,19 +25,65 @@ class sfImagePoolUtil
   /**
    * Add an image pool chooser widget to the form
    * 
-   * Requires MooTools.More:
+   * @requires MooTols Core
+   * @requires MooTools.More:
    *  * More/Fx.Reveal
    * 
-   * @param $form Form object which to add widget to
-   * @param $useSsl backend app uses SSL so return the MooTools JS with ssl
+   * @param $form   Form object which to add widget to
+   * @param $useSsl (@deprecated as JS dependancies should be in main project)
    */
   static public function addImageChooser($form, $useSsl = false)
   {
-    $form->setWidget('sf_image_pool_ids', new sfWidgetFormImagePoolChooser(array(
-      'object' => $form->getObject(), 'ssl' => $useSsl
-    )));
+    $form->setWidget('sf_image_pool_ids', new sfWidgetFormImagePoolChooser(array('object' => $form->getObject())));
 
     $form->setValidator('sf_image_pool_ids', new sfValidatorPass());    
+  }
+  
+  /**
+   * Add a MooEditable textarea widget with images from Image Pool as the selection
+   * 
+   * Use this as a basis for any textarea which requires MooEditable + ImagePool as config options are REQUIRED
+   * 
+   * @TODO: Test thoroughly with new MooEditable JS
+   * 
+   * @uses sfMooToolsFormExtraPlugin (REQUIRED)
+   * @requires Javascripts and Stylesheets to be included in form - see README (Optional extensions #1)
+   * @author Jo Carter <jocarter@holler.co.uk>
+   * 
+   * @param sfForm $form      Form object which to add widget to
+   * @param string $fieldName the field to set the textarea to
+   * @param string $tag       (optional) tag to restrict images for insertion - comma separated
+   */
+  static public function addImagePoolMooEditable($form, $fieldName, $tag = '')
+  {
+    if (!function_exists('url_for')) 
+    {
+      sfApplicationConfiguration::getActive()->loadHelpers(array('Url'));
+    }
+    
+    $form->setWidget($fieldName,
+      new sfWidgetFormTextareaMooEditable(array(
+        'extratoolbar'  =>'imagepool',
+        'config'        => sprintf(
+          "chooserUrl:  '%s',".
+          "imageFolder: '%s',".
+          "imageClass:  'image-pool'",
+          url_for('sf_image_pool_chooser', array('tag'=>$tag)), sfConfig::get('app_sf_image_pool_folder')
+        )
+      ))
+    );
+  }
+  
+  /**
+   * Add a validated image upload field to a form.
+   * 
+   * @param sfForm $form        Form to modify
+   * @param string $field_name  Name of the image upload field, default 'image'  
+   */
+  static public function addImageField($form, $field_name = 'image')
+  {
+    $form->setWidget($field_name, new sfWidgetFormInputFile());
+    $form->setValidator($field_name, new sfValidatorImageFile(self::getValidatorOptions(), self::getValidatorMessages()));
   }
   
   /**
@@ -46,7 +92,7 @@ class sfImagePoolUtil
    * 
    * Moved from sfImagePoolableBaseForm as this is now defunct
    * 
-   * @param $form Form object which to add widget to
+   * @param $form   Form object which to add widget to
    * @author Jo Carter
    */
   static public function addMultipleUploadFields($form, $field_name = 'image', $nb_images = 5)
@@ -59,99 +105,50 @@ class sfImagePoolUtil
       $form->embedForm($embed_name, $embedded_form);
     }
   }
-  
-  /**
-   * Add a MooEditable textarea widget with images from Image Pool as the selection
-   * 
-   * e.g: sfImagePoolUtil::addImagePoolMooEditable($this, 'summary', 'editorial');
-   * 
-   * Requires Javascripts and Stylesheets to be included in form
-   * 
-   *   public function getJavaScripts()
-   *   {
-   *     $js = parent::getJavascripts();
-   *     
-   *     return array_merge($js, array('/sfImagePoolPlugin/js/MooEditable.ImagePool.js'));
-   *   }
-   * 
-   *   public function getStylesheets()
-   *   {
-   *         $css = parent::getStylesheets();
-   *                 
-   *     return array_merge($css, array('/sfImagePoolPlugin/css/MooEditable.ImagePool.css'=>'all'));
-   *   }
-   * 
-   * Use this as a basis for any textarea which requires MooEditable + ImagePool as config
-   * options are REQUIRED
-   * 
-   * @TODO: Test thoroughly with new MooEditable JS
-   * 
-   * @uses sfMooToolsFormExtraPlugin (REQUIRED)
-   * @author Jo Carter <jocarter@holler.co.uk>
-   * 
-   * @param sfForm $form Form object which to add widget to
-   * @param string $fieldName the field to set the textarea to
-   * @param string $tag (optional) tag to restrict images for insertion - comma separated
-   */
-  static public function addImagePoolMooEditable($form, $fieldName, $tag = '')
-  {
-    sfApplicationConfiguration::getActive()->loadHelpers(array('Url'));
-    
-    $form->setWidget($fieldName,
-      new sfWidgetFormTextareaMooEditable(array(
-        'extratoolbar'  =>'imagepool',
-        'config'        => sprintf(
-          "chooserUrl: '%s',".
-          "imageFolder: '%s',".
-          "imageClass: 'image-pool'",
-          url_for('sf_image_pool_chooser', array('tag'=>$tag)), sfConfig::get('app_sf_image_pool_folder')
-        )
-      ))
-    );
-  }
-  
-  /**
-   * Add a validated image upload field to a form.
-   * 
-   * @param sfForm $form Form to modify
-   * @param string $field_name Name of the image upload field, default 'image'  
-   */
-  static public function addImageField($form, $field_name = 'image')
-  {
-    $form->setWidget($field_name, new sfWidgetFormInputFile());
-    $form->setValidator($field_name, new sfValidatorImageFile(self::getValidatorOptions(), self::getValidatorMessages()));
-  }
 
   /**
-   * @todo add ability to merge options with incoming array to allow easy overriding of an option.
+   * Get image validator options
+   * 
+   * @param array $options Array of options to override default options
    * @return array
    */
-  static public function getValidatorOptions()
+  static public function getValidatorOptions($options = array())
   {
     $max_size_bytes = sfConfig::get('app_sf_image_pool_maxfilesize');
     
-    return array(
-      'max_width'  => 5000,
-      'max_height' => 5000,
-      'resize'     => false,
-      'required'   => false,
-      'max_size'   => $max_size_bytes,
-      'mime_types' => sfConfig::get('app_sf_image_pool_mimes'),
-      'path'       => sfImagePoolPluginConfiguration::getBaseDir()
-    );
+    $defaultOptions = array(
+        'max_width'  => 5000,
+        'max_height' => 5000,
+        'resize'     => false,
+        'required'   => false,
+        'max_size'   => $max_size_bytes,
+        'mime_types' => sfConfig::get('app_sf_image_pool_mimes'),
+        'path'       => sfImagePoolPluginConfiguration::getBaseDir()
+      );
+      
+    $options = array_merge($defaultOptions, $options);
+    
+    return $options;
   }
   
   /**
+   * Get image validator messages
+   * 
+   * @param array $messages Array of messages to override default messages
    * @return array
    */
-  static public function getValidatorMessages()
+  static public function getValidatorMessages($messages = array())
   {
     $max_size_bytes = sfConfig::get('app_sf_image_pool_maxfilesize');
     
-    return array(
-      'mime_types' => 'Please upload either a JPG or PNG file',
-      'max_size'   => sprintf('Files cannot exceed %sMb in size', round($max_size_bytes / 1024 / 1024))
-    );    
+    $defaultMessages = array(
+        'mime_types' => 'Please upload either a JPG or PNG file',
+        'max_size'   => sprintf('Files cannot exceed %sMb in size', round($max_size_bytes / 1024 / 1024))
+      );   
+
+    $messages = array_merge($defaultMessages, $messages);
+    
+    return $messages;
   }
 
   /**
@@ -160,7 +157,7 @@ class sfImagePoolUtil
    * 
    * This method should be called after the call to isValid() returns true.
    * 
-   * @todo Investigate this and add in the caching elements
+   * @TODO Investigate this and add in the caching elements
    * 
    * @return Object Form's saved and updated object. 
    */
@@ -170,12 +167,12 @@ class sfImagePoolUtil
     
     // if image uploaded then create image pool entry and associate
     // with the model we're creating.
-    if($file = $form->getValue($field_name))
+    if ($file = $form->getValue($field_name))
     {
       // if the field name on the form is an embedded sfImagePoolForm
       // we'll need to step into an array of values on the field
       // in order to grab the sfValidatedFile object.
-      if(is_array($file) && !is_null($file['filename']))
+      if (is_array($file) && !is_null($file['filename']))
       {
         $file = $file['filename'];
       }
@@ -189,7 +186,7 @@ class sfImagePoolUtil
         return $object;
       }
       
-      if($file instanceof sfValidatedFile)
+      if ($file instanceof sfValidatedFile)
       {
         $file->save();
         unset($form[$field_name]);
@@ -234,8 +231,6 @@ class sfImagePoolUtil
    * This common logic is abstracted out so it can easily be used by other plugins
    * that require image upload but need to handle the actual upload logic themselves.
    * 
-   * @todo Add in caching
-   * 
    * @param array $upload
    * @param mixed $tags
    * @return sfImagePoolImage
@@ -265,7 +260,7 @@ class sfImagePoolUtil
     $image->fromArray($image_data);
     
     // now set tags if they've been supplied
-    if($tags)
+    if ($tags)
     {
       $image->addTag($tags);
     }
@@ -288,9 +283,9 @@ class sfImagePoolUtil
     $accepted_types = sfConfig::get('app_sf_image_pool_mimes');
     $max_size       = sfConfig::get('app_sf_image_pool_maxfilesize');
     
-    if($uploaded_file['error'] !== 0)
+    if ($uploaded_file['error'] !== 0)
     {
-      switch($uploaded_file['error']) 
+      switch ($uploaded_file['error']) 
       { 
         case UPLOAD_ERR_INI_SIZE: 
             $message = sprintf('Maximum file size is %s', ini_get('upload_max_filesize'));
@@ -327,10 +322,9 @@ class sfImagePoolUtil
       
       $errors[] = $message;
     }
-
     // if there aren't any standard php upload errors then we can do some checks of our own
     // as the file will actually have been uploaded. 
-    elseif(!in_array($uploaded_file['type'], $accepted_types))
+    else if (!in_array($uploaded_file['type'], $accepted_types))
     {
       $errors[] = sprintf('%s is not supported', $uploaded_file['type']);
     }    

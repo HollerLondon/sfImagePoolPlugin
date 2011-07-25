@@ -175,7 +175,14 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
       $resizer_options = array('width'=>$crop->width, 'height'=>$crop->height, 'scale'=>(!$crop->is_crop));
       $object_name = $this->getCloudName($resizer_options);
       
-      $this->container->delete_object($object_name);
+      try 
+      {
+        $this->container->delete_object($object_name);
+      }
+      catch (NoSuchObjectException $e)
+      {
+        // Image already deleted from cloud - that's ok
+      }
     }
   }
 } // END class 

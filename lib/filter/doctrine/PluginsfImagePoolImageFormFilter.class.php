@@ -3,10 +3,10 @@
 /**
  * PluginsfImagePoolImage form.
  *
- * @package    ##PROJECT_NAME##
+ * @package    sfImagePoolPlugin
  * @subpackage filter
- * @author     ##AUTHOR_NAME##
- * @version    SVN: $Id: sfDoctrineFormFilterPluginTemplate.php 23810 2009-11-12 11:07:44Z Kris.Wallsmith $
+ * @author     Ben Lancaster
+ * @version    SVN: $Id: PluginsfImagePoolImage.php 23810 2009-11-12 11:07:44Z Ben Lancaster $
  */
 abstract class PluginsfImagePoolImageFormFilter extends BasesfImagePoolImageFormFilter
 {
@@ -15,6 +15,7 @@ abstract class PluginsfImagePoolImageFormFilter extends BasesfImagePoolImageForm
     parent::setup();
     
     $image = new sfImagePoolImage();
+    
     if ($image->option('tagging'))
     {
       $query = Doctrine_Core::getTable('Tag')
@@ -36,6 +37,7 @@ abstract class PluginsfImagePoolImageFormFilter extends BasesfImagePoolImageForm
         'required'      => false
       ));
     }
+    
     $image->free(true);
   }
   
