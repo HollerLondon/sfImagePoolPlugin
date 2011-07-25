@@ -34,20 +34,27 @@ Dependencies
 Optional Dependencies
 --------------------
 
- * [sfDoctrineActAsTaggablePlugin](http://www.symfony-project.org/plugins/sfDoctrineActAsTaggablePlugin) (but only if tagging: true) in the options section of the model definition for sfImagePoolImage in schema.yml
+ * [sfDoctrineActAsTaggablePlugin](http://www.symfony-project.org/plugins/sfDoctrineActAsTaggablePlugin) (but only if tagging: true) in the options section of the model definition for sfImagePoolImage in `schema.yml`
  * [sfMooToolsFormExtraPlugin](https://github.com/HollerLondon/sfMooToolsFormExtraPlugin) - sfImagePoolPlugin includes an `sfImaegPoolPlugin` Image Chooser for [MooEditable](http://cheeaun.github.com/mooeditable/), and `sfMooToolsFormExtraPlugin` provides a MooEditable Symfony form widget - see _Optional extensions_.
  * [Rackspace Cloud files](https://github.com/rackspace/php-cloudfiles.git) - if storing image files on a Rackspace cloud this library is required in `lib/vendor/rackspace`
   
 ### Rackspace Cloud files: Note for SVN
 
-If using SVN you will need to these dependancies as `svn:externals`
+If using SVN you will need to add these dependancies as `svn:externals` in the project's `lib/vendor` folder
 
-      lib/vendor/rackspace            https://github.com/rackspace/php-cloudfiles.git
+    rackspace            https://svn.github.com/rackspace/php-cloudfiles.git
+
+You will then need to autoload these files in the application's `config/autoload.yml`
+
+	autoload:
+	  vendor_rackspace:
+	    path:      %SF_LIB_DIR%/vendor/rackspace
+        recursive: on
 
 
 ### Rackspace Cloud files: Note for Git
 
-The `lib/vendor` folder contains `submodules` for the Rackspace Cloud files API library, if exporting this repository then these files will also need to be exported
+The plugin's `lib/vendor` folder contains `submodules` for the Rackspace Cloud files API library, if exporting this repository then these files will also need to be exported
 
     [submodule "lib/vendor/rackspace"]
       path = lib/vendor/rackspace
@@ -272,7 +279,8 @@ plugin's sfImagePoolPluginConfiguration class. If changed the above rule would a
 
 #### 1. Add sfImagePool to MooEditable text areas
 
-To add a HTML editor (see _Requirements_) with image pool for image insertion, use the following method (or take the code in the method and amend to it) - in the form class
+To add a HTML editor (see _Requirements_) with image pool for image insertion, use the following method (or take the code in the method and amend to it) - in the form class.  
+It requires the extensions' javascripts and stylesheets to be included in form
 
     class MyModelForm extends BaseMyModelForm
     {
@@ -281,6 +289,20 @@ To add a HTML editor (see _Requirements_) with image pool for image insertion, u
         $widgetName = 'summary';  
         $restrictToTag = '';
         sfImagePoolUtil::addImagePoolMooEditable($this, $widgetName, $restrictToTag);
+      }
+    
+	  public function getJavaScripts()
+      {
+        $js = parent::getJavascripts();
+   
+		return array_merge($js, array('/sfImagePoolPlugin/js/MooEditable.ImagePool.js'));
+      }
+   
+      public function getStylesheets()
+      {
+         $css = parent::getStylesheets();
+   
+         return array_merge($css, array('/sfImagePoolPlugin/css/MooEditable.ImagePool.css'=>'all'));
       }
     }
 
