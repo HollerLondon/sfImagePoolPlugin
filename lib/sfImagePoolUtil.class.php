@@ -40,6 +40,25 @@ class sfImagePoolUtil
     $form->setValidator('sf_image_pool_ids', new sfValidatorPass());    
   }
   
+  /**
+   * Add multiple image upload fields to form
+   * @todo Refactor this to use a single widget and validator?
+   * 
+   * Moved from sfImagePoolableBaseForm as this is now defunct
+   * 
+   * @param $form Form object which to add widget to
+   * @author Jo Carter
+   */
+  static public function addMultipleUploadFields($form, $field_name = 'image', $nb_images = 5)
+  {
+    for ($i = 1; $i < $nb_images + 1; $i++)
+    {
+      $embedded_form = new sfImagePoolImageForm(new sfImagePoolImage, array('embedded' => true));
+      $embed_name    = sprintf('%s_%u', $field_name, $i);
+      
+      $form->embedForm($embed_name, $embedded_form);
+    }
+  }
   
   /**
    * Add a MooEditable textarea widget with images from Image Pool as the selection

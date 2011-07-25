@@ -47,6 +47,8 @@ abstract class PluginsfImagePoolImage extends BasesfImagePoolImage
      * Set up image to have or not have tagging depending on the project settings
      * Option to be set in the schema.yml - see README
      * 
+     * @see PluginsfImagePoolImage::option() - if in test environment
+     * 
      * @author Ben Lancaster
      * @requires sfDoctrineActAsTaggablePlugin
      * @throws sfPluginDependencyException

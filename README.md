@@ -18,6 +18,7 @@ The plugin is comprised of:
  * Plugin for `sfMooToolsFormExtraPlugin` to enable image pool images to be added into a rich text area
  * An improved sfThumbnail Adapter for ImageMagick which will optionally sharpen images as they're sized
 
+
 Dependencies
 ------------
 
@@ -29,16 +30,34 @@ Dependencies
  * MooTools More 1.3.x:
   * Fx.Reveal
   
+  
 Optional Dependencies
 --------------------
 
  * [sfDoctrineActAsTaggablePlugin](http://www.symfony-project.org/plugins/sfDoctrineActAsTaggablePlugin) (but only if tagging: true) in the options section of the model definition for sfImagePoolImage in schema.yml
- * [sfMooToolsFormExtraPlugin](https://github.com/HollerLondon/sfMooToolsFormExtraPlugin) - sfImagePoolPlugin includes an `sfImaegPoolPlugin` Image Chooser for [MooEditable](http://cheeaun.github.com/mooeditable/), and `sfMooToolsFormExtraPlugin` provides a MooEditable Symfony form widget - see 5.
+ * [sfMooToolsFormExtraPlugin](https://github.com/HollerLondon/sfMooToolsFormExtraPlugin) - sfImagePoolPlugin includes an `sfImaegPoolPlugin` Image Chooser for [MooEditable](http://cheeaun.github.com/mooeditable/), and `sfMooToolsFormExtraPlugin` provides a MooEditable Symfony form widget - see _Optional extensions_.
+ * [Rackspace Cloud files](https://github.com/rackspace/php-cloudfiles.git) - if storing image files on a Rackspace cloud this library is required in `lib/vendor/rackspace`
   
+### Rackspace Cloud files: Note for SVN
+
+If using SVN you will need to these dependancies as `svn:externals`
+
+      lib/vendor/rackspace            https://github.com/rackspace/php-cloudfiles.git
+
+
+### Rackspace Cloud files: Note for Git
+
+The `lib/vendor` folder contains `submodules` for the Rackspace Cloud files API library, if exporting this repository then these files will also need to be exported
+
+    [submodule "lib/vendor/rackspace"]
+      path = lib/vendor/rackspace
+      url = https://github.com/rackspace/php-cloudfiles.git
+  
+
 Setup
 -----
 
-### 1. Enable the plugin ###
+### 1. Enable the plugin
 
 In `ProjectConfiguration`:
   
@@ -50,12 +69,13 @@ In `ProjectConfiguration`:
       }
     }
     ...
+    
   
-### 2. Enable modules ###
+### 2. Enable modules
 
 Typically, `sfImagePoolAdmin` in the backend app, and `sfImagePool` in all apps where you need to output images.
 
-Every application that'll handle images from the image pool should have the `sfImagePool` module enabled in the app's settings.yml (or globally in the project's settings.yml):
+Every application that will handle images from the image pool should have the `sfImagePool` module enabled in the app's `settings.yml` (or globally in the project's `settings.yml`):
 
     all:
      .settings:
@@ -73,11 +93,12 @@ It's probably a good idea to enable the `ImagePoolHelper` for all apps by defaul
      .settings:
       standard_helpers: [ ImagePool ]
       
-### 3. Add behaviour to model(s) in schema.yml ###
+
+### 3. Add behaviour to model(s) in schema.yml
 
 #### Enable tagging (optional)
 
-Decide whether tagging should be enabled (requires `sfDoctrineActAsTaggablePlugin`) - add in doctrine/schema.yml
+Decide whether tagging should be enabled (requires `sfDoctrineActAsTaggablePlugin`) - add in `doctrine/schema.yml`
 
     sfImagePoolImage:
       options:
@@ -114,9 +135,8 @@ only the lookup entries are deleted, images objects and files are left untouched
         sfImagePoolable: { shared_images: false }    
         ...
  
-### 4. Modify forms to use the image chooser widget ###
 
-#### Add the widget
+### 4. Add an image chooser widget to MyModelForm
 
 To associate images with a model, the sfWidgetFormImagePoolChooser widget must be added to the model's form. The validator is required so that Symfony doesn't 
 reject the values submitted by the additional widget.
@@ -129,71 +149,12 @@ reject the values submitted by the additional widget.
       }
     }
 
-*Note:* the form's object is passed to the widget so that it may fetch currently associated images and any sfImagePoolable options specific to that model.
-
-#### Ensure images are associated, extend sfImagePoolableBaseForm
-
-The plugin handles all image association when saving a form that has the sfImageChooserWidget widget embedded. To setup, alter your BaseFormDoctrine class to extend from sfImagePoolableBaseForm:
-
-    abstract class BaseFormDoctrine extends sfImagePoolableBaseForm
-    {
-      ...
+*Note:* the form's object is passed to the widget so that it may fetch currently associated images and any `sfImagePoolable` options specific to that model.
 
 
-### 5. Add sfImagePool to MooEditable textareas ###
+### 5. Customise plugin options
 
-To add a HTML editor (see Requirements) with image pool for image insertion, use the following method (or take the code on the method and add to it) - in the form class
-
-    class MyModelForm extends BaseMyModelForm
-    {
-      public function configure()
-      {
-        $widgetName = 'summary';  
-        $restrictToTag = '';
-        sfImagePoolUtil::addImagePoolMooEditable($this, $widgetName, $restrictToTag);
-      }
-    }
-   
-   
-### 6 .htaccess tweaks ###
-
-We need to set the mod_rewrite rules to serve the local copy if it exists, or route the request through the controller to generate the crop (and then cache it):
-    
-    <IfModule mod_rewrite.c>
-      RewriteEngine On
-  
-      # uncomment the following line, if you are having trouble
-      # getting no_script_name to work
-      RewriteBase /
-  
-      # Don't route files ending in .something
-      RewriteCond %{REQUEST_URI} \..+$
-      RewriteCond %{REQUEST_URI} !\.html$
-      RewriteCond %{REQUEST_URI} !image-pool
-      RewriteRule .* - [L]
-    
-      # we check if the .html version is here (caching)
-      RewriteRule ^$ index.html [QSA]
-      RewriteRule ^([^.]+)$ $1.html [QSA]
-  
-      # no, so we redirect to our front web controller
-      RewriteCond %{REQUEST_FILENAME} !-f
-      RewriteRule ^(.*)$ index.php [QSA,L]
-  
-    </IfModule>
-
-Additionally, to improve performance, dynamically resized and cropped images are created once and then served from the filesystem (if caching on filesystem). 
-To ensure this works when accessing the website via controllers, add the following lines to web/.htaccess:
-
-    RewriteCond "%{DOCUMENT_ROOT}$2" -f
-    RewriteRule (\w+\.php)(/image-pool/(crop|scale)/\d{1,3}/\d{1,3}/[\w\-]+\.(gif|jpe?g|png)) $2 [NC,L]
-    
-*Note*: the 'image-pool' part of the rewrite rule above refers to the default location where uploaded/transformed images are saved. This can be configured in the 
-plugin's sfImagePoolPluginConfiguration class. If changed the above rule would also need changing.   
-
-### 7. Customise plugin options ###
-
-The following options may be overridden in your app.yml files:
+The following options may be overridden in your `app.yml` files:
 
     all:
       sf_image_pool:
@@ -235,7 +196,8 @@ The following options may be overridden in your app.yml files:
           #   auth_host:    UK # UK or US, depending on where your account is based
           # off_site_uri: ~ # The Base URI for the container
     
-### 8. Include images in templates ###
+
+### 6. Include images in templates
 
 Use the `ImagePoolHelper` to output a single image associated with an object. In this example, the default size is used (fit to 200px width):
 
@@ -246,7 +208,7 @@ Use the `ImagePoolHelper` to output a single image associated with an object. In
     
 #### With transformations
 
-Original images are retained so you may product resized or cropped versions on the fly. To scale an image so its longes edge fits within 250px by 150px:
+Original images are retained so you may product resized or cropped versions on the fly. To scale an image so its longest edge fits within 250px by 150px:
 
     echo pool_image_tag($imagepoolable_object_or_sfImagePoolImage, '200x150');
     
@@ -254,7 +216,7 @@ This is the same as
 
     echo pool_image_tag($imagepoolable_object_or_sfImagePoolImage, '200x150', 'scale');
     
-scale is the default transform method. If this doesn't product a good result, try using crop. To crop an image to 500x325:
+`scale` is the default transform method. If this doesn't product a good result, try using `crop`. To crop an image to 500x325:
 
     echo pool_image_tag($imagepoolable_object_or_sfImagePoolImage, '500x325', 'crop');
     
@@ -267,6 +229,60 @@ The fourth parameter of `pool_image_tag` is an optional array of html attributes
 If no `alt` parameter is given, the image's caption will be used. In the backend only, if no `title` parameter is given, the image's original filename will be used. 
 If the transform method is `crop` then the <img> tag's `width` and `height` attributes will be set accordingly. These are not set when using the `scale` method, as the `scale` 
 method fits the image to the specified dimensions and will not necessarily match them.
+
+
+### 7 .htaccess tweaks
+
+We need to set the `mod_rewrite` rules to serve the local copy if it exists, or route the request through the controller to generate the crop (and then cache it):
+    
+    <IfModule mod_rewrite.c>
+      RewriteEngine On
+  
+      # uncomment the following line, if you are having trouble
+      # getting no_script_name to work
+      RewriteBase /
+  
+      # Don't route files ending in .something
+      RewriteCond %{REQUEST_URI} \..+$
+      RewriteCond %{REQUEST_URI} !\.html$
+      RewriteCond %{REQUEST_URI} !image-pool
+      RewriteRule .* - [L]
+    
+      # we check if the .html version is here (caching)
+      RewriteRule ^$ index.html [QSA]
+      RewriteRule ^([^.]+)$ $1.html [QSA]
+  
+      # no, so we redirect to our front web controller
+      RewriteCond %{REQUEST_FILENAME} !-f
+      RewriteRule ^(.*)$ index.php [QSA,L]
+  
+    </IfModule>
+
+Additionally, to improve performance, dynamically resized and cropped images are created once and then served from the filesystem (if caching on filesystem). 
+To ensure this works when accessing the website via controllers, add the following lines to `web/.htaccess`:
+
+    RewriteCond "%{DOCUMENT_ROOT}$2" -f
+    RewriteRule (\w+\.php)(/image-pool/(crop|scale)/\d{1,3}/\d{1,3}/[\w\-]+\.(gif|jpe?g|png)) $2 [NC,L]
+    
+*Note*: the 'image-pool' part of the rewrite rule above refers to the default location where uploaded/transformed images are saved. This can be configured in the 
+plugin's sfImagePoolPluginConfiguration class. If changed the above rule would also need changing.   
+
+
+### Optional extensions
+
+#### 1. Add sfImagePool to MooEditable text areas
+
+To add a HTML editor (see _Requirements_) with image pool for image insertion, use the following method (or take the code in the method and amend to it) - in the form class
+
+    class MyModelForm extends BaseMyModelForm
+    {
+      public function configure()
+      {
+        $widgetName = 'summary';  
+        $restrictToTag = '';
+        sfImagePoolUtil::addImagePoolMooEditable($this, $widgetName, $restrictToTag);
+      }
+    }
 
 
 ### Overriding Automatic Crops

@@ -166,8 +166,8 @@ class sfImagePoolable extends Doctrine_Template
     /**
      * Just fetch URL to the default pool image.
      * 
-     * @todo Move the logic from the sf_image_pool_image_url() into this method and then
-     * call this method from the helper() for backwards compatibility.
+     * @todo Move the logic from the pool_image_uri() into this method and then
+     * call this method from the helper for backwards compatibility.
      */    
     public function getDefaultPoolImageUrl($dimensions = '100x100', $method = 'crop', $absolute = false, Doctrine_Record $object = null)
     {
@@ -222,6 +222,39 @@ class sfImagePoolable extends Doctrine_Template
         $object->getPoolImages()->add($image);
       }
       
+    }
+    
+    /**
+     * Perform sfImagePool related logic to modify relations with images. For use
+     * when the image pool image chooser widget is part of your form.  Assign selected
+     * images in widget to the object
+     * 
+     * Moved from sfImagePoolableBaseForm::doUpdateObject as shouldn't need to override
+     * BaseForm to get this functionality to work.
+     *
+     * @param array $values
+     * @author Jo Carter
+     */
+    public function setSfImagePoolIds($values)
+    {
+      // Fix for empty image ids
+      foreach ($values as $idx => $image_id) 
+      { 
+        if (empty($image_id)) unset($values[$idx]); 
+      }
+      
+      if (!empty($values)) 
+      {
+        // if there is a featured image specified
+        if (isset($values['featured']))
+        {
+          $featured_id = $values['featured'];
+          $this->setFeaturedImage($featured_id);
+          unset($values['featured']);
+        }
+  
+        $this->setImageIds($values);
+      }
     }
     
     /**
