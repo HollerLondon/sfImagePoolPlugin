@@ -178,6 +178,7 @@ The following options may be overridden in your `app.yml` files:
 
         placeholders:       false # If true, use file placeholder.jpg if an image can't be found
         use_placeholdit:    false # if true, returns handy placeholder images from http://placehold.it
+        placeholdit_text:   ' '   # Text to display on placehold.it image - space ' ' leaves a blank image, '' shows the size.
     
         # include controller in generated image URLs?
         use_script_name:    true

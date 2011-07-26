@@ -64,12 +64,13 @@ class BasesfImagePoolActions extends sfActions
         // thumbnail could not be generated so let's spit out a thumbnail instead 
         catch (sfImagePoolException $e)
         {
-          if (sfConfig::get('app_sf_image_pool_placeholders',false))
+          if (sfConfig::get('app_sf_image_pool_placeholders', false))
           {
             $dest = sfConfig::get('app_sf_image_pool_use_placeholdit', false)
-              ? sprintf('http://placehold.it/%ux%u',$width,$height,urlencode($e->getMessage()))
-              : sprintf('@image?width=%s&height=%s&filename=%s&method=%s', $width, $height, 'placeholder.jpg', $thumb_method);
+              ? sprintf('http://placehold.it/%ux%u&text=%s', $width, $height, urlencode(sfConfig::get('app_sf_image_pool_placeholdit_text', ' ')))
+              : sprintf('@image?width=%s&height=%s&filename=%s&method=%s', $width, $height, sfImagePoolImage::DEFAULT_FILENAME, $thumb_method);
             
+            $this->logMessage($e->getMessage());
             $this->redirect($dest, 302);
           }
           else

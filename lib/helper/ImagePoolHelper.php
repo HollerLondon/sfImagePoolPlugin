@@ -122,7 +122,6 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
   }
   
   $cache_options = sfConfig::get('app_sf_image_pool_cache');
-
   $class = $cache_options['class'];
 
   // If remote and remote uri set, plus image exists
@@ -139,36 +138,48 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
     }
   }
   
-  // if we have an empty sfImagePool instance (ie. no image) then output a placeholder
-  // @TODO: Proper handling of placeholders as per config - return false if no image and no placeholders
-  if (!$image['filename'])
-  {
-    $image['filename'] = 'placeholder.jpg';
-    
-    // If offsite then should have cached placeholder too
-    if ($class::IS_REMOTE && !empty($cache_options['off_site_uri']))
-    {
-      $absolute = false;
-      $offsite = true;
-    }
-  }
-  
   if (!function_exists('url_for'))
   {
     sfApplicationConfiguration::getActive()->loadHelpers(array('Url'));
   }
   
-  $url = url_for(sprintf('@image?width=%s&height=%s&filename=%s&method=%s', $width, $height, $image['filename'], $method), $absolute);
+  // If we have an empty sfImagePool instance (ie. no image) then output a placeholder if set in config to do so
+  if (!$image['filename'])
+  {
+    if (sfConfig::get('app_sf_image_pool_placeholders', false))
+    {
+      if (sfConfig::get('app_sf_image_pool_use_placeholdit', false))
+      {
+        $url = sprintf('http://placehold.it/%ux%u&text=%s', $width, $height, urlencode(sfConfig::get('app_sf_image_pool_placeholdit_text', ' ')));
+      }
+      else
+      {
+        // If offsite then should have cached placeholder too
+        if ($class::IS_REMOTE && !empty($cache_options['off_site_uri']))
+        {
+          $absolute = false;
+          $offsite = true;
+        }
+        
+        $url = url_for(sprintf('@image?width=%s&height=%s&filename=%s&method=%s', $width, $height, sfImagePoolImage::DEFAULT_FILENAME, $method), $absolute);
+      }
+    }
+    else return false; // No image, no placeholder
+  }
+  else
+  {
+    $url = url_for(sprintf('@image?width=%s&height=%s&filename=%s&method=%s', $width, $height, $image['filename'], $method), $absolute);
+  }
 
-  // do we want to remove the controller filename?
-  // its good to have this option independent of the global Symfony
-  // setting as we may be generating URLs to insert into the db and which
-  // should not therefore have any controller referenced.
+  // Do we want to remove the controller filename? It's good to have this option independent of the global Symfony
+  // setting as we may be generating URLs to insert into the db and which should not have any controller referenced.
   if (!sfConfig::get('app_sf_image_pool_use_script_name', false) || $offsite)
   {
     $url = preg_replace('%\w+(_dev)?\.php/%', '', $url);
   }
   
+  // If offsite - then replace local image-pool folder with offsite URL (naming convention for offsite should mirror 
+  // folder structure for local)
   if ($offsite)
   {
     $url = str_replace(sfImagePoolPluginConfiguration::getBaseUrl(), $cache_options['off_site_uri'], $url);
