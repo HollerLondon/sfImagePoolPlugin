@@ -32,7 +32,7 @@ Dependencies
   
   
 Optional Dependencies
---------------------
+---------------------
 
  * [sfDoctrineActAsTaggablePlugin](http://www.symfony-project.org/plugins/sfDoctrineActAsTaggablePlugin) (but only if tagging: true) in the options section of the model definition for sfImagePoolImage in `schema.yml`
  * [sfMooToolsFormExtraPlugin](https://github.com/HollerLondon/sfMooToolsFormExtraPlugin) - sfImagePoolPlugin includes an `sfImaegPoolPlugin` Image Chooser for [MooEditable](http://cheeaun.github.com/mooeditable/), and `sfMooToolsFormExtraPlugin` provides a MooEditable Symfony form widget - see _Optional extensions_.
@@ -54,7 +54,7 @@ You will then need to autoload these files in the application's `config/autoload
 
 ### Rackspace Cloud files: Note for Git
 
-The plugin's `lib/vendor` folder contains `submodules` for the Rackspace Cloud files API library, if exporting this repository then these files will also need to be exported
+The plugin's `lib/vendor` folder contains submodules for the Rackspace Cloud files API library, if exporting this repository then these files will also need to be exported
 
     [submodule "lib/vendor/rackspace"]
       path = lib/vendor/rackspace
@@ -204,6 +204,13 @@ The following options may be overridden in your `app.yml` files:
           #   auth_host:    UK # UK or US, depending on where your account is based
           # off_site_uri: ~ # The Base URI for the container
     
+#### Rackspace Cloud files
+
+If you want to use the Rackspace cloud to store your image pool thumbnails you will need to add the dependancy specified in _Optional Dependencies_ and follow the instructions.
+
+Then you can run `./symfony rackspace:initialise` and fill in your settings at the prompt.  This will generate the correct settings in your project's `config/app.yml` file 
+(and create the file if it doesn't exist).  This saves you manually creating the settings as above. 
+
 
 ### 6. Include images in templates
 
@@ -325,8 +332,8 @@ For example:
 Testing
 -------
 
-Please note that for test environments the option `tagging` is overwritten in `PluginsfImagePoolImage` to be set as `false` - this is to ensure
-that tests do not depend on additional plugins being installed.
+Please note that for test environments the option `tagging` is overwritten in `PluginsfImagePoolImage` to be set as `false` - this is to ensure that tests do not depend on 
+additional plugins being installed.
 
-The `sfImagePoolRackCloudCache` test requires Rackspace Cloud credentials, therefore this test can only be run successfully in projects
-with these credentials in `app.yml`.
+The `sfImagePoolRackCloudCache` test requires Rackspace Cloud credentials, therefore this test can only be run successfully in projects with these credentials set in in 
+`app.yml` - see _5. Customise plugin options_.
