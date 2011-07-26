@@ -96,6 +96,12 @@ function _sf_image_pool_build_attrs($invoker, $dimensions, $method, $attributes 
 
 function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute = false)
 {
+  // remove Symfony escaping if applied
+  if ($image instanceof sfOutputEscaper)
+  {
+      $image = $image->getRawValue();
+  }
+  
   $offsite = false;
   
   if (is_array($dimensions))
