@@ -20,15 +20,24 @@ class PluginsfImagePoolCropTable extends Doctrine_Table
     /*
      * Find a crop of an image
      * 
-     * @param sfImagePoolImage $image
+     * @param sfImagePoolImage/string $image An image, or filename to locate
      * @param int $width
      * @param int $height
-     * @param string $identifier
+     * @param string $identifier Crop cache store identifier - see sfImagePoolCache
      */
-    public function findCrop(sfImagePoolImage $image, $width, $height, $is_crop = true, $identifier = NULL)
+    public function findCrop($image, $width, $height, $is_crop = true, $identifier = NULL)
     {
-      $q = $this->createQuery('c')
+      if ($image instanceOf sfImagePoolImage)
+      {
+        $q = $this->createQuery('c')
                 ->where('c.sf_image_id = ? AND width = ? AND height = ? AND is_crop = ?', array($image->getPrimaryKey(), $width, $height, $is_crop));
+      }
+      else 
+      {
+        $q = $this->createQuery('c')
+                ->innerJoin('c.Image i')
+                ->where('i.filename = ? AND width = ? AND height = ? AND is_crop = ?', array($image, $width, $height, $is_crop));
+      }
 
       if ($identifier)
       {

@@ -17,7 +17,7 @@ abstract class PluginsfImagePoolImage extends BasesfImagePoolImage
      * 
      * @var string
      */
-    const DEFAULT_FILENAME = 'placeholder.png';
+    const DEFAULT_FILENAME = 'placeholder.jpg';
     
     /**
      * Overriding the values returned for 'tagging' if the parent project has it enabled

@@ -246,7 +246,13 @@ If the transform method is `crop` then the <img> tag's `width` and `height` attr
 method fits the image to the specified dimensions and will not necessarily match them.
 
 
-### 7 .htaccess tweaks
+### 7. Placeholder
+
+If the configuration is set to enable placeholders then when there is no image for a model or the image can't be found the placeholder will be used.  This requires it to be in the 
+database.  Use the sample fixtures file, and create `placeholder.jpg` in the `image-pool` folder for this purpose.
+
+
+### 8 .htaccess tweaks
 
 We need to set the `mod_rewrite` rules to serve the local copy if it exists, or route the request through the controller to generate the crop (and then cache it):
     

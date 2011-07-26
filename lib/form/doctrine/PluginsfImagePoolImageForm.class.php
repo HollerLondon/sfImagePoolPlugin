@@ -31,6 +31,8 @@ abstract class PluginsfImagePoolImageForm extends BasesfImagePoolImageForm
         'caption',
     ));
     
+    $this->widgetSchema->setLabel('caption', 'Caption (Alt text)');
+    
     // Override the default options
     $options = array(
           'required'   => $this->isNew(),

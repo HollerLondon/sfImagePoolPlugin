@@ -154,11 +154,17 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
       }
       else
       {
-        // If offsite then should have cached placeholder too
+        // If offsite then should have cached placeholder too - check whether created as crop too
         if ($class::IS_REMOTE && !empty($cache_options['off_site_uri']))
         {
-          $absolute = false;
-          $offsite = true;
+          $is_crop = ('crop' == $method);
+          $crop = sfImagePoolCropTable::getInstance()->findCrop(sfImagePoolImage::DEFAULT_FILENAME, $width, $height, $is_crop, $class::CROP_IDENTIFIER);
+          
+          if ($crop)
+          {
+            $absolute = false;
+            $offsite = true;
+          }
         }
         
         $url = url_for(sprintf('@image?width=%s&height=%s&filename=%s&method=%s', $width, $height, sfImagePoolImage::DEFAULT_FILENAME, $method), $absolute);
