@@ -7,43 +7,43 @@
  */
 class PluginsfImagePoolCropTable extends Doctrine_Table
 {
-    /**
-     * Returns an instance of this class.
-     *
-     * @return object PluginsfImagePoolCropTable
-     */
-    public static function getInstance()
+  /**
+   * Returns an instance of this class.
+   *
+   * @return object PluginsfImagePoolCropTable
+   */
+  public static function getInstance()
+  {
+      return Doctrine_Core::getTable('PluginsfImagePoolCrop');
+  }
+  
+  /**
+   * Find a crop of an image
+   * 
+   * @param sfImagePoolImage/string $image An image, or filename to locate
+   * @param int $width
+   * @param int $height
+   * @param string $identifier Crop cache store identifier - see sfImagePoolCache
+   */
+  public function findCrop($image, $width, $height, $is_crop = true, $identifier = NULL)
+  {
+    if ($image instanceOf sfImagePoolImage)
     {
-        return Doctrine_Core::getTable('PluginsfImagePoolCrop');
+      $q = $this->createQuery('c')
+              ->where('c.sf_image_id = ? AND width = ? AND height = ? AND is_crop = ?', array($image->getPrimaryKey(), $width, $height, $is_crop));
     }
-    
-    /*
-     * Find a crop of an image
-     * 
-     * @param sfImagePoolImage/string $image An image, or filename to locate
-     * @param int $width
-     * @param int $height
-     * @param string $identifier Crop cache store identifier - see sfImagePoolCache
-     */
-    public function findCrop($image, $width, $height, $is_crop = true, $identifier = NULL)
+    else 
     {
-      if ($image instanceOf sfImagePoolImage)
-      {
-        $q = $this->createQuery('c')
-                ->where('c.sf_image_id = ? AND width = ? AND height = ? AND is_crop = ?', array($image->getPrimaryKey(), $width, $height, $is_crop));
-      }
-      else 
-      {
-        $q = $this->createQuery('c')
-                ->innerJoin('c.Image i')
-                ->where('i.filename = ? AND width = ? AND height = ? AND is_crop = ?', array($image, $width, $height, $is_crop));
-      }
+      $q = $this->createQuery('c')
+              ->innerJoin('c.Image i')
+              ->where('i.filename = ? AND width = ? AND height = ? AND is_crop = ?', array($image, $width, $height, $is_crop));
+    }
 
-      if ($identifier)
-      {
-        $q->addWhere('location = ?', $identifier);
-      }
+    if ($identifier)
+    {
+      $q->addWhere('location = ?', $identifier);
+    }
 
-      return $q->fetchOne();
-    }   
+    return $q->fetchOne();
+  }   
 }

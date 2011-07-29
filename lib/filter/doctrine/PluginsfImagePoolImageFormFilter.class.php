@@ -41,6 +41,13 @@ abstract class PluginsfImagePoolImageFormFilter extends BasesfImagePoolImageForm
     $image->free(true);
   }
   
+  /**
+   * Allow filtering by tags
+   * 
+   * @param Doctrine_Query $q
+   * @param string $field
+   * @param string $value
+   */
   public function addTagColumnQuery(Doctrine_Query $q, $field, $value)
   {
     $a = $q->getRootAlias();
