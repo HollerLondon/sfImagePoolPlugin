@@ -197,12 +197,13 @@ The following options may be overridden in your `app.yml` files:
           class:            sfImagePoolFilesystemCache
           # RACKSPACE CLOUD FILES ADAPTER:
           # class:          sfImagePoolRackspaceCloudFilesCache
-          # options:
+          # options: 
           #   username:     ~ # Your Username
           #   container:    ~ # Name for the container
           #   api_key:      ~
           #   auth_host:    UK # UK or US, depending on where your account is based
-          # off_site_uri: ~ # The Base URI for the container
+          # off_site_uri:   ~ # The Base URI for the container
+          # off_site_ssl_uri: ~ # The Base SSL URI for the container
     
 #### Rackspace Cloud files
 

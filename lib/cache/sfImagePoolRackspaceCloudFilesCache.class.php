@@ -141,7 +141,11 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
     $imageCrop->is_crop   = !($this->resizer_options['scale']);
     
     // controller redirect 301 to cdn
-    $url = $this->options['off_site_uri'] . DIRECTORY_SEPARATOR . $object_name;
+    // If we are on a secure page we want to use the ssl option to avoid security warnings
+    $ssl = sfContext::getInstance()->getRequest()->isSecure();
+    $off_site_index = ($ssl ? 'off_site_ssl_uri' : 'off_site_uri');
+  
+    $url = $this->options[$off_site_index] . DIRECTORY_SEPARATOR . $object_name;
 
     // There's a chance that save() will fail because the crop already exists
     // in the database (race condition). So, if it does fail, let's try and grab it. If it 

@@ -123,9 +123,13 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
   
   $cache_options = sfConfig::get('app_sf_image_pool_cache');
   $class = $cache_options['class'];
+  
+  // If we are on a secure page we want to use the ssl option to avoid security warnings
+  $ssl = sfContext::getInstance()->getRequest()->isSecure();
+  $off_site_index = ($ssl ? 'off_site_ssl_uri' : 'off_site_uri');
 
   // If remote and remote uri set, plus image exists
-  if ($class::IS_REMOTE && !empty($cache_options['off_site_uri']) && $image) 
+  if ($class::IS_REMOTE && !empty($cache_options[$off_site_index]) && $image) 
   {
     // check whether crop exists - if it doesn't business as usual
     $is_crop = ('crop' == $method);
@@ -155,7 +159,7 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
       else
       {
         // If offsite then should have cached placeholder too - check whether created as crop too
-        if ($class::IS_REMOTE && !empty($cache_options['off_site_uri']))
+        if ($class::IS_REMOTE && !empty($cache_options[$off_site_index]))
         {
           $is_crop = ('crop' == $method);
           $crop = sfImagePoolCropTable::getInstance()->findCrop(sfImagePoolImage::DEFAULT_FILENAME, $width, $height, $is_crop, $class::CROP_IDENTIFIER);
@@ -188,7 +192,7 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
   // folder structure for local)
   if ($offsite)
   {
-    $url = str_replace(sfImagePoolPluginConfiguration::getBaseUrl(), $cache_options['off_site_uri'], $url);
+    $url = str_replace(sfImagePoolPluginConfiguration::getBaseUrl(), $cache_options[$off_site_index], $url);
   }
   
   return $url;

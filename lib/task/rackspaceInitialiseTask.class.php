@@ -65,6 +65,7 @@ EOF;
     {
       $container = sfImagePoolRackspaceCloudFilesCache::setup($cache_options);
       $cache_options['off_site_uri'] = $container->cdn_uri;
+      $cache_options['off_site_ssl_uri'] = $container->cdn_ssl_uri;
     }
     
     $file = sfConfig::get('sf_config_dir').'/app.yml';
