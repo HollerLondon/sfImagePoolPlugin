@@ -71,15 +71,6 @@ class PluginsfImagePoolImageTable extends Doctrine_Table
       
       return $pager;
   }
-
-  /**
-   * @deprecated as shouldn't call static methods on table
-   * @param array $image_ids
-   */
-  public static function getByIds($image_ids)
-  {
-    return self::getInstance()->getByIds($image_ids);
-  }
   
   /**
    * Get images by ids
