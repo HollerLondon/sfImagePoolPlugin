@@ -118,7 +118,7 @@ class sfImagePoolable extends Doctrine_Template
     {
       $object->mapValue('_images', new sfImagePoolImageCollection('sfImagePoolImage'));
       
-      $image_ids = sfImagePoolLookup::getInstance()->getImages($object, Doctrine_Core::HYDRATE_SINGLE_SCALAR);
+      $image_ids = sfImagePoolLookupTable::getInstance()->getImages($object, Doctrine_Core::HYDRATE_SINGLE_SCALAR);
 
       // If we don't have images - don't want to return all images
       if (!empty($image_ids)) 
