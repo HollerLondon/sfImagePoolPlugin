@@ -160,7 +160,7 @@ class sfImagePoolable extends Doctrine_Template
       }
       else 
       {
-        $image_ids = sfImagePoolLookup::getInstance()->getImages($object, Doctrine_Core::HYDRATE_SINGLE_SCALAR);
+        $image_ids = sfImagePoolLookupTable::getInstance()->getImages($object, Doctrine_Core::HYDRATE_SINGLE_SCALAR);
     
         $object->mapValue('_nb_pool_images', count($image_ids));
       }
