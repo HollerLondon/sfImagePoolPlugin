@@ -83,7 +83,7 @@ class sfImagePoolableListener extends Doctrine_Record_Listener
         // if images are shared - delete only the lookups, leave images alone for other objects to use
         if ($images_shared)
         {
-          sfImagePoolLookupTable::removeImages($object);
+          sfImagePoolLookupTable::getInstance()->removeImages($object);
         }
         // if not shared and exclusive to model - delete the lookups, images and files.
         else

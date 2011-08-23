@@ -36,7 +36,7 @@ class PluginsfImagePoolLookupTable extends Doctrine_Table
    * 
    * @param object $object
    */
-  public static function removeImages($object)
+  public function removeImages($object)
   {
     return $this->createQuery('i')
                 ->delete()
