@@ -25,6 +25,8 @@ all:
       # Sharpening is CPU-intensive, so you can prefix the "convert" command
       # with nice -n19 to make sure other processes get priority over the CPU
       # convert:        nice -n19 /usr/bin/convert
+      # Fix problems with thumbnail not respecting orientation (uses -auto-orient)
+      auto_orient:  true
       
     # How should we cache files?
     cache:

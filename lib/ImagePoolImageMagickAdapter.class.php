@@ -134,6 +134,11 @@ class ImagePoolImageMagickAdapter extends sfImageMagickAdapter
         $command .= ' -unsharp 1.5x1.2+0.7+0.10 ';
       }
     }
+    
+    if (isset($this->options['auto_orient']) && $this->options['auto_orient'])
+    {
+      $command .= ' -auto-orient ';
+    }
 
     // extract images such as pages from a pdf doc
     $extract = '';
