@@ -283,9 +283,9 @@ class sfImagePoolable extends Doctrine_Template
         $this->setFeaturedImage($featured_id);
         unset($values['featured']);
       }
-
-      $this->setImageIds($values);
     }
+    
+    $this->setImageIds($values);
   }
   
   /**
