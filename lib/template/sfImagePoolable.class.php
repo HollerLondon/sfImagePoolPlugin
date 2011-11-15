@@ -181,6 +181,21 @@ class sfImagePoolable extends Doctrine_Template
     return $this->getPoolImages($object)->getFeatured();
   }
 
+  
+  /**
+   * Get image tagged with a certain tag
+   * 
+   * @param string $tag
+   * @param Doctrine_Record $object
+   * @return sfImagePoolImage
+   */
+  public function getImageTaggedWith($tag, Doctrine_Record $object = null)
+  {
+  	$object = is_null($object) ? $this->getInvoker() : $object;
+    return $this->getPoolImages($object)->getTaggedWith($tag);
+  }
+  
+  
   /**
    * Fetch URL to the default pool image.
    * 

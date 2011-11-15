@@ -36,13 +36,7 @@ MooEditable.Locale.define({
 /**
  * Create new UI Dialog to handle image pool images
  */
-MooEditable.UI.ImageDialog = function(editor) {
-  // Image pool selector - create a new div - only if doesn't exist (i.e: multiple mooeditables on the page)
-  if (!$('image-pool-editable')) {
-    var newElement = new Element('div', { id: 'image-pool-editable' });
-    $('body').grab(newElement, 'after');
-  }
-  
+MooEditable.UI.ImagePoolDialog = function(editor) {
   // Select image - NOTE: must pass through URL in MooEditable config - see sfImagePoolUtil
   var  html = '<label class="dialog-label">Choose an image from the image pool *<br /><br />' +
             '<span class="selected-image"></span>' +
@@ -61,7 +55,7 @@ MooEditable.UI.ImageDialog = function(editor) {
   + '<button class="dialog-button dialog-cancel-button">' + MooEditable.Locale.get('cancel') + '</button>';
   
   return new MooEditable.UI.Dialog(html, {
-    'class': 'mooeditable-image-dialog',
+    'class': 'mooeditable-imagepool-dialog',
     
     // Catch button clicks
     onClick: function(e){
@@ -74,6 +68,12 @@ MooEditable.UI.ImageDialog = function(editor) {
     	// Set the editor id for the current editor
         editorId = editor.container.get('id');
       
+        // Image pool selector - create a new div - only if doesn't exist (i.e: multiple mooeditables on the page)
+        if (!$('image-pool-editable')) {
+          var newElement = new Element('div', { id: 'image-pool-editable' });
+          $(editorId).getElement('iframe').grab(newElement, 'after');
+        }
+        
         $('image-pool-editable').reveal();
         
         // AJAX request to get first page of images
@@ -141,21 +141,17 @@ MooEditable.UI.ImageDialog = function(editor) {
 /**
  * Add extra option to toolbar to insert image from sfImagePool
  */
-Object.append(MooEditable.Actions, {
-
-  imagepool: {
-    title: MooEditable.Locale.get('imagePoolable'),
-    dialogs: {
-      prompt: function(editor){
-		// Opens the above defined UI Dialog
-        return MooEditable.UI.ImageDialog(editor);
-      }
-    },
-    command: function(){
-        this.dialogs.imagepool.prompt.open();
-    }
-  }
-});
+MooEditable.Actions.imagepool = {
+	title: MooEditable.Locale.get('imagePoolable'),
+	dialogs: {
+	  prompt: function(editor){
+	    return MooEditable.UI.ImagePoolDialog(editor);
+	  }
+	},
+	command: function(){
+	    this.dialogs.imagepool.prompt.open();
+	}
+};
 
 
 /**

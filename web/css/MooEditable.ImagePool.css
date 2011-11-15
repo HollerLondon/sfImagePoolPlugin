@@ -3,7 +3,7 @@
 #image-pool-editable {
   display: none;
   position: absolute;
-  top: 200px;
+  top: -50px;
   left: 50%;
   margin-left: -339px;
   border: 1px black solid;
@@ -23,4 +23,18 @@
 #image-pool-editable label img:hover {
   border: 1px solid #ad2b29;
   cursor: pointer;
+}
+
+.mooeditable-imagepool-dialog label.dialog-label {
+  width: auto !important;	
+}
+
+.mooeditable-imagepool-dialog .selected-image {
+  width: 100px;
+  height: 100px;
+  display: block;
+}
+
+.mooeditable-imagepool-dialog .dialog-content {
+	overflow: hidden;
 }
