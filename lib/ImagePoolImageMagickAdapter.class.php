@@ -129,7 +129,7 @@ class ImagePoolImageMagickAdapter extends sfImageMagickAdapter
       {
         $command .= sprintf(' -quality %u%% ',$this->quality);
       }
-      if(isset($this->options['sharpen']))
+      if(isset($this->options['sharpen']) && $targetMime == 'image/jpeg')
       {
         $command .= ' -unsharp 1.5x1.2+0.7+0.10 ';
       }

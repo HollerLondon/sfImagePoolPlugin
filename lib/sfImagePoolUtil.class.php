@@ -223,7 +223,16 @@ class sfImagePoolUtil
     
     return $object;
   }   
-
+  
+  static public function calculateWidthAndHeight(sfImagePoolImage $image,$w, $h)
+  {
+    $sfthumb  = new sfThumbnail($w, $h, true, sfConfig::get('app_sf_image_pool_inflate',true));
+    $sfthumb->loadFile($image->getPathToOriginalFile());
+    $response = array($sfthumb->getThumbWidth(),$sfthumb->getThumbHeight());
+    unset($sfthumb);
+    return $response;
+  }
+  
   /**
    * Take array of data for a single upload and create an image, assigning
    * content of $tags as tag (CSV string or single tag or array).

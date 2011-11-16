@@ -45,4 +45,26 @@ class sfImagePoolImageCollection extends Doctrine_Collection
       
       return $data;
   }
+  
+  
+  /**
+   * Return the first image tagged with the specified tag
+   * 
+   * @param string $tag
+   * @return sfImagePoolImage
+   */
+  public function getTaggedWith($tag)
+  {
+  	$data = $this->getData();
+  	
+  	foreach ($data as $index => $image)
+  	{
+  		if ($image->hasTag($tag))
+  		{
+  			return $image;
+  		}
+  	}
+  	
+  	return null;
+  }
 }
