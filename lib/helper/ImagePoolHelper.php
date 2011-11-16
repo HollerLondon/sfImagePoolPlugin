@@ -47,8 +47,8 @@ function pool_image_tag($invoker, $dimensions = 200, $options = 'crop', $attribu
   else
   {
     $method = $options;
+    $options = array();
   }
-  $options = array();
   
   $pool_image_uri = pool_image_uri($image,array($w,$h),$method,$absolute);
   
