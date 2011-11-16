@@ -2,11 +2,11 @@
 /**
  * Output image of given size for an sfImagePoolImage.
  *
- * @param string $invoker 
+ * @param mixed $invoker Model or sfImagePool image
  * @param string $dimensions e.g. 'crop=200x150' or '200' for fit to 200 width (scale is default)
  * @param mixed $options either string or array, e.g. array('method' => 'scale', 'require_size' => true)
- * @param string $attributes 
- * @param string $absolute 
+ * @param string $attributes HTML attributes, such as width, height and alt
+ * @param boolean $absolute return absolute URL for an image
  * @return string
  * @author Jimmy Wong
  */
