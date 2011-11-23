@@ -1,17 +1,17 @@
 <?php
 /**
  * Template for object that has associated sfImagePoolImages
- * 
+ *
  * @package sfImagePoolPlugin
  * @subpackage template
  */
 class sfImagePoolable extends Doctrine_Template
 {
   private static $instance;
-  
+
   /**
    * Get current instance
-   * 
+   *
    * @return sfImagePoolable
    */
   public static function getInstance()
@@ -20,10 +20,10 @@ class sfImagePoolable extends Doctrine_Template
     {
         self::$instance = new self();
     }
-    
+
     return self::$instance;
   }
-  
+
   /**
    * Set the image pool listener to the table
    */
@@ -34,7 +34,7 @@ class sfImagePoolable extends Doctrine_Template
 
   /**
    * Get the featured image for the object
-   * 
+   *
    * @param Doctrine_Record $object
    */
   public function getFeaturedImage(Doctrine_Record $object = null)
@@ -42,10 +42,10 @@ class sfImagePoolable extends Doctrine_Template
     $object = is_null($object) ? $this->getInvoker() : $object;
     return $this->getPoolImage($object);
   }
-  
+
   /**
    * Set the featured images for the object
-   * 
+   *
    * @param mixed $object_or_id
    */
   public function setFeaturedImage($object_or_id)
@@ -53,10 +53,10 @@ class sfImagePoolable extends Doctrine_Template
     $image = ($object_or_id instanceof sfImagePoolImage)
       ? $object_or_id
       : sfImagePoolImageTable::getInstance()->findOneById($object_or_id);
-      
+
     $this->getPoolImages()->setFeaturedImage($image);
   }
-  
+
   /**
    * Get tag restrictions on the images to be displayed for association
    */
@@ -66,45 +66,45 @@ class sfImagePoolable extends Doctrine_Template
     {
       return is_array($restricted) ? $restricted : array($restricted);
     }
-    
+
     return false;
   }
-  
+
   /**
    * Should this model allow multiple images to be associated with it?
-   * Affects the rendering of the sfWidgetFormImagePoolChooser widget. 
-   * 
+   * Affects the rendering of the sfWidgetFormImagePoolChooser widget.
+   *
    * @return boolean
    */
   public function allowSelectMultiple()
   {
     return $this->getOption('multiple', false);
   }
-  
+
   /**
    * Return value of shared_images option, true by default
-   * 
+   *
    * @return boolean
    */
   public function sharedImages()
   {
     return $this->getOption('shared_images', true);
   }
-  
+
   /**
-   * Make the query available so it can be customised 
-   * 
+   * Make the query available so it can be customised
+   *
    * @return Doctrine_Query
    */
   public function getImagePoolQuery()
   {
-    return sfImagePoolImageTable::getInstance()->createQuery('i');      
+    return sfImagePoolImageTable::getInstance()->createQuery('i');
   }
 
   /**
    * Get image pool images for an object
    * Fetch contents of the parameter holder from both namespaces (i.e. including featured image).
-   * 
+   *
    * @param Doctrine_Record $object
    * @param Doctrine_Query $query
    * @return sfImagePoolImageCollection
@@ -113,23 +113,23 @@ class sfImagePoolable extends Doctrine_Template
   {
     $object = is_null($object) ? $this->getInvoker() : $object;
     $query  = is_null($query)  ? $this->getImagePoolQuery() : $query;
-    
+
     if (!isset($object->_images) || !($object->_images instanceof sfImagePoolImageCollection))
     {
       $object->mapValue('_images', new sfImagePoolImageCollection('sfImagePoolImage'));
-      
+
       $image_ids = sfImagePoolLookupTable::getInstance()->getImages($object, Doctrine_Core::HYDRATE_SINGLE_SCALAR);
 
       // If we don't have images - don't want to return all images
-      if (!empty($image_ids)) 
+      if (!empty($image_ids))
       {
       	$query->andWhereIn('i.id',$image_ids);
-      	
+
         if ($this->getOption('use_query_cache',false))
         {
           $query->useResultCache(true, 300, sprintf('images_for_%u_%s',$object->getPrimaryKey(),get_class($object)));
         }
-        
+
         $images = $query->execute();
 
         $object->_images->merge($images);
@@ -139,7 +139,7 @@ class sfImagePoolable extends Doctrine_Template
 
     return $object->_images;
   }
-  
+
   /**
    * Get the number of pool images on this object
    *
@@ -150,7 +150,7 @@ class sfImagePoolable extends Doctrine_Template
   public function getNbPoolImages(Doctrine_Record $object = null, Doctrine_Query $query = null)
   {
     $object = is_null($object) ? $this->getInvoker() : $object;
-    
+
     if (!$object->hasMappedValue('_nb_pool_images'))
     {
       // If already have getPoolImages _images mapped then get count
@@ -158,20 +158,20 @@ class sfImagePoolable extends Doctrine_Template
       {
         $object->mapValue('_nb_pool_images', count($object->_images->count()));
       }
-      else 
+      else
       {
         $image_ids = sfImagePoolLookupTable::getInstance()->getImages($object, Doctrine_Core::HYDRATE_SINGLE_SCALAR);
-    
+
         $object->mapValue('_nb_pool_images', count($image_ids));
       }
     }
-    
+
     return $object->_nb_pool_images;
   }
-  
+
   /**
    * Get the featured image for an object
-   * 
+   *
    * @param Doctrine_Record $object
    * @return sfImagePoolImage
    */
@@ -181,10 +181,10 @@ class sfImagePoolable extends Doctrine_Template
     return $this->getPoolImages($object)->getFeatured();
   }
 
-  
+
   /**
    * Get image tagged with a certain tag
-   * 
+   *
    * @param string $tag
    * @param Doctrine_Record $object
    * @return sfImagePoolImage
@@ -194,30 +194,30 @@ class sfImagePoolable extends Doctrine_Template
   	$object = is_null($object) ? $this->getInvoker() : $object;
     return $this->getPoolImages($object)->getTaggedWith($tag);
   }
-  
-  
+
+
   /**
    * Fetch URL to the default pool image.
-   * 
+   *
    * @todo Move the logic from the pool_image_uri() into this method and then
    * call this method from the helper for backwards compatibility.
-   * 
+   *
    * @return string
-   */    
+   */
   public function getDefaultPoolImageUrl($dimensions = '100x100', $method = 'crop', $absolute = false, Doctrine_Record $object = null)
   {
     $object = is_null($object) ? $this->getInvoker() : $object;
-    
+
     // get main image
     $image = $this->getPoolImages($object)->getFeatured();
 
     // return url for the image
     return pool_image_uri($image, $dimensions, $method, $absolute);
   }
-  
+
   /**
    * Set images to an object
-   * 
+   *
    * @param array $images
    * @param Doctrine_Record $object
    */
@@ -226,19 +226,22 @@ class sfImagePoolable extends Doctrine_Template
     $object = is_null($object) ? $this->getInvoker() : $object;
 
     $object->getPoolImages()->clear();
-    
+
     foreach ($images as $image)
     {
-      $object->getPoolImages()->add($image);
-      
-      if (!$object->allowSelectMultiple()) 
+      if($image instanceof sfImagePoolImage)
       {
-        // Stop after adding one if object isn't allowed multiple images
-        break;
+        $object->getPoolImages()->add($image);
+
+        if (!$object->allowSelectMultiple())
+        {
+          // Stop after adding one if object isn't allowed multiple images
+          break;
+        }
       }
     }
   }
-  
+
   /**
    * Will either add a new image to the object's collection
    * or if the shared_images = false and multiple = false
@@ -247,7 +250,7 @@ class sfImagePoolable extends Doctrine_Template
   public function addImage(sfImagePoolImage $image, Doctrine_Record $object = null)
   {
     $object = is_null($object) ? $this->getInvoker() : $object;
-    
+
     if ($this->allowSelectMultiple())
     {
       $object->getPoolImages()->add($image);
@@ -265,16 +268,16 @@ class sfImagePoolable extends Doctrine_Template
       {
         $object->getPoolImages()->clear();
       }
-      
+
       $object->getPoolImages()->add($image);
     }
   }
-  
+
   /**
    * Perform sfImagePool related logic to modify relations with images. For use
    * when the image pool image chooser widget is part of your form.  Assign selected
    * images in widget to the object
-   * 
+   *
    * Moved from sfImagePoolableBaseForm::doUpdateObject as shouldn't need to override
    * BaseForm to get this functionality to work.
    *
@@ -284,12 +287,12 @@ class sfImagePoolable extends Doctrine_Template
   public function setSfImagePoolIds($values)
   {
     // Fix for empty image ids
-    foreach ($values as $idx => $image_id) 
-    { 
-      if (empty($image_id)) unset($values[$idx]); 
+    foreach ($values as $idx => $image_id)
+    {
+      if (empty($image_id)) unset($values[$idx]);
     }
-    
-    if (!empty($values)) 
+
+    if (!empty($values))
     {
       // if there is a featured image specified
       if (isset($values['featured']))
@@ -299,33 +302,33 @@ class sfImagePoolable extends Doctrine_Template
         unset($values['featured']);
       }
     }
-    
+
     $this->setImageIds($values);
   }
-  
+
   /**
    * Method for setting images but from ids only.
-   * 
+   *
    * @param $object
    * @param array $image_ids
    */
   public function setImageIds($image_ids = array(), Doctrine_Record $object = null)
   {
     $object = is_null($object) ? $this->getInvoker() : $object;
-    
+
     if (empty($image_ids))
     {
     	return $object->getPoolImages()->clear();
     }
-    
+
     $images = sfImagePoolImageTable::getInstance()->getByIds($image_ids);
-    
+
     $this->setImages($images, $object);
   }
-  
+
   /**
    * Does the invoker have the given sfImagePoolImage object associated?
-   * 
+   *
    * @param sfImagePoolImage $image
    * @return boolean
    */
@@ -333,12 +336,12 @@ class sfImagePoolable extends Doctrine_Template
   {
     // No image supplied - so of course not!
     if (is_null($image)) return false;
-    
+
     if ($image instanceof sfOutputEscaper)
     {
     	$image = $image->getRawValue();
     }
-  	
+
     foreach ($this->getInvoker()->getPoolImages() as $i)
     {
     	if ($i['id'] == $image['id'])
@@ -346,13 +349,13 @@ class sfImagePoolable extends Doctrine_Template
     	  return true;
     	}
     }
-    
+
     return false;
   }
-  
+
   /**
    * Does the object have images associated?
-   * 
+   *
    * @return int
    */
   public function hasImages()
