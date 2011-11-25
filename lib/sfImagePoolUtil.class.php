@@ -42,9 +42,10 @@ class sfImagePoolUtil
   /**
    * Add a MooEditable textarea widget with images from Image Pool as the selection
    * 
-   * Use this as a basis for any textarea which requires MooEditable + ImagePool as config options are REQUIRED
+   * Use this to add ImagePool to MooEditable with extra config as required as the image pool is REQUIRED
    * 
-   * @TODO: Test thoroughly with new MooEditable JS
+   * Example extension:
+   *  sfImagePoolUtil::addImagePoolMooEditable($this, 'body', 'ingredients', array('extratoolbar' => 'tableadd | imagepool', 'height' => 150));
    * 
    * @uses sfMooToolsFormExtraPlugin (REQUIRED)
    * @requires Javascripts and Stylesheets to be included in form - see README (Optional extensions #1)
@@ -53,16 +54,16 @@ class sfImagePoolUtil
    * @param sfForm $form      Form object which to add widget to
    * @param string $fieldName the field to set the textarea to
    * @param string $tag       (optional) tag to restrict images for insertion - comma separated
+   * @param array $options    (optional) additional MooEditable options (can use to override the extra toolbar without recreating this widget)
    */
-  static public function addImagePoolMooEditable($form, $fieldName, $tag = '')
+  static public function addImagePoolMooEditable($form, $fieldName, $tag = '', $options = array())
   {
     if (!function_exists('url_for')) 
     {
       sfApplicationConfiguration::getActive()->loadHelpers(array('Url'));
     }
     
-    $form->setWidget($fieldName,
-      new sfWidgetFormTextareaMooEditable(array(
+    $baseOptions = array(
         'extratoolbar'  =>'imagepool',
         'config'        => sprintf(
           "chooserUrl:  '%s',".
@@ -70,7 +71,12 @@ class sfImagePoolUtil
           "imageClass:  'image-pool'",
           url_for('sf_image_pool_chooser', array('tag'=>$tag)), sfConfig::get('app_sf_image_pool_folder')
         )
-      ))
+      );
+      
+    $options = array_merge($baseOptions, $options);
+    
+    $form->setWidget($fieldName,
+      new sfWidgetFormTextareaMooEditable($options)
     );
   }
   

@@ -25,6 +25,10 @@
   cursor: pointer;
 }
 
+#image-pool-editable #pagination {
+  clear: both;
+}
+
 .mooeditable-imagepool-dialog label.dialog-label {
   width: auto !important;	
 }
@@ -38,3 +42,4 @@
 .mooeditable-imagepool-dialog .dialog-content {
 	overflow: hidden;
 }
+
