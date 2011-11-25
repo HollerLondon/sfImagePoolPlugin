@@ -76,6 +76,10 @@ MooEditable.UI.ImagePoolDialog = function(editor) {
         
         $('image-pool-editable').reveal();
         
+        // Set width and height from defaults if they exist
+        $(editorId).getElement('.image-width').set('value', editor.options.defaultWidth);
+        $(editorId).getElement('.image-height').set('value', editor.options.defaultHeight);
+        
         // AJAX request to get first page of images
         var request = new Request.HTML({
           'method':     'get',
@@ -161,6 +165,7 @@ MooEditable.Actions.imagepool = {
 var clear_inputs = function (e) {
   e.getElement('.image-width').set('value','');
   e.getElement('.image-url').set('value','');
+  e.getElement('.image-alt').set('value','');
   e.getElement('.image-height').set('value','');
   e.getElement('.image-crop').set('checked',false);
   e.getElement('.selected-image').empty();

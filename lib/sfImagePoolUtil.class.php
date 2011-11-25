@@ -53,23 +53,34 @@ class sfImagePoolUtil
    * 
    * @param sfForm $form      Form object which to add widget to
    * @param string $fieldName the field to set the textarea to
-   * @param string $tag       (optional) tag to restrict images for insertion - comma separated
+   * @param string $config    (optional) config - including tag to restrict images for insertion - comma separated; default width and height of image
    * @param array $options    (optional) additional MooEditable options (can use to override the extra toolbar without recreating this widget)
    */
-  static public function addImagePoolMooEditable($form, $fieldName, $tag = '', $options = array())
+  static public function addImagePoolMooEditable($form, $fieldName, $config = array(), $options = array())
   {
     if (!function_exists('url_for')) 
     {
       sfApplicationConfiguration::getActive()->loadHelpers(array('Url'));
     }
     
+    // for backwards compatibility
+    if (!is_array($config))
+    {
+      $config = array('tag' => $config);
+    }
+    
+    // Set defaults to empty
+    if (!isset($config['tag'])) $config['tag'] = '';
+    if (!isset($config['width'])) $config['width'] = '';
+    if (!isset($config['height'])) $config['height'] = '';
+    
     $baseOptions = array(
         'extratoolbar'  =>'imagepool',
         'config'        => sprintf(
-          "chooserUrl:  '%s',".
-          "imageFolder: '%s',".
-          "imageClass:  'image-pool'",
-          url_for('sf_image_pool_chooser', array('tag'=>$tag)), sfConfig::get('app_sf_image_pool_folder')
+          "chooserUrl:  '%s', imageFolder: '%s', imageClass: 'image-pool', defaultWidth: '%s', defaultHeight: '%s'",
+          url_for('sf_image_pool_chooser', array('tag'=>$config['tag'])), sfConfig::get('app_sf_image_pool_folder'),
+          $config['width'],
+          $config['height']
         )
       );
       
