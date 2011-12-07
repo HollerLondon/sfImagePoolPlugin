@@ -149,32 +149,65 @@ class sfImagePoolAdminActions extends autoSfImagePoolAdminActions
      **/
     public function executeChooser(sfWebRequest $request)
     {
-        sfConfig::set('sf_web_debug', false);
+      sfConfig::set('sf_web_debug', false);
+      
+      // Is there a potential taggable object to restrict by?
+      $class = ($request->hasParameter('class')       ? $request->getParameter('class')     : null);
+      $class_id = ($request->hasParameter('class_id') ? $request->getParameter('class_id')  : null);
+      
+      if ($class && $class_id) 
+      {
+        $object = Doctrine_Core::getTable($class)->findOneById($class_id);
+      }
+      else $object = null;
+      
+      // Or a tag set? Added for MooEditable
+      $tag = ($request->hasParameter('tag')           ? $request->getParameter('tag')       : null);
+      
+      $per_page = sfConfig::get('app_sf_image_pool_chooser_per_page', 24);
+      $pager    = sfImagePoolImageTable::getInstance()->getPager($per_page, $request->getParameter('page', 1), $object, $tag);
+      
+      $vars = array(
+          'paginationId'  => 'pagination',
+          'kind'          => 'image-chooser',
+          'pager'         => $pager,
+          'object'        => $object,
+          'tag'           => $tag,          // Added for MooEditable
+          'multiple'      => ($request->getParameter('multiple', false) === 'true'),
+      );
+      
+      return $this->renderPartial('sfImagePoolAdmin/chooser_pagination', $vars);
+    }
+    
+    
+    /**
+     * iFrame powered upload for the AJAX image chooser (to avoid form within form difficulties)
+     * 
+     * @author Jo Carter
+     * @param sfWebRequest $request
+     */
+    public function executeChooserUpload(sfWebRequest $request)
+    {
+      $image = new sfImagePoolImage();
+      $this->form = $this->configuration->getForm(null, array('edit' => false));
+      $this->form->disableLocalCSRFProtection();
+      $this->success = false;
+      
+      $tag = ($request->hasParameter('tag') ? $request->getParameter('tag') : null);
+      if ($tag) $this->form->setDefault('image_tags', $tag);
+      
+      if ($request->isMethod(sfWebRequest::POST) && $request->hasParameter('sf_image_pool_image'))
+      {
+        $this->form->bind($request->getParameter('sf_image_pool_image'), $request->getFiles('sf_image_pool_image'));
         
-        // Is there a potential taggable object to restrict by?
-        $class = ($request->hasParameter('class') ? $request->getParameter('class') : null);
-        $class_id = ($request->hasParameter('class_id') ? $request->getParameter('class_id') : null);
-        
-        if ($class && $class_id) {
-          $object = Doctrine_Core::getTable($class)->findOneById($class_id);
+        if ($this->form->isValid())
+        {
+          $this->form->save();
+          $this->success = true;
         }
-        else $object = null;
-        
-        // Or a tag set? Added for MooEditable
-        $tag = ($request->hasParameter('tag') ? $request->getParameter('tag') : null);
-        
-        $per_page = sfConfig::get('app_sf_image_pool_chooser_per_page', 24);
-        $pager    = Doctrine_Core::getTable('sfImagePoolImage')->getPager($per_page, $request->getParameter('page', 1), $object, $tag);
-        
-        $vars = array(
-            'paginationId'  => 'pagination',
-            'kind'          => 'image-chooser',
-            'pager'         => $pager,
-            'object'        => $object,
-            'tag'           => $tag,          // Added for MooEditable
-            'multiple'      => $request->getParameter('multiple',false) === 'true',
-        );
-        
-        return $this->renderPartial('sfImagePoolAdmin/chooser_pagination', $vars);
+      }
+      
+      sfConfig::set('sf_web_debug', false);
+      $this->setLayout(false);
     }
 }

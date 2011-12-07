@@ -57,6 +57,12 @@ div#selectedSectionImage
     margin-bottom:        1.5em;
 }
 
+div#selectedImage img, 
+div#selectedImages img 
+{
+  cursor: pointer;
+}
+
 div#selectedImage h4,
 div#selectedImages h4,
 div#selectedSectionImage h4
@@ -93,4 +99,29 @@ div.pool-image label.is_featured
 div.pool-image input
 {
   display:                none !important;
+}
+
+body#iframe {
+  background-color: white;  
+  width: 660px;
+  margin: 0;
+  padding: 0;
+}
+
+body#iframe div#sf_admin_container {
+   margin-top: 0px !important;
+   width: 660px !important;
+}
+
+body#iframe div#sf_admin_container h1 {
+  margin-left: 0.25em;
+}
+
+body#iframe div#sf_admin_container ul.sf_admin_actions {
+  margin: 0.25em !important;
+  padding: 0;  
+}
+
+iframe {
+  border: none;
 }
