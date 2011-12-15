@@ -215,7 +215,7 @@ var ed_upload_image = function ()
       // Create iFrame and load page in the iFrame
       var iFrame = new Element('iframe', { 'src': $('upload_new_image').get('href'), 'width':'100%', 'height':'250px' });
       var paginationLink = new Element('a', { 'href' : $('image_chooser_page_1').get('value'), 'html' : '&laquo; Back to selection', 'id' : 'image_upload_back' })
-      var paginationDiv = new Element('p', { 'id': paginationId });
+      var paginationDiv = new Element('p', { 'id': 'pagination' });
       paginationDiv.adopt(paginationLink);
       
       $('image-pool-editable').empty();
