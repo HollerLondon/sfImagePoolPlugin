@@ -33,14 +33,18 @@ class sfWidgetFormImagePoolChooser extends sfWidgetForm
     
     $object   = $this->getOption('object');
     $per_page = sfConfig::get('app_sf_image_pool_chooser_per_page', 24);
+    
+    $tag = $object->getTagRestriction();
+    if ($tag) $tag = implode(',', $tag); // Because we use this for image upload
 
     $vars = array(
-        'pager'     => Doctrine_Core::getTable('sfImagePoolImage')->getPager($per_page, 1, $object),
+        'pager'     => sfImagePoolImageTable::getInstance()->getPager($per_page, 1, $object),
         'name'      => $name,
         'object'    => $object,
         'per_page'  => $per_page,
         'images'    => $object->getPoolImages(),
         'multiple'  => (bool) $object->allowSelectMultiple(),
+        'tag'       => $tag
     );
 
     return get_partial('sfImagePoolAdmin/widget', $vars);

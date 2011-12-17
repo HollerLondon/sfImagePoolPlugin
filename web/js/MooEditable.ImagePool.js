@@ -28,7 +28,8 @@ provides:
  */ 
 var editorId;
 
-MooEditable.Locale.define({
+MooEditable.Locale.define(
+{
   imagePoolable: 'Add image from pool'
 });
 
@@ -36,7 +37,8 @@ MooEditable.Locale.define({
 /**
  * Create new UI Dialog to handle image pool images
  */
-MooEditable.UI.ImagePoolDialog = function(editor) {
+MooEditable.UI.ImagePoolDialog = function(editor) 
+{
   // Select image - NOTE: must pass through URL in MooEditable config - see sfImagePoolUtil
   var  html = '<label class="dialog-label">Choose an image from the image pool *<br /><br />' +
             '<span class="selected-image"></span>' +
@@ -54,7 +56,8 @@ MooEditable.UI.ImagePoolDialog = function(editor) {
   html += '<br class="clear" /><br /><button class="dialog-button dialog-ok-button">' + MooEditable.Locale.get('ok') + '</button>'
   + '<button class="dialog-button dialog-cancel-button">' + MooEditable.Locale.get('cancel') + '</button>';
   
-  return new MooEditable.UI.Dialog(html, {
+  return new MooEditable.UI.Dialog(html, 
+  {
     'class': 'mooeditable-imagepool-dialog',
     
     // Catch button clicks
@@ -64,8 +67,9 @@ MooEditable.UI.ImagePoolDialog = function(editor) {
       var button = document.id(e.target);
       
       // If selected browse images
-      if (button.hasClass('image-pool-select')){
-    	// Set the editor id for the current editor
+      if (button.hasClass('image-pool-select'))
+      {
+    	  // Set the editor id for the current editor
         editorId = editor.container.get('id');
       
         // Image pool selector - create a new div - only if doesn't exist (i.e: multiple mooeditables on the page)
@@ -76,29 +80,40 @@ MooEditable.UI.ImagePoolDialog = function(editor) {
         
         $('image-pool-editable').reveal();
         
+        // Set width and height from defaults if they exist
+        $(editorId).getElement('.image-width').set('value', editor.options.defaultWidth);
+        $(editorId).getElement('.image-height').set('value', editor.options.defaultHeight);
+        
         // AJAX request to get first page of images
-        var request = new Request.HTML({
+        var request = new Request.HTML(
+        {
           'method':     'get',
           'url':        button.get('href'),
           'update':     $('image-pool-editable'),
           'onSuccess':  function () {
+            ed_upload_image();
             ed_pagination();
             ed_images();
+            ed_create_close_image();
           },
-          'onRequest':  function () {
+          'onRequest':  function () 
+          {
             $('image-pool-editable').set('html','<img src="/sfImagePoolPlugin/images/indicator.gif" />');
           }
         }).send('multiple='+false);
       }
       // Cancel - clear and close
-      else if (button.hasClass('dialog-cancel-button')){
-    	// Clear entered options and reset
-    	clear_inputs(this.el);
-    	
+      else if (button.hasClass('dialog-cancel-button'))
+      {
         this.close();
+        
+      	// Clear entered options and reset
+      	clear_inputs(this.el);
+      	$('image-pool-editable').destroy();
       } 
       // OK - validate, close, insert image, and clear
-      else if (button.hasClass('dialog-ok-button')){
+      else if (button.hasClass('dialog-ok-button'))
+      {
         var imageWidth = this.el.getElement('.image-width').value;
         var imageUrl = this.el.getElement('.image-url').value;
         
@@ -131,6 +146,7 @@ MooEditable.UI.ImagePoolDialog = function(editor) {
           
           // Clear entered options and reset
           clear_inputs(this.el);
+          $('image-pool-editable').destroy();
         }
       }
     }
@@ -141,7 +157,8 @@ MooEditable.UI.ImagePoolDialog = function(editor) {
 /**
  * Add extra option to toolbar to insert image from sfImagePool
  */
-MooEditable.Actions.imagepool = {
+MooEditable.Actions.imagepool = 
+{
 	title: MooEditable.Locale.get('imagePoolable'),
 	dialogs: {
 	  prompt: function(editor){
@@ -158,29 +175,73 @@ MooEditable.Actions.imagepool = {
  * Clear and reset the image pool dialog
  * @param Element e the editor
  */
-var clear_inputs = function (e) {
+var clear_inputs = function (e) 
+{
   e.getElement('.image-width').set('value','');
   e.getElement('.image-url').set('value','');
+  e.getElement('.image-alt').set('value','');
   e.getElement('.image-height').set('value','');
   e.getElement('.image-crop').set('checked',false);
   e.getElement('.selected-image').empty();
   e.getElement('.image-pool-select').set('html', 'browse images');
 }
 
+// Add a close button
+var ed_create_close_image = function ()
+{
+  var closeElement = new Element('span', { 'id' : 'close_image_pool', 'html' : 'close x' });
+  
+  closeElement.inject($('image-pool-editable'), 'top');
+  
+  $('close_image_pool').addEvent('click', ed_close_images);
+};
+
+// Close event
+var ed_close_images = function()
+{
+  //Hide the div
+  $('image-pool-editable').dissolve();
+};
+
+var ed_upload_image = function ()
+{
+  if ($('upload_new_image'))
+  {
+    $('upload_new_image').addEvent('click', function(e) 
+    {
+      e.stop();
+      $('pagination').set('html','<img src="/sfImagePoolPlugin/images/indicator.gif" />');
+      
+      // Create iFrame and load page in the iFrame
+      var iFrame = new Element('iframe', { 'src': $('upload_new_image').get('href'), 'width':'100%', 'height':'250px' });
+      var paginationLink = new Element('a', { 'href' : $('image_chooser_page_1').get('value'), 'html' : '&laquo; Back to selection', 'id' : 'image_upload_back' })
+      var paginationDiv = new Element('p', { 'id': 'pagination' });
+      paginationDiv.adopt(paginationLink);
+      
+      $('image-pool-editable').empty();
+      $('image-pool-editable').adopt(iFrame);
+      $('image-pool-editable').adopt(paginationDiv);
+      
+      ed_create_close_image();
+      ed_pagination();
+    });
+  }
+};
 
 /**
  * Add click events to the images in the pool to allow them to set the hidden
  * input field and show the selected image
  */
-var ed_images = function () {
+var ed_images = function () 
+{
   $(document.body).getElements("#image-pool-editable img").each(
-    function(el) {
+    function(el) 
+    {
       el.addEvent('click', function () {
         selectedFilename  = this.get('title');
         selectedAlt  = this.get('alt');
 
-        // Hide the div
-        $('image-pool-editable').dissolve();
+        ed_close_images();
         
         // Set the hidden input in the current editor
         $(editorId).getElement('.image-url').set('value', selectedFilename);
@@ -198,19 +259,23 @@ var ed_images = function () {
 /**
  * Add click events to turn pagination into AJAX
  */
-var ed_pagination = function () {
+var ed_pagination = function () 
+{
   $(document.body).getElements('#image-pool-editable #pagination a').each(
-    function (el) {
+    function (el) 
+    {
       el.addEvent('click', function (ev) {
-        ev.preventDefault();
+        if (ev) ev.preventDefault();
       
         request = new Request.HTML({
           'method':     'get',
           'url':        this.get('href'),
           'update':     $('image-pool-editable'),
           'onSuccess':  function () {
+            ed_upload_image();
             ed_pagination();
             ed_images();
+            ed_create_close_image();
           },
           'onRequest':  function () {
             $('image-pool-editable').set('html','<img src="/sfImagePoolPlugin/images/indicator.gif" />');

@@ -7,7 +7,7 @@ var hidden = true;
 
 var images = function ()
 {
-  $(document.body).getElements("#thumbnailsContainer img").each(
+  $$("#thumbnailsContainer img").each(
     function(el)
     {
       el.addEvent('click',
@@ -16,7 +16,7 @@ var images = function ()
           selectedFilename  = this.get('title');
           selectedId        = this.get('rel');
           
-          if($('selectedImage').getElement('input[value='+selectedId+']'))
+          if ($('selectedImage').getElement('input[value='+selectedId+']'))
           {
             return;
           }
@@ -40,11 +40,13 @@ var images = function ()
             h4 = new Element('h4',{html: 'Selected Image:'});
             $('selectedImage').adopt(im);
             
-            input = new Element('input',{
+            input = new Element('input',
+            {
               'type':         'hidden',
               'value':        selectedId,
               'name':         $('sf-image-id').get('name')
             });
+            
             $('selectedImage').adopt(input);
 
             $('selectedImage').reveal();
@@ -52,11 +54,14 @@ var images = function ()
           else
           {
             $('selectedImage').adopt(im);
-            input = new Element('input',{
+            
+            input = new Element('input',
+            {
               'type':         'hidden',
               'value':        selectedId,
               'name':         $('sf-image-id').get('name')
             });
+            
             $('selectedImage').adopt(input);
           }
         }
@@ -74,42 +79,79 @@ var removeItem = function ()
 
 var pagination = function ()
 {
-  $(document.body).getElements('#pagination a').each(
+  $$('#thumbnailsContainer #pagination a').each(
     function (el)
     {
-      el.addEvent('click',
-        function (ev)
-        {
-          ev.preventDefault();
-          
-          multiple = $(chooserId).hasClass('multiple');
-          
-          request = new Request.HTML({
-            'method':     'get',
-            'url':        this.get('href'),
-            'update':     $('thumbnailsContainer'),
-            'onSuccess':  function ()
-            {
-              pagination();
-              images();
-            },
-            'onRequest':  function ()
-            {
-              $('pagination').set('html','<img src="/sfImagePoolPlugin/images/indicator.gif" />');
-            }
-          }).send('multiple='+multiple);
-        }
-      );
+      el.addEvent('click', function (ev)
+      {
+        if (ev) ev.preventDefault();
+        
+        multiple = $(chooserId).hasClass('multiple');
+        
+        request = new Request.HTML({
+          'method':     'get',
+          'url':        this.get('href'),
+          'update':     $('thumbnailsContainer'),
+          'onSuccess':  function ()
+          {
+            uploadImage();
+            pagination();
+            images();
+          },
+          'onRequest':  function ()
+          {
+            $('pagination').set('html','<img src="/sfImagePoolPlugin/images/indicator.gif" />');
+          }
+        }).send('multiple='+multiple);
+      });
     }
   );
 };
 
-window.addEvent('domready',
-  function ()
+var uploadImage = function ()
+{
+  $$('#thumbnailsContainer #upload_new_image').addEvent('click', function(e) 
   {
+    e.stop();
+    $('pagination').set('html','<img src="/sfImagePoolPlugin/images/indicator.gif" />');
+    
+    // Create iFrame and load page in the iFrame
+    var iFrame = new Element('iframe', { 'src': $('upload_new_image').get('href'), 'width':'100%', 'height':'250px' });
+    var paginationLink = new Element('a', { 'href' : $('image_chooser_page_1').get('value'), 'html' : '&laquo; Back to selection', 'id' : 'image_upload_back' })
+    var paginationDiv = new Element('p', { 'id': paginationId });
+    paginationDiv.adopt(paginationLink);
+    
+    $('thumbnailsContainer').empty();
+    $('thumbnailsContainer').adopt(iFrame);
+    $('thumbnailsContainer').adopt(paginationDiv);
+    
+    pagination();
+  });
+};
+
+var closeIframe = function ()
+{
+  if ($('image_upload_back'))
+  {
+    $('image_upload_back').fireEvent('click');
+  }
+};
+
+window.addEvent('domready', function ()
+{
+  if ($('cancel_upload'))
+  {
+    $('cancel_upload').addEvent('click', function(e) {
+      parent.closeIframe();
+    });
+  }
+  
+  if ($('toggleThumbnails'))
+  {
+    uploadImage();
     pagination();
     images();
-
+  
     $('toggleThumbnails').addEvent('click',
       function (ev)
       {
@@ -134,6 +176,5 @@ window.addEvent('domready',
         img.addEvent('click', removeItem );
       }
     );
-    
   }
-);
+});
