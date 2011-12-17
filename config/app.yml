@@ -18,6 +18,8 @@ all:
     inflate:            true # allow images to be scaled above their original dimensions
     jpeg_quality:       90   # JPEG quality
     
+    require_size:       true # Add width and height attributes to image tags?
+    
     # include controller in generated image URLs?
     use_script_name:    true
     adapter:            ImagePoolImageMagickAdapter
