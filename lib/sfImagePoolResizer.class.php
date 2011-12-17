@@ -96,8 +96,8 @@ class sfImagePoolResizer
             $this->width,
             $this->height,
             $this->scale,
-            true,                                // Inflate
-            90,                                  // JPEG Quality
+            sfConfig::get('app_sf_image_pool_inflate',true),  // Inflate
+            sfConfig::get('app_sf_image_pool_jpeg_quality',90),  // JPEG Quality
             sfConfig::get('app_image_pool_adapter','ImagePoolImageMagickAdapter'), // Adapter
             $this->options
         );

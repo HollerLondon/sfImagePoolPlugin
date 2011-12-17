@@ -31,12 +31,13 @@ abstract class PluginsfImagePoolImageForm extends BasesfImagePoolImageForm
         'caption',
     ));
     
+    $this->widgetSchema['caption'] = new sfWidgetFormInputText();
     $this->widgetSchema->setLabel('caption', 'Caption (Alt text)');
     
     // Override the default options
     $options = array(
-          'required'   => $this->isNew(),
-          'path'       => $this->getUploadDir()
+      'required'   => $this->isNew(),
+      'path'       => $this->getUploadDir()
     );
     
     $this->setWidget('filename', new sfWidgetFormInputFile());

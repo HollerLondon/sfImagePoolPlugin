@@ -2,13 +2,15 @@
 /**
  * Output image of given size for an sfImagePoolImage.
  *
- * @param Mixed $image Either sfImagePoolImage instance or array
+ * @param mixed $invoker Model or sfImagePool image
  * @param string $dimensions e.g. 'crop=200x150' or '200' for fit to 200 width (scale is default)
- * @param array $attributes
- * 
- * @return string IMG tag including attributes
+ * @param mixed $options either string or array, e.g. array('method' => 'scale', 'require_size' => true)
+ * @param string $attributes HTML attributes, such as width, height and alt
+ * @param boolean $absolute return absolute URL for an image
+ * @return string
+ * @author Jimmy Wong
  */
-function pool_image_tag($invoker, $dimensions = 200, $method = 'crop', $attributes = array(), $absolute = false)
+function pool_image_tag($invoker, $dimensions = 200, $options = 'crop', $attributes = array(), $absolute = false)
 {
   // remove Symfony escaping if applied
   if ($invoker instanceof sfOutputEscaper)
@@ -37,10 +39,41 @@ function pool_image_tag($invoker, $dimensions = 200, $method = 'crop', $attribut
   {
       $h = $w = $dimensions;
   }
-
-  $attributes = _sf_image_pool_build_attrs($image, array($w,$h), $method, $attributes);
-
-  return image_tag(pool_image_uri($image,array($w,$h),$method,$absolute),$attributes);
+  
+  if(is_array($options))
+  {
+    $method = array_key_exists('method',$options) ? $options['method'] : 'crop';
+  }
+  else
+  {
+    $method   = $options;
+    $options  = array();
+  }
+  
+  $pool_image_uri = pool_image_uri($image,array($w,$h),$method,$absolute);
+  
+  $options['require_size'] = array_key_exists('require_size',$options)
+    ? $options['require_size']
+    : sfConfig::get('app_sf_image_pool_require_size',true);
+  
+  // We need the actual image dimensions so the space is correct on the page
+  if (array_key_exists('require_size',$options) && true == $options['require_size'])
+  {
+    // Only if we're scaling it - get the image size
+    if ('scale' == $method)
+    {
+      list($attributes['width'], $attributes['height']) = sfImagePoolUtil::calculateWidthAndHeight($image, $w, $h);
+    }
+    else
+    {
+      $attributes['width'] = $w;
+      $attributes['height'] = $h;
+    }
+  }
+  
+  $attributes = _sf_image_pool_build_attrs($image, $options['require_size'] ? array($w,$h) : false, $method, $attributes);
+  
+  return image_tag($pool_image_uri,$attributes);
 }
 
 function _sf_image_pool_build_attrs($invoker, $dimensions, $method, $attributes = array())
@@ -85,7 +118,7 @@ function _sf_image_pool_build_attrs($invoker, $dimensions, $method, $attributes 
   // we can specify width and height IF we're dealing with a crop,
   // as when using scale, a fit happens and the precise dimensions of the resulting
   // image aren't necessarily what were specified.
-  if ($method == 'crop')
+  if ($method == 'crop' && $w && $h)
   {
     $attributes['width']  = $w;
     $attributes['height'] = $h;

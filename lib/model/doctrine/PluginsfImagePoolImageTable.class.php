@@ -28,13 +28,15 @@ class PluginsfImagePoolImageTable extends Doctrine_Table
   {
       $pager = new sfDoctrinePager($this->getClassnameToReturn(), $per_page);
       
-      $im = new sfImagePoolImage;
+      $im = new sfImagePoolImage();
       
       if(!$im->option('tagging'))
       {
         $tagged_object = $tag = null;
       }
+      
       $im->free(true);
+      
       if (isset($tagged_object) && $tag = $tagged_object->getTagRestriction()) 
       {
         $query = TagTable::getObjectTaggedWithQuery(
@@ -63,6 +65,7 @@ class PluginsfImagePoolImageTable extends Doctrine_Table
         {
           $pager->getQuery()->whereIn('sfImagePoolImage.id', $image_ids);
         }
+        else $pager->getQuery()->where('false'); // we have no images tagged
       }
       
       $pager->getQuery()->orderBy('updated_at DESC');

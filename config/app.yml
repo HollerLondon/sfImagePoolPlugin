@@ -15,6 +15,11 @@ all:
     use_placeholdit:    false # if true, returns handy placeholder images from http://placehold.it
     placeholdit_text:   ' '   # Text to display on placehold.it image - space ' ' leaves a blank image, '' shows the size.
     
+    inflate:            true # allow images to be scaled above their original dimensions
+    jpeg_quality:       90   # JPEG quality
+    
+    require_size:       true # Add width and height attributes to image tags?
+    
     # include controller in generated image URLs?
     use_script_name:    true
     adapter:            ImagePoolImageMagickAdapter

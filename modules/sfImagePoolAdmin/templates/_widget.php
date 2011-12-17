@@ -16,7 +16,8 @@
         'paginationId' => 'pagination',
         'object'       => $object,
         'name'         => $name,
-        'multiple'     => $multiple
+        'multiple'     => $multiple,
+        'tag'          => $tag
     )); ?>
   </div>
   
