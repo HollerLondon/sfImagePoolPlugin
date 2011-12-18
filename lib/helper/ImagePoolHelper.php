@@ -57,7 +57,7 @@ function pool_image_tag($invoker, $dimensions = 200, $options = 'crop', $attribu
   
   $options['require_size'] = array_key_exists('require_size',$options)
     ? $options['require_size']
-    : sfConfig::get('app_sf_image_pool_require_size', false);
+    : sfConfig::get('app_sf_image_pool_require_size', true);
   
   // We need the actual image dimensions so the space is correct on the page
   if (array_key_exists('require_size',$options) && true == $options['require_size'])
