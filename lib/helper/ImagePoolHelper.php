@@ -23,6 +23,9 @@ function pool_image_tag($invoker, $dimensions = 200, $options = 'crop', $attribu
       ? $invoker
       : $invoker->getFeaturedImage();
 
+  // If no image  then return blank to avoid exceptions later on
+  if (!$image) return '';
+      
   if (is_array($dimensions))
   {
     $w  = $dimensions[0];
@@ -46,11 +49,15 @@ function pool_image_tag($invoker, $dimensions = 200, $options = 'crop', $attribu
   }
   else
   {
-    $method = $options;
-    $options = array();
+    $method   = $options;
+    $options  = array();
   }
   
   $pool_image_uri = pool_image_uri($image,array($w,$h),$method,$absolute);
+  
+  $options['require_size'] = array_key_exists('require_size',$options)
+    ? $options['require_size']
+    : sfConfig::get('app_sf_image_pool_require_size', true);
   
   // We need the actual image dimensions so the space is correct on the page
   if (array_key_exists('require_size',$options) && true == $options['require_size'])
@@ -67,7 +74,7 @@ function pool_image_tag($invoker, $dimensions = 200, $options = 'crop', $attribu
     }
   }
   
-  $attributes = _sf_image_pool_build_attrs($image, array($w,$h), $method, $attributes);
+  $attributes = _sf_image_pool_build_attrs($image, $options['require_size'] ? array($w,$h) : false, $method, $attributes);
   
   return image_tag($pool_image_uri,$attributes);
 }
@@ -114,7 +121,7 @@ function _sf_image_pool_build_attrs($invoker, $dimensions, $method, $attributes 
   // we can specify width and height IF we're dealing with a crop,
   // as when using scale, a fit happens and the precise dimensions of the resulting
   // image aren't necessarily what were specified.
-  if ($method == 'crop')
+  if ($method == 'crop' && $w && $h)
   {
     $attributes['width']  = $w;
     $attributes['height'] = $h;

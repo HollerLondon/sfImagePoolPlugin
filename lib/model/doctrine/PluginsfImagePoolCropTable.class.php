@@ -18,14 +18,16 @@ class PluginsfImagePoolCropTable extends Doctrine_Table
   }
   
   /**
-   * Find a crop of an image
+   * Query to get the crop of an image
    * 
    * @param sfImagePoolImage/string $image An image, or filename to locate
    * @param int $width
    * @param int $height
+   * @param boolean $is_crop
    * @param string $identifier Crop cache store identifier - see sfImagePoolCache
+   * @return Doctrine_Query
    */
-  public function findCrop($image, $width, $height, $is_crop = true, $identifier = NULL)
+  protected function getCropQuery($image, $width, $height, $is_crop = true, $identifier = NULL)
   {
     if ($image instanceOf sfImagePoolImage)
     {
@@ -43,7 +45,42 @@ class PluginsfImagePoolCropTable extends Doctrine_Table
     {
       $q->addWhere('location = ?', $identifier);
     }
+    
+    return $q;
+  }
+  
+  /**
+   * Find a crop of an image
+   * 
+   * @param sfImagePoolImage/string $image An image, or filename to locate
+   * @param int $width
+   * @param int $height
+   * @param boolean $is_crop
+   * @param string $identifier Crop cache store identifier - see sfImagePoolCache
+   * @return sfImagePoolCrop 
+   */
+  public function findCrop($image, $width, $height, $is_crop = true, $identifier = NULL)
+  {
+    $q = $this->getCropQuery($image, $width, $height, $is_crop, $identifier);
 
     return $q->fetchOne();
   }   
+  
+  /**
+   * Get the existance of a crop
+   * 
+   * @param sfImagePoolImage/string $image An image, or filename to locate
+   * @param int $width
+   * @param int $height
+   * @param boolean $is_crop
+   * @param string $identifier Crop cache store identifier - see sfImagePoolCache
+   * @return string(id)/boolean
+   */
+  public function getCropExistance($image, $width, $height, $is_crop = true, $identifier = NULL)
+  {
+    $q = $this->getCropQuery($image, $width, $height, $is_crop, $identifier);
+    $q->select('c.sf_image_id');
+    
+    return $q->fetchOne(null, Doctrine_Core::HYDRATE_SINGLE_SCALAR);
+  }
 }

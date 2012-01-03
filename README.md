@@ -28,7 +28,7 @@ Dependencies
    * A image manipulation library depending on which sfThumbnail adapter you choose. Defaults to `ImagePoolImageMagickAdapter`
  * MooTools Core 1.3.x
  * MooTools More 1.3.x:
-  * Fx.Reveal
+  * [Fx.Reveal](http://mootools.net/more/b182d2c5d96807119ec2cc0d6508a442)
   
   
 Optional Dependencies
@@ -180,16 +180,24 @@ The following options may be overridden in your `app.yml` files:
         use_placeholdit:    false # if true, returns handy placeholder images from http://placehold.it
         placeholdit_text:   ' '   # Text to display on placehold.it image - space ' ' leaves a blank image, '' shows the size.
     
+        inflate:            true # allow images to be scaled above their original dimensions
+        jpeg_quality:       90   # JPEG quality
+    
+        require_size:       true # Add width and height attributes to image tags?
+    
         # include controller in generated image URLs?
         use_script_name:    true
         adapter:            ImagePoolImageMagickAdapter
         # adapter:            sfGDAdapter
         adapter_options:
-          # Sharpen scaled/cropped images - only works for ImagePoolImageMagickAdapter
-          sharpen:      true
           # Sharpening is CPU-intensive, so you can prefix the "convert" command
           # with nice -n19 to make sure other processes get priority over the CPU
           # convert:        nice -n19 /usr/bin/convert
+          # Options specific to ImagePoolImageMagickAdapter:
+          # Sharpen scaled/cropped images
+          sharpen:      true
+          # Fix problems with thumbnail not respecting orientation with photos from certain cameras (e.g. iPhone)
+          auto_orient:  true
       
         # How should we cache files?
         cache:
@@ -197,7 +205,7 @@ The following options may be overridden in your `app.yml` files:
           class:            sfImagePoolFilesystemCache
           # RACKSPACE CLOUD FILES ADAPTER:
           # class:          sfImagePoolRackspaceCloudFilesCache
-          # options: 
+          # options:
           #   username:     ~ # Your Username
           #   container:    ~ # Name for the container
           #   api_key:      ~
@@ -235,6 +243,12 @@ This is the same as
 `scale` is the default transform method. If this doesn't product a good result, try using `crop`. To crop an image to 500x325:
 
     echo pool_image_tag($imagepoolable_object_or_sfImagePoolImage, '500x325', 'crop');
+
+The third argument may also be an array of options. For example:
+
+    echo pool_image_tag($imagepoolable_object_or_sfImagePoolImage, '500x325', array('method'=>'crop','require_size'=>false));
+
+...where the `required_size` option in this example disables adding width and height attributes on the resulting `img` tag, useful, for example, if you're creating images to be used in a fluid layout. When set to `true`, the `require_size` option will also add actual width and height attributes to scaled images.
     
 #### Image parameters
 
