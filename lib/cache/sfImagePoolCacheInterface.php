@@ -53,4 +53,12 @@ interface sfImagePoolCacheInterface
    */
   public function delete(sfImagePoolCrop $crop = null);
   
+  /**
+   * Whether the thumbnail already exists
+   * 
+   * @return boolean
+   * @author Jo Carter
+   */
+  public function exists();
+  
 } // END interface sfImagePoolCache

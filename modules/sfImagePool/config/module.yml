@@ -1,0 +1,4 @@
+all:
+  sf_google_analytics_plugin:
+    params:
+      enabled: false

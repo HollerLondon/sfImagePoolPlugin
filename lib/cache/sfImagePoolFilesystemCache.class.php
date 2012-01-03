@@ -40,4 +40,30 @@ class sfImagePoolFilesystemCache extends sfImagePoolCache implements sfImagePool
   {
     if (!$redirect) return $this->getDestination(); 
   }
+  
+  /**
+   * Crops are always stored on the filesystem - they are only in the image crop table
+   * if they have been manually uploaded
+   * 
+   * @see cache/sfImagePoolCache::exists()
+   */
+  public function exists()
+  {
+    if (file_exists($this->getDestination()))
+    {
+      try
+      {
+        // @TODO: NOTE: There may be a better way to do this - but php should use memory mapping here
+        return file_get_contents($this->getDestination());
+      }
+      catch (Exception $e)
+      {
+        return false;s
+      }
+    }
+    else
+    {
+      return false;
+    }
+  }
 } // END class 

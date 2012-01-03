@@ -11,7 +11,7 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
    * 
    * @var CF_Container
    */
-  private $container;
+  private $container = null;
   
   /**
    * Array of Rackspace Cloud Files options
@@ -28,9 +28,6 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
   public function __construct(sfImagePoolImage $image, $options = array(), $resizer_options = array())
   {
     parent::__construct($image, $options, $resizer_options);
-    
-    // Set up rackspace container
-    $this->container = self::setup($options);
   }
   
   /**
@@ -45,9 +42,9 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
     $required_fields = array('container','api_key','username');
     $adapter_options = $options['options'];
     
-    foreach($required_fields as $f)
+    foreach ($required_fields as $f)
     {
-      if(!array_key_exists($f, $adapter_options))
+      if (!array_key_exists($f, $adapter_options))
       {
         throw new InvalidArgumentException(sprintf("Missing option '%s' is required",$f));
       }
@@ -80,6 +77,12 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
    */
   public function getContainer()
   {
+    if (!$this->container)
+    {
+      // Set up rackspace container when needed only
+      $this->container = self::setup($this->options);
+    }
+    
     return $this->container;
   }
 
@@ -117,8 +120,9 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
   {
     // save to cloud
     $object_name = $this->getCloudName();
+    $container   = $this->getContainer();
     
-    $this->object = $this->container->create_object($object_name);
+    $this->object = $container->create_object($object_name);
     $this->object->load_from_filename($this->getDestination()); 
     
     // clean up temp file
@@ -187,6 +191,33 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
       {
         // Image already deleted from cloud - that's ok
       }
+    }
+  }
+  
+  /**
+   * Check crop exists
+   * @see cache/sfImagePoolCacheInterface::exists()
+   */
+  public function exists()
+  {
+    $imageCropExists = sfImagePoolCropTable::getInstance()->getCropExistance($this->image, $this->resizer_options['width'], $this->resizer_options['height'], !($this->resizer_options['scale']), self::CROP_IDENTIFIER);
+    
+    if (false === $imageCropExists)
+    {
+      return false;
+    }
+    else 
+    {
+      $object_name = $this->getCloudName();
+      
+      $ssl = sfContext::getInstance()->getRequest()->isSecure();
+      $off_site_index = ($ssl ? 'off_site_ssl_uri' : 'off_site_uri');
+    
+      $url = $this->options[$off_site_index] . DIRECTORY_SEPARATOR . $object_name;
+      
+      sfContext::getInstance()->getController()->redirect($url, 0, 301);
+      
+      return $url; // or true // or whatever ;)
     }
   }
 } // END class 

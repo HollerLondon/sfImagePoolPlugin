@@ -13,7 +13,10 @@ class BasesfImagePoolActions extends sfActions
      */
     public function executeImage(sfWebRequest $request)
     {
+        sfConfig::set('sf_web_debug', false);
+      
         $sf_pool_image = $this->getRoute()->getObject();
+        $response      = $this->getResponse();
 
         $thumb_method  = $request->getParameter('method');
         $width         = $request->getParameter('width');
@@ -27,41 +30,52 @@ class BasesfImagePoolActions extends sfActions
             throw new sfImagePoolException(sprintf('%s does not exist', $sf_pool_image->getPathToOriginalFile()));
           }
           
-          // create thumbnail
+          // create resizer and cache
           $resizer = new sfImagePoolResizer($sf_pool_image, $thumb_method, $width, $height);
-          
           $cache   = sfImagePoolCache::getInstance($sf_pool_image, array(), $resizer->getParams());
           
-          $thumb   = $resizer->save($cache->getDestination());
-        
-          // get thumbnail data and spit out
-          $image_data = $thumb->toString();
-          $response   = $this->getResponse();
-        
           // set headers so when image is requested again, if it exists
           // on the filesystem it'll just be fetched from the browser cache.
+          // @TODO: Should remote images cache?
           if ($cache->sendCachingHttpHeaders())
           {
-            $response->setContentType($thumb->getMime()); 
+            $response->setContentType($sf_pool_image->getMimeType()); 
 
             $response->addCacheControlHttpHeader('public');
             $response->addCacheControlHttpHeader('max_age', $cache->getLifetime());
           
             $response->setHttpHeader('Last-Modified', date('D, j M Y, H:i:s'));
             $response->setHttpHeader('Expires', date('D, j M Y, H:i:s', strtotime(sprintf('+ %u second', $cache->getLifetime()))));
-            $response->setHttpHeader('Content-Length', strlen($image_data));
           }
           
           $response->setHttpHeader('X-Is-Cached', 'no');
+          
+          // if thumbnail doesn't already exist
+          // if it does - we get the file contents here or redirect
+          if (!($image_data = $cache->exists()))
+          {
+            // create thumbnail
+            $thumb = $resizer->save($cache->getDestination());
+          
+            // get thumbnail data and spit out
+            $image_data = $thumb->toString();
 
-          sfConfig::set('sf_web_debug', false);
+            $cache->commit();
+          }
           
-          $cache->commit();
-          
-          return $this->renderText($image_data);
+          // If it's remote there'll be a redirect to the remote URL
+          if (!$cache::IS_REMOTE)
+          {
+            if ($cache->sendCachingHttpHeaders()) $response->setHttpHeader('Content-Length', strlen($image_data));
+            
+            return $this->renderText($image_data);
+          }
+          else 
+          {
+            return sfView::NONE;
+          }
         }
-
-        // thumbnail could not be generated so let's spit out a thumbnail instead 
+        // thumbnail could not be generated so let's spit out a placeholder instead 
         catch (sfImagePoolException $e)
         {
           if (sfConfig::get('app_sf_image_pool_placeholders', false))
