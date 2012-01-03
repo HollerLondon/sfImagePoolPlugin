@@ -28,7 +28,7 @@ Dependencies
    * A image manipulation library depending on which sfThumbnail adapter you choose. Defaults to `ImagePoolImageMagickAdapter`
  * MooTools Core 1.3.x
  * MooTools More 1.3.x:
-  * Fx.Reveal
+  * [Fx.Reveal](http://mootools.net/more/b182d2c5d96807119ec2cc0d6508a442)
   
   
 Optional Dependencies
