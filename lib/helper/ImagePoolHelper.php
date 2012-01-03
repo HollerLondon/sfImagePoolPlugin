@@ -12,6 +12,8 @@
  */
 function pool_image_tag($invoker, $dimensions = 200, $options = 'crop', $attributes = array(), $absolute = false)
 {
+  if(is_null($invoker)) return;
+  
   // remove Symfony escaping if applied
   if ($invoker instanceof sfOutputEscaper)
   {
