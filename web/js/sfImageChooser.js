@@ -2,7 +2,7 @@ var toggleId        = 'toggleThumbnails';
 var containerId     = 'thumbnailsContainer';
 var paginationId    = 'pagination';
 var chooserId       = 'imageChooser';
-
+var bound           = false;
 var hidden = true;
 
 var images = function ()
@@ -139,6 +139,8 @@ var closeIframe = function ()
 
 window.addEvent('domready', function ()
 {
+  if(bound) return;
+  bound = true;
   if ($('cancel_upload'))
   {
     $('cancel_upload').addEvent('click', function(e) {
