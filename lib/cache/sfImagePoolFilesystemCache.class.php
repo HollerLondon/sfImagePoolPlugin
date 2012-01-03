@@ -58,7 +58,7 @@ class sfImagePoolFilesystemCache extends sfImagePoolCache implements sfImagePool
       }
       catch (Exception $e)
       {
-        return false;s
+        return false;
       }
     }
     else
