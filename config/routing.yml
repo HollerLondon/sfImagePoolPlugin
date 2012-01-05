@@ -41,7 +41,7 @@ sf_image_pool_chooser:
   url:                  /sfImagePool/chooser/:page
   param:                { module: sfImagePoolAdmin, action: chooser, page: 1, no_javascript: false}
   requirements:
-    page:               "\d"
+    page:               "\d+"
     
 sf_image_pool_browse:
   url:                  /sfImagePool/browse/:page

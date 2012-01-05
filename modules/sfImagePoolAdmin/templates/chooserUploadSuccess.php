@@ -17,11 +17,16 @@
       <div class="sf_admin_form">
         <?php if ($success) : ?>
           <h1>Image uploaded</h1>
+          
           <script type="text/javascript">
-            parent.closeIframe();
+            var id = '<?php echo $sf_request->getParameter('chooser_id'); ?>';
+            parent.sfImageChooser[id].closeIframe();
           </script>
+          
         <?php else : ?>
+        
           <?php include_partial('sfImagePoolAdmin/chooser_upload', array('paginationId'  => 'pagination', 'form' => $form)); ?>
+          
         <?php endif; ?>
       </div>
     </div>

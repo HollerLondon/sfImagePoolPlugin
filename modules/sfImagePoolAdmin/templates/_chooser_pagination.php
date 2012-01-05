@@ -2,12 +2,13 @@
 
 <?php 
 // Send through extra optional parameters to AJAX
+$extra = array('chooser_id' => $id);
 $object = $sf_data->getRaw('object'); // Otherwise class is sfOutputEscaperIteratorDecorator ;)
+
 if ($object && $object->id) 
 {
-  $extra = array('class'=>get_class($object), 'class_id'=>$object->id);
+  $extra = $extra + array('class'=>get_class($object), 'class_id'=>$object->id);
 }
-else $extra = array();
 
 if ($sf_data->offsetExists('tag')) 
 {
@@ -24,7 +25,7 @@ if ($sf_data->offsetExists('tag'))
   </div>
 <?php endforeach ?>
 
-<p id="<?php echo $paginationId ?>">
+<p class="<?php echo $paginationId ?>">
   <?php if ($pager->haveToPaginate()): ?>
     <?php
     if ($pager->getPage() !== $pager->getFirstPage())
@@ -56,5 +57,5 @@ if ($sf_data->offsetExists('tag'))
   Displaying <?php echo $pager->getFirstIndice() ?> - <?php echo $pager->getLastIndice() ?> of <?php echo $pager->getNbResults() ?> images
 </p>
 
-<ul class="sf_admin_actions"><li class="sf_admin_action_new"><?php echo link_to('Upload a new image', 'sf_image_pool_chooser_upload', $extra, array('id'=>"upload_new_image")); ?></li></ul>
+<ul class="sf_admin_actions"><li class="sf_admin_action_new"><?php echo link_to('Upload a new image', 'sf_image_pool_chooser_upload', $extra, array('class'=>"upload_new_image")); ?></li></ul>
 <input type="hidden" id="image_chooser_page_1" value="<?php echo url_for('sf_image_pool_chooser', array('page' => 1) + $extra); ?>" />

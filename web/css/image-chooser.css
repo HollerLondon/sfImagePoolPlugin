@@ -1,94 +1,77 @@
-div#imageChooser,
-div#multipleImageChooser,
-div#sectionImageChooser
+div.imageChooser
 {
     width:                678px;
     margin:               2em 0 2em 0;
 }
 
-div#thumbnailsContainer,
-div#multipleThumbnailsContainer,
-div#sectionThumbnailsContainer
+div.thumbnailsContainer
 {
     overflow:             hidden;
     display:              none;
 }
 
-div#thumbnailsContainer label img,
-div#multipleThumbnailsContainer label img,
-div#sectionThumbnailsContainer label img
+div.thumbnailsContainer label img
 {
 	  float:                left !important;
 	  border:               1px solid #fff;
-    background:           transparent url('/sfImagePoolPlugin/images/loader.gif') no-repeat center center;
+    /* background:           transparent url('/sfImagePoolPlugin/images/loader.gif') no-repeat center center; */
 }
 
-div#thumbnailsContainer label img:hover,
-div#multipleThumbnailsContainer label img:hover,
-div#sectionThumbnailsContainer label img:hover
+div.thumbnailsContainer label img:hover
  {
     border:               1px solid #ad2b29;
     cursor:               pointer;
 }
 
-div#thumbnailsContainer label,
-div#multipleThumbnailsContainer label,
-div#sectionThumbnailsContainer label
+div.thumbnailsContainer label
 {
-    padding:              0;
-    margin:               0;
+    padding:              0 !important;
+    margin:               0 !important;
     width:                auto !important;
 }
 
-div#thumbnailsContainer input[type=radio],
-div#multipleThumbnailsContainer input[type=radio],
-div#sectionThumbnailsContainer input[type=radio],
-div#thumbnailsContainer input[type=checkbox],
-div#multipleThumbnailsContainer input[type=checkbox],
-div#sectionThumbnailsContainer input[type=checkbox]
- {
+div.thumbnailsContainer input[type=radio],
+div.thumbnailsContainer input[type=checkbox]
+{
     display:              none;
 }
 
-div#selectedImage,
-div#selectedImages,
-div#selectedSectionImage
+div.selectedImage
 {
     margin-bottom:        1.5em;
 }
 
-div#selectedImage img, 
-div#selectedImages img 
+div.selectedImage img
 {
   cursor: pointer;
 }
 
-div#selectedImage h4,
-div#selectedImages h4,
-div#selectedSectionImage h4
+div.selectedImage h4
 {
     color:                #ccc;
     font-size:            9pt;
     margin-bottom:        0.5em;
 }
 
-div#selectedImage img,
-div#selectedImages img,
-div#selectedSectionImage img
+div.selectedImage img
 {
     -webkit-box-shadow:   0 0 20px #aaa;   
     -moz-box-shadow:      0 0 20px #aaa;   
     box-shadow:           0 0 20px #aaa;
 }
 
-p#pagination,
-p#multiplePagination,
-p#sectionPagination
+p.pagination
 {
-  margin-top:             1em;
+  margin:                 1em 0 0 0;
   line-height:            2em;
   text-align:             center;
   clear:                  both;
+  font-weight:            normal;
+}
+
+p.pagination span, p.pagination a
+{
+  margin: 0;
 }
 
 div.pool-image label.is_featured

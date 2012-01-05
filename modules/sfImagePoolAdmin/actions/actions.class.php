@@ -169,9 +169,9 @@ class sfImagePoolAdminActions extends autoSfImagePoolAdminActions
       
       $vars = array(
           'paginationId'  => 'pagination',
-          'kind'          => 'image-chooser',
           'pager'         => $pager,
           'object'        => $object,
+          'id'            => $request->getParameter('chooser_id'),
           'tag'           => $tag,          // Added for MooEditable
           'multiple'      => ($request->getParameter('multiple', false) === 'true'),
       );

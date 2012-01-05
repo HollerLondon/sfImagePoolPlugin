@@ -45,10 +45,10 @@ class sfImagePoolUtil
    * Use this to add ImagePool to MooEditable with extra config as required as the image pool is REQUIRED
    * 
    * Example extension:
-   *  sfImagePoolUtil::addImagePoolMooEditable($this, 'body', 'ingredients', array('extratoolbar' => 'tableadd | imagepool', 'height' => 150));
+   *  sfImagePoolUtil::addImagePoolMooEditable($this, 'body', array('tag'=>'ingredients', 'width'=>100, 'height'=>100), array('extratoolbar' => 'tableadd | imagepool', 'height' => 150));
    * 
    * @uses sfMooToolsFormExtraPlugin (REQUIRED)
-   * @requires Javascripts and Stylesheets to be included in form - see README (Optional extensions #1)
+   * @uses custom image pool version to include javascripts and stylesheets
    * @author Jo Carter <jocarter@holler.co.uk>
    * 
    * @param sfForm $form      Form object which to add widget to
@@ -58,37 +58,24 @@ class sfImagePoolUtil
    */
   static public function addImagePoolMooEditable($form, $fieldName, $config = array(), $options = array())
   {
-    if (!function_exists('url_for')) 
-    {
-      sfApplicationConfiguration::getActive()->loadHelpers(array('Url'));
-    }
-    
     // for backwards compatibility
     if (!is_array($config))
     {
       $config = array('tag' => $config);
     }
     
-    // Set defaults to empty
-    if (!isset($config['tag'])) $config['tag'] = '';
-    if (!isset($config['width'])) $config['width'] = '';
-    if (!isset($config['height'])) $config['height'] = '';
-    
-    $baseOptions = array(
-        'extratoolbar'  =>'imagepool',
-        'config'        => sprintf(
-          "chooserUrl:  '%s', imageFolder: '%s', imageClass: 'image-pool', defaultWidth: '%s', defaultHeight: '%s'",
-          url_for('sf_image_pool_chooser', array('tag'=>$config['tag'])), sfConfig::get('app_sf_image_pool_folder'),
-          $config['width'],
-          $config['height']
-        )
-      );
+    // change config to options
+    foreach ($config as $idx => $value) // tag / width / height
+    {
+      if (false === strstr($idx, 'image_')) // in case using the option format
+      {
+        $idx = 'image_' . $idx;
+      }
       
-    $options = array_merge($baseOptions, $options);
+      $options[$idx] = $value;
+    }
     
-    $form->setWidget($fieldName,
-      new sfWidgetFormTextareaMooEditable($options)
-    );
+    $form->setWidget($fieldName, new sfWidgetFormTextareaMooEditableImagePool($options));
   }
   
   /**

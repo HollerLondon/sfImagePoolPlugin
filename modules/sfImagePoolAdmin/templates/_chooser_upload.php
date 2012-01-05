@@ -1,14 +1,15 @@
 <?php 
 // Send through extra optional parameters to AJAX
+$extra = array('chooser_id' => $sf_request->getParameter('chooser_id'));
+
 if ($sf_params->has('class')) 
 {
-  $extra = array('class'=>$sf_params->get('object'), 'class_id'=>$sf_params->get('object_id'));
+  $extra = $extra + array('class'=>$sf_request->getParameter('class'), 'class_id'=>$sf_request->getParameter('class_id'));
 }
-else $extra = array();
 
-if ($sf_params->has('tag')) 
+if ($sf_request->offsetExists('tag')) 
 {
-  $tag = $sf_params->getRaw('tag');       // Hack if no object for MooEditable
+  $tag = $sf_request->getParameter('tag');       // Hack if no object for MooEditable
   if ($tag && !empty($tag)) $extra['tag'] = $tag;
 }
 ?>
@@ -38,7 +39,7 @@ if ($sf_params->has('tag'))
       
       <ul class="sf_admin_actions">
         <li class="sf_admin_action_save"><input type="submit" name="upload_image" id="upload_image" value="Upload image" /></li>
-        <li><input type="button" name="cancel_upload" id="cancel_upload" value="Cancel" /></li>
+        <li><input type="button" name="cancel_upload" id="cancel_upload" value="Cancel" rel="<?php echo $sf_request->getParameter('chooser_id'); ?>" /></li>
       </ul>
     </form>
   </div>

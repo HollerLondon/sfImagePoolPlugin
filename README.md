@@ -308,8 +308,7 @@ plugin's sfImagePoolPluginConfiguration class. If changed the above rule would a
 
 #### 1. Add sfImagePool to MooEditable text areas
 
-To add a HTML editor (see _Requirements_) with image pool for image insertion, use the following method (or take the code in the method and amend to it) - in the form class.  
-It requires the extensions' javascripts and stylesheets to be included in form
+To add a HTML editor (see _Requirements_) with image pool for image insertion
 
     class MyModelForm extends BaseMyModelForm
     {
@@ -317,21 +316,12 @@ It requires the extensions' javascripts and stylesheets to be included in form
       {
         $widgetName = 'summary';  
         $restrictToTag = '';
+
+		// Basic tag
         sfImagePoolUtil::addImagePoolMooEditable($this, $widgetName, $restrictToTag);
-      }
-    
-	  public function getJavaScripts()
-      {
-        $js = parent::getJavascripts();
-   
-		return array_merge($js, array('/sfImagePoolPlugin/js/MooEditable.ImagePool.js'));
-      }
-   
-      public function getStylesheets()
-      {
-         $css = parent::getStylesheets();
-   
-         return array_merge($css, array('/sfImagePoolPlugin/css/MooEditable.ImagePool.css'=>'all'));
+
+		// More advanced config
+		sfImagePoolUtil::addImagePoolMooEditable($this, $widgetName, array('tag'=>$restrictToTag, 'width'=>100, 'height'=>100), array('extratoolbar' => 'tableadd | imagepool', 'height' => 150));
       }
     }
 

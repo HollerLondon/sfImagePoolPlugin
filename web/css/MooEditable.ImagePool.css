@@ -1,4 +1,4 @@
-.mooeditable-ui-toolbar .imagepool-item .button-icon{ background-position: 0 -208px; }
+.mooeditable-ui-toolbar .imagepool-item .button-icon { background-position: 0 -208px; }
 
 #image-pool-editable {
   display: none;
@@ -14,9 +14,18 @@
   min-height: 289px;
 }
 
+#image-pool-editable .thumbnailsContainer {
+  display: block;
+}
+
+#image-pool-editable label {
+    padding:              0;
+    margin:               0;
+    width: auto !important;
+}
+
 #image-pool-editable label img {
   float: left !important;
-  padding: 5px;
   border: 1px solid white;
 }
 
@@ -25,8 +34,14 @@
   cursor: pointer;
 }
 
-#image-pool-editable #pagination {
+#image-pool-editable .pagination {
   clear: both;
+  font-weight:            normal;
+}
+
+#image-pool-editable .pagination span, #image-pool-editable .pagination a
+{
+  margin: 0;
 }
 
 .mooeditable-imagepool-dialog label.dialog-label {

@@ -14,7 +14,6 @@ class sfWidgetFormImagePoolChooser extends sfWidgetForm
   public function configure($options = array(), $attributes = array())
   {
     $this->addOption('object');
-    $this->addOption('ssl', false);
     $this->setLabel('Images');
   }
   
@@ -40,6 +39,7 @@ class sfWidgetFormImagePoolChooser extends sfWidgetForm
     $vars = array(
         'pager'     => sfImagePoolImageTable::getInstance()->getPager($per_page, 1, $object),
         'name'      => $name,
+        'id'        => $this->generateId($name),
         'object'    => $object,
         'per_page'  => $per_page,
         'images'    => $object->getPoolImages(),
