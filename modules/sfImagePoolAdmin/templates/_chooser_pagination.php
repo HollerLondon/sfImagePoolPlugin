@@ -7,7 +7,7 @@ $object = $sf_data->getRaw('object'); // Otherwise class is sfOutputEscaperItera
 
 if ($object && $object->id) 
 {
-  $extra = $extra + array('class'=>get_class($object), 'class_id'=>$object->id);
+  $extra = $extra + array('class'=>get_class($object), 'class_id'=>$object->getId());
 }
 
 if ($sf_data->offsetExists('tag')) 
