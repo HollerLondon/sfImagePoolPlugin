@@ -58,4 +58,4 @@ if ($sf_data->offsetExists('tag'))
 </p>
 
 <ul class="sf_admin_actions"><li class="sf_admin_action_new"><?php echo link_to('Upload a new image', 'sf_image_pool_chooser_upload', $extra, array('class'=>"upload_new_image")); ?></li></ul>
-<input type="hidden" id="image_chooser_page_1" value="<?php echo url_for('sf_image_pool_chooser', array('page' => 1) + $extra); ?>" />
+<input type="hidden" id="<?php echo $id; ?>_page_1" value="<?php echo url_for('sf_image_pool_chooser', array('page' => 1) + $extra); ?>" />

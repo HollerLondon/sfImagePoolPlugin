@@ -242,7 +242,7 @@ var ImageChooser = new Class(
         
         // Create iFrame and load page in the iFrame
         iFrame = new Element('iframe', { 'src': el.get('href'), 'width':'100%', 'height':'250px' });
-        paginationLink = new Element('a', { 'href' : $('image_chooser_page_1').get('value'), 'html' : '&laquo; Back to selection', 'class' : self.options.uploadBackClass });
+        paginationLink = new Element('a', { 'href' : $(self.imageChooser.id + '_page_1').get('value'), 'html' : '&laquo; Back to selection', 'class' : self.options.uploadBackClass });
         paginationDiv = new Element('p', { 'class': self.options.paginationClass });
         paginationDiv.adopt(paginationLink);
         
