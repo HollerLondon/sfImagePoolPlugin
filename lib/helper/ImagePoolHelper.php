@@ -25,9 +25,6 @@ function pool_image_tag($invoker, $dimensions = 200, $options = 'crop', $attribu
       ? $invoker
       : $invoker->getFeaturedImage();
 
-  // If no image  then return blank to avoid exceptions later on
-  if (!$image) return '';
-      
   if (is_array($dimensions))
   {
     $w  = $dimensions[0];
@@ -36,13 +33,13 @@ function pool_image_tag($invoker, $dimensions = 200, $options = 'crop', $attribu
   // parse dimensions string for width and height
   else if (strpos(strtolower($dimensions), 'x') !== false)
   {
-      list($w, $h) = explode('x', $dimensions);
+    list($w, $h) = explode('x', $dimensions);
   }
   // set width and height to the same as $dimensions default
   // this *might* need changing if it produces inaccurate results with 'scale'
   else
   {
-      $h = $w = $dimensions;
+    $h = $w = $dimensions;
   }
   
   if(is_array($options))
@@ -54,7 +51,7 @@ function pool_image_tag($invoker, $dimensions = 200, $options = 'crop', $attribu
     $method   = $options;
     $options  = array();
   }
-  
+
   $pool_image_uri = pool_image_uri($image,array($w,$h),$method,$absolute);
   
   $options['require_size'] = array_key_exists('require_size',$options)
@@ -62,7 +59,7 @@ function pool_image_tag($invoker, $dimensions = 200, $options = 'crop', $attribu
     : sfConfig::get('app_sf_image_pool_require_size', true);
   
   // We need the actual image dimensions so the space is correct on the page
-  if (array_key_exists('require_size',$options) && true == $options['require_size'])
+  if ($image && array_key_exists('require_size',$options) && true == $options['require_size'])
   {
     // Only if we're scaling it - get the image size
     if ('scale' == $method)
@@ -192,7 +189,7 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
     {
       if (sfConfig::get('app_sf_image_pool_use_placeholdit', false))
       {
-        $url = sprintf('http://placehold.it/%ux%u&text=%s', $width, $height, urlencode(sfConfig::get('app_sf_image_pool_placeholdit_text', ' ')));
+        $url = sprintf('http://placehold.it/%ux%u&text=%s',$width, $height, urlencode(sfConfig::get('app_sf_image_pool_placeholdit_text',$width.'x'.$height)));
       }
       else
       {
@@ -208,7 +205,6 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
             $offsite = true;
           }
         }
-        
         $url = url_for(sprintf('@image?width=%s&height=%s&filename=%s&method=%s', $width, $height, sfImagePoolImage::DEFAULT_FILENAME, $method), $absolute);
       }
     }
