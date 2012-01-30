@@ -129,6 +129,14 @@ function _sf_image_pool_build_attrs($invoker, $dimensions, $method, $attributes 
   return $attributes;
 }
 
+/**
+ * Get the URL for the original uploaded file
+ **/
+function pool_image_source_uri($image,$absolute)
+{
+  return _compute_public_path($image['filename'],sfConfig::get('app_sf_image_pool_folder','image-pool'),$absolute,false);
+}
+
 function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute = false)
 {
   // remove Symfony escaping if applied
@@ -138,6 +146,11 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
   }
   
   $offsite = false;
+  
+  if($dimensions == 'original')
+  {
+    return pool_image_source_uri($image,$absolute);
+  }
   
   if (is_array($dimensions))
   {
