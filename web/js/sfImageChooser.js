@@ -241,7 +241,7 @@ var ImageChooser = new Class(
         self.pagination.set('html', self.loadingImage);
         
         // Create iFrame and load page in the iFrame
-        iFrame = new Element('iframe', { 'src': el.get('href'), 'width':'100%', 'height':'250px' });
+        iFrame = new Element('iframe', { 'src': el.get('href'), 'width':'100%', 'height':'250px', 'id': self.imageChooser.id + '_iframe' });
         paginationLink = new Element('a', { 'href' : $(self.imageChooser.id + '_page_1').get('value'), 'html' : '&laquo; Back to selection', 'class' : self.options.uploadBackClass });
         paginationDiv = new Element('p', { 'class': self.options.paginationClass });
         paginationDiv.adopt(paginationLink);
@@ -262,6 +262,33 @@ var ImageChooser = new Class(
     
     // Need to send event otherwise can't use this / e.target
     el.fireEvent('click', e);
+  },
+  
+  resizeIframe: function ()
+  {
+    var iframe = new IFrame($(this.imageChooser.id + '_iframe'));
+    
+    try
+    {
+      var height = 0;
+      
+      if (iframe.contentDocument)
+      {
+        height = iframe.contentDocument.height;
+      }
+     
+      if (iframe.contentWindow && (!height || 0 == height))
+      {
+        height = iframe.contentWindow.document.body.scrollHeight;
+      }
+      
+      if (height && 0 < height)
+      {
+        height += 10;
+        $(this.imageChooser.id + '_iframe').set("height", height + 'px');
+      }
+    }
+    catch (e) {}
   }
 });
 
@@ -317,9 +344,12 @@ window.addEvent('domready', function ()
   // iframe cancel button
   if ($('cancel_upload'))
   {
-    $('cancel_upload').addEvent('click', function(e) {
-      
-      var id = this.get('rel');
+    var id = $('cancel_upload').get('rel');
+    
+    parent.sfImageChooser[id].resizeIframe(); // resize on load of content
+    
+    $('cancel_upload').addEvent('click', function(e) 
+    {
       parent.sfImageChooser[id].closeIframe();
     });
   }
