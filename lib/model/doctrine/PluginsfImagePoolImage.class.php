@@ -189,4 +189,20 @@ abstract class PluginsfImagePoolImage extends BasesfImagePoolImage
     
     return $i;
   }
+  
+  public function getFilesize()
+  {
+    if(!$this->hasMappedValue('size_on_disk'))
+    {
+      $sizes  = array('Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
+      $path   = array( sfConfig::get('sf_web_dir'), sfConfig::get('app_sf_image_pool_folder'), $this['filename'] );
+      $path   = implode(DIRECTORY_SEPARATOR, $path);
+      $size   = filesize($path);
+      $s      = (round($size/pow(1024, ($i = floor(log($size, 1024)))), 2) . ' ' . $sizes[$i]);
+
+      $this->mapValue('size_on_disk',$s);
+    }
+
+    return $this['size_on_disk'];
+  }
 }

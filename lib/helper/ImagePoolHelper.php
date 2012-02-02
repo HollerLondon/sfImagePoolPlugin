@@ -132,7 +132,7 @@ function _sf_image_pool_build_attrs($invoker, $dimensions, $method, $attributes 
 /**
  * Get the URL for the original uploaded file
  **/
-function pool_image_source_uri($image,$absolute)
+function pool_image_source_uri($image,$absolute = false)
 {
   return _compute_public_path($image['filename'],sfConfig::get('app_sf_image_pool_folder','image-pool'),$absolute,false);
 }
@@ -225,7 +225,7 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
   }
   else
   {
-    $url = url_for(sprintf('@image?width=%s&height=%s&filename=%s&method=%s', $width, $height, $image['filename'], $method), $absolute);
+    $url = url_for(sprintf('@image?width=%s&height=%s&filename=%s&method=%s',$width, $height, $image['filename'], $method), $absolute);
   }
 
   // Do we want to remove the controller filename? It's good to have this option independent of the global Symfony
