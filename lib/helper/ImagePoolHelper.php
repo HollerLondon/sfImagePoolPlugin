@@ -148,14 +148,14 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
   // remove Symfony escaping if applied
   if ($image instanceof sfOutputEscaper)
   {
-      $image = $image->getRawValue();
+    $image = $image->getRawValue();
   }
   
   $offsite = false;
   
-  if($dimensions == 'original')
+  if ($dimensions == 'original')
   {
-    return pool_image_source_uri($image,$absolute);
+    return pool_image_source_uri($image, $absolute);
   }
   
   if (is_array($dimensions))
@@ -166,13 +166,13 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
   // parse dimensions string for width and height
   else if (strpos(strtolower($dimensions), 'x') !== false)
   {
-      list($width, $height) = explode('x', $dimensions);
+    list($width, $height) = explode('x', $dimensions);
   }
   // set width and height to the same as $dimensions default
   // this *might* need changing if it produces inaccurate results with 'scale'
   else
   {
-      $height = $width = $dimensions;
+    $height = $width = $dimensions;
   }
   
   $cache_options = sfConfig::get('app_sf_image_pool_cache');
@@ -232,6 +232,9 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
   else
   {
     $filename = $image instanceof sfImagePoolImage ? $image['filename'] : $image;
+    
+    if (!$filename) return false; // no image, no filename
+    
     $url = url_for(sprintf('@image?width=%s&height=%s&filename=%s&method=%s',$width, $height, $filename, $method), $absolute);
   }
 
