@@ -134,6 +134,11 @@ function _sf_image_pool_build_attrs($invoker, $dimensions, $method, $attributes 
  **/
 function pool_image_source_uri($image,$absolute = false)
 {
+  if($image instanceof sfOutputEscaper)
+  {
+    $image = $image->getRawValue();
+  }
+  
   $filename = $image instanceof sfImagePoolImage ? $image['filename'] : $image;
   return _compute_public_path($filename,sfConfig::get('app_sf_image_pool_folder','image-pool'),$absolute,false);
 }
