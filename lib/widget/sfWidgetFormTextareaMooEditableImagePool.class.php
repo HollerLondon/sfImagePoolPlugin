@@ -27,6 +27,7 @@ class sfWidgetFormTextareaMooEditableImagePool extends sfWidgetFormTextareaMooEd
     $this->addOption('image_tag', '');
     $this->addOption('image_width', null);
     $this->addOption('image_height', null);
+    $this->addOption('image_callback_id', '');
     
     if (!function_exists('url_for')) 
     {
@@ -34,9 +35,10 @@ class sfWidgetFormTextareaMooEditableImagePool extends sfWidgetFormTextareaMooEd
     }
     
     // Set defaults
-    if (!isset($options['image_tag']))    $options['image_tag']     = '';
-    if (!isset($options['image_width']))  $options['image_width']   = '';
-    if (!isset($options['image_height'])) $options['image_height']  = '';
+    if (!isset($options['image_tag']))    $options['image_tag']     = '';  // Filter images
+    if (!isset($options['image_callback_id'])) $options['image_callback_id'] = '';  // Selection of image in the editable also populate an image chooser
+    if (!isset($options['image_width']))  $options['image_width']   = '';  // Set default
+    if (!isset($options['image_height'])) $options['image_height']  = '';  // Set default
     if (!isset($options['extratoolbar'])) $options['extratoolbar']  = sfConfig::get('app_mooeditable_default_extra_toolbar');
     if (!isset($options['config']))       $options['config']        = sfConfig::get('app_mooeditable_default_config');
     
@@ -45,11 +47,12 @@ class sfWidgetFormTextareaMooEditableImagePool extends sfWidgetFormTextareaMooEd
     
     $options['config']       = sprintf(
           "%s
-          chooserUrl:  '%s', imageFolder: '%s', imageClass: 'image-pool', defaultWidth: '%s', defaultHeight: '%s'",
+          chooserUrl: '%s', imageFolder: '%s', imageClass: 'image-pool', defaultWidth: '%s', defaultHeight: '%s', callbackId: '%s'",
           $options['config'],
           url_for('sf_image_pool_chooser', array('tag'=>$options['image_tag'])), sfConfig::get('app_sf_image_pool_folder'),
           $options['image_width'],
-          $options['image_height']
+          $options['image_height'],
+          $options['image_callback_id']
         );
       
     parent::configure($options, $attributes);

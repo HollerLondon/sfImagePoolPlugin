@@ -38,18 +38,19 @@ MooEditable.UI.ImagePoolDialog = function(editor)
   // Select image - NOTE: must pass through URL in MooEditable config - see sfImagePoolUtil
   var  html = '<label class="dialog-label">Choose an image from the image pool *<br /><br />' +
             '<span class="selected-image"></span>' +
-            '<button class="dialog-button image-pool-select" href="' + editor.options.chooserUrl + '">browse images</button><input type="hidden" class="image-url" />' +
+            '<button class="dialog-button image-pool-select" href="' + editor.options.chooserUrl + '">browse images</button>' +
+            '<input type="hidden" class="image-url" /><input type="hidden" class="image-id" />' +
          '</label>';
   
   // Add image options
-  html += '<br class="clear" /><br /><label class="dialog-label">width * <input type="text" class="image-width" value="" style="width:50px !important;" />px</label>';
+  html += '<br /><br /><label class="dialog-label">width * <input type="text" class="image-width" value="" style="width:50px !important;" />px</label>';
   html += '<label class="dialog-label">&nbsp;x height <input type="text" class="image-height" value="" style="width:50px !important;" />px</label>';
-  html += '<br class="clear" /><br /><label class="dialog-label">crop image? <input type="checkbox" class="image-crop" value="yes" /> (by default will be scaled)</label>';
-  html += '<br class="clear" /><br /><label class="dialog-label">alt text <input type="text" class="image-alt" value="" /></label>';
+  html += '<br /><br /><label class="dialog-label">crop image? <input type="checkbox" class="image-crop" value="yes" /> (by default will be scaled)</label>';
+  html += '<br /><br /><label class="dialog-label">alt text <input type="text" class="image-alt" value="" /></label>';
  
   
   // Add buttons
-  html += '<br class="clear" /><br /><button class="dialog-button dialog-ok-button">' + MooEditable.Locale.get('ok') + '</button>'
+  html += '<br /><br /><button class="dialog-button dialog-ok-button">' + MooEditable.Locale.get('ok') + '</button>'
   + '<button class="dialog-button dialog-cancel-button">' + MooEditable.Locale.get('cancel') + '</button>';
   
   return new MooEditable.UI.Dialog(html, 
@@ -77,7 +78,7 @@ MooEditable.UI.ImagePoolDialog = function(editor)
         if (!$('image-pool-editable')) 
         {
           var imageChooserDiv = new Element('div', { id: 'image-pool-editable' });
-          var thumbnailsContainerDiv = new Element('div', { 'class': 'thumbnailsContainer' }); // to match other iamge chooser
+          var thumbnailsContainerDiv = new Element('div', { 'class': 'thumbnailsContainer' }); // to match other image chooser
           imageChooserDiv.adopt(thumbnailsContainerDiv);
           
           $(editorId).getElement('iframe').grab(imageChooserDiv, 'after');
@@ -99,33 +100,34 @@ MooEditable.UI.ImagePoolDialog = function(editor)
           'update':     thumbnailsContainer,
           'onSuccess':  function () 
           {
-            sfImageChooser['image-pool-editable'] = new ImageChooser($('image-pool-editable'), 
-              {
-                onSuccessEvent: function () 
-                { 
-                  MooEditable.Actions.imagepool.createClose(); 
-                },
-                imageOnClickEvent: function (e) 
-                  { 
-                    var self = this;
-                    var el   = e.target;
-                  
-                    var selectedFilename  = el.get('title');
-                    var selectedAlt       = el.get('alt');
-            
-                    $('image-pool-editable').dissolve();
-                    
-                    // Set the hidden input in the current editor
-                    $(editorId).getElement('.image-url').set('value', selectedFilename);
-                    $(editorId).getElement('.image-alt').set('value', selectedAlt);
-                    
-                    // Show the selected image
-                    $(editorId).getElement('.image-pool-select').set('html', 'change image');
-                    $(editorId).getElement('.selected-image').empty();
-                    $(editorId).getElement('.selected-image').adopt(el);
-                  }
+            sfImageChooser[editorId] = new ImageChooser($('image-pool-editable'), 
+            {
+              onSuccessEvent: function () 
+              { 
+                MooEditable.Actions.imagepool.createClose(); 
+              },
+              imageOnClickEvent: function (e) 
+              { 
+                var self = this;
+                var el   = e.target;
+                
+                var selectedFilename  = el.get('title');
+                var selectedAlt       = el.get('alt');
+                var selectedId        = el.get('rel');
+        
+                $('image-pool-editable').dissolve();
+                
+                // Set the hidden input in the current editor
+                $(editorId).getElement('.image-url').set('value', selectedFilename);
+                $(editorId).getElement('.image-id').set('value', selectedId);
+                $(editorId).getElement('.image-alt').set('value', selectedAlt);
+                
+                // Show the selected image
+                $(editorId).getElement('.image-pool-select').set('html', 'change image');
+                $(editorId).getElement('.selected-image').empty();
+                $(editorId).getElement('.selected-image').adopt(el);
               }
-            );
+            });
           },
           'onRequest':  function () 
           {
@@ -158,6 +160,15 @@ MooEditable.UI.ImagePoolDialog = function(editor)
         }
         else 
         {
+          // Callback
+          // e.g: callbackId: 'blog_post_sf_image_pool_ids' (id of image chooser to populate)
+          if (editor.options.callbackId && '' != editor.options.callbackId) 
+          {
+            var imageEl = this.el.getElement('.selected-image img');
+            
+            sfImageChooser[editor.options.callbackId].addItem(imageEl);
+          }
+          
           this.close();
           
           var imageHeight = this.el.getElement('.image-height').value;
@@ -167,6 +178,7 @@ MooEditable.UI.ImagePoolDialog = function(editor)
           {
             imageHeight = imageWidth;
           }
+          
           var imageMethod = (this.el.getElement('.image-crop').checked ? 'crop' : 'scale');
           var imageAlt = this.el.getElement('.image-alt').value;
 
@@ -218,6 +230,7 @@ MooEditable.Actions.imagepool =
   {
     e.getElement('.image-width').set('value','');
     e.getElement('.image-url').set('value','');
+    e.getElement('.image-id').set('value','');
     e.getElement('.image-alt').set('value','');
     e.getElement('.image-height').set('value','');
     e.getElement('.image-crop').set('checked',false);
