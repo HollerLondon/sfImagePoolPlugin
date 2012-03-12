@@ -117,6 +117,22 @@ var ImageChooser = new Class(
     var self    = this;
     var el      = e.target;
     
+    if (!self.multiple)
+    {
+      self.hidden = true;
+      self.thumbnailsContainer.dissolve();
+      self.imageChooser.getElement('.'+self.options.toggleClass).set('html', 'Show Images');
+    }
+    
+    // Add item
+    return self.addItem(el);
+  },
+  
+  addItem: function (el)
+  {
+    var selectedId, im, input;
+    var self    = this;
+    
     selectedId = el.get('rel');
     
     if (self.selectedImage.getElement('input[value='+selectedId+']'))
@@ -135,37 +151,23 @@ var ImageChooser = new Class(
       }
     });
     
+    input = new Element('input',
+    {
+      'type':         'hidden',
+      'value':        selectedId,
+      'name':         self.selectedImageInput.get('name')
+    });
+    
     if (!self.multiple)
     {
       self.selectedImage.empty();
-      self.hidden = true;
-      self.thumbnailsContainer.dissolve();
       
-      self.imageChooser.getElement('.'+self.options.toggleClass).set('html', 'Show Images');
-    
       self.selectedImage.adopt(im);
-      
-      input = new Element('input',
-      {
-        'type':         'hidden',
-        'value':        selectedId,
-        'name':         self.selectedImageInput.get('name')
-      });
-      
       self.selectedImage.adopt(input);
-      self.selectedImage.reveal();
     }
     else
     {
       self.selectedImage.adopt(im);
-      
-      input = new Element('input',
-      {
-        'type':         'hidden',
-        'value':        selectedId,
-        'name':         self.selectedImageInput.get('name')
-      });
-      
       self.selectedImage.adopt(input);
     }
   },

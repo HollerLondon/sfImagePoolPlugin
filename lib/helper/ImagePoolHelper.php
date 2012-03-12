@@ -134,7 +134,13 @@ function _sf_image_pool_build_attrs($invoker, $dimensions, $method, $attributes 
  **/
 function pool_image_source_uri($image,$absolute = false)
 {
-  return _compute_public_path($image['filename'],sfConfig::get('app_sf_image_pool_folder','image-pool'),$absolute,false);
+  if($image instanceof sfOutputEscaper)
+  {
+    $image = $image->getRawValue();
+  }
+  
+  $filename = $image instanceof sfImagePoolImage ? $image['filename'] : $image;
+  return _compute_public_path($filename,sfConfig::get('app_sf_image_pool_folder','image-pool'),$absolute,false);
 }
 
 function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute = false)
@@ -142,14 +148,14 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
   // remove Symfony escaping if applied
   if ($image instanceof sfOutputEscaper)
   {
-      $image = $image->getRawValue();
+    $image = $image->getRawValue();
   }
   
   $offsite = false;
   
-  if($dimensions == 'original')
+  if ($dimensions == 'original')
   {
-    return pool_image_source_uri($image,$absolute);
+    return pool_image_source_uri($image, $absolute);
   }
   
   if (is_array($dimensions))
@@ -160,13 +166,13 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
   // parse dimensions string for width and height
   else if (strpos(strtolower($dimensions), 'x') !== false)
   {
-      list($width, $height) = explode('x', $dimensions);
+    list($width, $height) = explode('x', $dimensions);
   }
   // set width and height to the same as $dimensions default
   // this *might* need changing if it produces inaccurate results with 'scale'
   else
   {
-      $height = $width = $dimensions;
+    $height = $width = $dimensions;
   }
   
   $cache_options = sfConfig::get('app_sf_image_pool_cache');
@@ -196,7 +202,7 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
   }
   
   // If we have an empty sfImagePool instance (ie. no image) then output a placeholder if set in config to do so
-  if (!$image['filename'])
+  if ($image instanceof sfImagePoolImage && !$image['filename'])
   {
     if (sfConfig::get('app_sf_image_pool_placeholders', false))
     {
@@ -225,7 +231,11 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
   }
   else
   {
-    $url = url_for(sprintf('@image?width=%s&height=%s&filename=%s&method=%s',$width, $height, $image['filename'], $method), $absolute);
+    $filename = $image instanceof sfImagePoolImage ? $image['filename'] : $image;
+    
+    if (!$filename) return false; // no image, no filename
+    
+    $url = url_for(sprintf('@image?width=%s&height=%s&filename=%s&method=%s',$width, $height, $filename, $method), $absolute);
   }
 
   // Do we want to remove the controller filename? It's good to have this option independent of the global Symfony
