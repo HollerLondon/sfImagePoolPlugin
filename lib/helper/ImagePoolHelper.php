@@ -13,17 +13,17 @@
 function pool_image_tag($invoker, $dimensions = 200, $options = 'crop', $attributes = array(), $absolute = false)
 {
   if(is_null($invoker)) return;
-  
+
   // remove Symfony escaping if applied
   if ($invoker instanceof sfOutputEscaper)
   {
-      $invoker = $invoker->getRawValue();
+    $invoker = $invoker->getRawValue();
   }
-  
+
   // attempt to fetch associated sfImagePoolImage
   $image = ($invoker instanceof sfImagePoolImage)
-      ? $invoker
-      : $invoker->getFeaturedImage();
+    ? $invoker
+    : $invoker->getFeaturedImage();
 
   if (is_array($dimensions))
   {
@@ -41,7 +41,7 @@ function pool_image_tag($invoker, $dimensions = 200, $options = 'crop', $attribu
   {
     $h = $w = $dimensions;
   }
-  
+
   if(is_array($options))
   {
     $method = array_key_exists('method',$options) ? $options['method'] : 'crop';
@@ -53,11 +53,11 @@ function pool_image_tag($invoker, $dimensions = 200, $options = 'crop', $attribu
   }
 
   $pool_image_uri = pool_image_uri($image,array($w,$h),$method,$absolute);
-  
+
   $options['require_size'] = array_key_exists('require_size',$options)
     ? $options['require_size']
     : sfConfig::get('app_sf_image_pool_require_size', true);
-  
+
   // We need the actual image dimensions so the space is correct on the page
   if ($image && array_key_exists('require_size',$options) && true == $options['require_size'])
   {
@@ -72,9 +72,9 @@ function pool_image_tag($invoker, $dimensions = 200, $options = 'crop', $attribu
       $attributes['height'] = $h;
     }
   }
-  
+
   $attributes = _sf_image_pool_build_attrs($image, $options['require_size'] ? array($w,$h) : false, $method, $attributes);
-  
+
   return image_tag($pool_image_uri,$attributes);
 }
 
@@ -90,7 +90,7 @@ function _sf_image_pool_build_attrs($invoker, $dimensions, $method, $attributes 
   // parse dimensions string for width and height
   else if (strpos(strtolower($dimensions), 'x') !== false)
   {
-      list($w, $h) = explode('x', $dimensions);
+    list($w, $h) = explode('x', $dimensions);
   }
   // set width and height to the same as $dimensions default
   // this *might* need changing if it produces inaccurate results with 'scale'
@@ -104,12 +104,12 @@ function _sf_image_pool_build_attrs($invoker, $dimensions, $method, $attributes 
   {
     $attributes['alt'] = $invoker['caption'];
   }
-  
+
   // set title tag if not already set.
   // ONLY in the backend - if image's caption is empty, use original filename.
   if (!isset($attributes['title']))
   {
-    if ('backend' == sfConfig::get('sf_app')) 
+    if ('backend' == sfConfig::get('sf_app'))
     {
       $attributes['title'] = $invoker['original_filename'];
     }
@@ -138,7 +138,7 @@ function pool_image_source_uri($image,$absolute = false)
   {
     $image = $image->getRawValue();
   }
-  
+
   $filename = $image instanceof sfImagePoolImage ? $image['filename'] : $image;
   return _compute_public_path($filename,sfConfig::get('app_sf_image_pool_folder','image-pool'),$absolute,false);
 }
@@ -150,14 +150,14 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
   {
     $image = $image->getRawValue();
   }
-  
+
   $offsite = false;
-  
+
   if ($dimensions == 'original')
   {
     return pool_image_source_uri($image, $absolute);
   }
-  
+
   if (is_array($dimensions))
   {
     $width  = $dimensions[0];
@@ -174,33 +174,33 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
   {
     $height = $width = $dimensions;
   }
-  
+
   $cache_options = sfConfig::get('app_sf_image_pool_cache');
   $class = $cache_options['class'];
-  
+
   // If we are on a secure page we want to use the ssl option to avoid security warnings
   $ssl = sfContext::getInstance()->getRequest()->isSecure();
   $off_site_index = ($ssl ? 'off_site_ssl_uri' : 'off_site_uri');
 
   // If remote and remote uri set, plus image exists
-  if ($class::IS_REMOTE && !empty($cache_options[$off_site_index]) && $image) 
+  if ($class::IS_REMOTE && !empty($cache_options[$off_site_index]) && $image)
   {
     // check whether crop exists - if it doesn't business as usual
     $is_crop = ('crop' == $method);
     $crop = sfImagePoolCropTable::getInstance()->findCrop($image, $width, $height, $is_crop, $class::CROP_IDENTIFIER);
-    
+
     if ($crop)
     {
       $absolute = false;
       $offsite = true;
     }
   }
-  
+
   if (!function_exists('url_for'))
   {
     sfApplicationConfiguration::getActive()->loadHelpers(array('Url'));
   }
-  
+
   // If we have an empty sfImagePool instance (ie. no image) then output a placeholder if set in config to do so
   if ($image instanceof sfImagePoolImage && !$image['filename'])
   {
@@ -217,7 +217,7 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
         {
           $is_crop = ('crop' == $method);
           $crop = sfImagePoolCropTable::getInstance()->findCrop(sfImagePoolImage::DEFAULT_FILENAME, $width, $height, $is_crop, $class::CROP_IDENTIFIER);
-          
+
           if ($crop)
           {
             $absolute = false;
@@ -232,9 +232,25 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
   else
   {
     $filename = $image instanceof sfImagePoolImage ? $image['filename'] : $image;
-    
-    if (!$filename) return false; // no image, no filename
-    
+
+    // No image associated with this object, use placehold.it instead?
+    if(!$filename && sfConfig::get('app_sf_image_pool_use_placeholdit', false))
+    {
+      return sprintf('http://placehold.it/%ux%u&text=%s',$width, $height, urlencode(sfConfig::get('app_sf_image_pool_placeholdit_text', $width.'x'.$height)));
+    }
+
+    // Or, if not placehold.it and placeholders is enabled, let's spit one out.
+    elseif(!$filename && sfConfig::get('app_sf_image_pool_placeholders', true))
+    {
+      $filename = 'placeholder.jpg';
+    }
+
+    // but if placeholders isn't switched on then output nothing.
+    elseif(!$filename)
+    {
+      return false;
+    }
+
     $url = url_for(sprintf('@image?width=%s&height=%s&filename=%s&method=%s',$width, $height, $filename, $method), $absolute);
   }
 
@@ -244,13 +260,13 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
   {
     $url = preg_replace('%\w+(_dev)?\.php/%', '', $url);
   }
-  
-  // If offsite - then replace local image-pool folder with offsite URL (naming convention for offsite should mirror 
+
+  // If offsite - then replace local image-pool folder with offsite URL (naming convention for offsite should mirror
   // folder structure for local)
   if ($offsite)
   {
     $url = str_replace(sfImagePoolPluginConfiguration::getBaseUrl(), $cache_options[$off_site_index], $url);
   }
-  
+
   return $url;
 }
