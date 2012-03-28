@@ -232,8 +232,18 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
   else
   {
     $filename = $image instanceof sfImagePoolImage ? $image['filename'] : $image;
-    
-    if (!$filename) return false; // no image, no filename
+
+    // if there's no filename, it means there isn't actually an image associated
+    // at all. if placeholders is enabled, let's spit one out.
+    if(!$filename && sfConfig::get('app_sf_image_pool_placeholders', true))
+    {
+      $filename = 'placeholder.jpg';
+    }
+    // but if placeholders isn't switched on then output nothing.
+    elseif(!$filename)
+    {
+      return false;
+    }
     
     $url = url_for(sprintf('@image?width=%s&height=%s&filename=%s&method=%s',$width, $height, $filename, $method), $absolute);
   }
