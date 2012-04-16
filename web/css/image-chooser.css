@@ -10,9 +10,14 @@ div.thumbnailsContainer
     display:              none;
 }
 
+div.thumbnailsContainer .pool-image {
+  overflow:             hidden;
+  width:                102px;
+  float:                left;
+}
+
 div.thumbnailsContainer label img
 {
-	  float:                left !important;
 	  border:               1px solid #fff;
     /* background:           transparent url('/sfImagePoolPlugin/images/loader.gif') no-repeat center center; */
 }
@@ -106,5 +111,9 @@ body#iframe div#sf_admin_container ul.sf_admin_actions {
 }
 
 iframe {
+  border: none;
+}
+
+#iframe #content {
   border: none;
 }
