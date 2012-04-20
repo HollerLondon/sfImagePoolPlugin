@@ -42,7 +42,7 @@ Optional Dependencies
 
 If using SVN you will need to add these dependancies as `svn:externals` in the project's `lib/vendor` folder
 
-    rackspace            https://svn.github.com/rackspace/php-cloudfiles.git
+    rackspace            https://github.com/rackspace/php-cloudfiles.git/trunk
 
 You will then need to autoload these files in the application's `config/autoload.yml`
 
