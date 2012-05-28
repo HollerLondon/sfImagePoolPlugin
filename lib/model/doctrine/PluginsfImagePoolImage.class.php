@@ -108,10 +108,9 @@ abstract class PluginsfImagePoolImage extends BasesfImagePoolImage
    */
   public function getPathToOriginalFile()
   {
-    return implode(DIRECTORY_SEPARATOR, array(
-        sfImagePoolPluginConfiguration::getBaseDir(),
-        $this['filename']
-    ));
+    $cache = sfImagePoolCache::getInstance($this);
+    
+    return $cache->getPathToOriginalFile();
   }
   
   /**

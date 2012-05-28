@@ -59,26 +59,21 @@ abstract class PluginsfImagePoolImageForm extends BasesfImagePoolImageForm
   }
   
   /**
-   * Deal with returning the 'image' field to contain a string, and not
-   * an sfValidatedFile object, which Doctrine turns its nose up at.
+   * Get extra info if has file (and delete old one if exists)
+   * 
+   * @return array
    */
   public function updateObject($values = null)
   {
     // if a new file is uploaded
     if ($file = $this->getValue('filename'))
     {
-      $previous_filename = $this->getObject()->getFilename();
+      if ($previous_filename = $this->getObject()->getFilename()) $this->deleteCached($previous_filename, $this->getObject());
       
-      $this->deleteCached($previous_filename, $this->getObject());
-      
-      $object = parent::updateObject($values);              
+      $object = parent::updateObject($values);
       
       $object['original_filename'] = $file->getOriginalName();
-      $object['filename']          = basename($file->getSavedName());
       $object['mime_type']         = $file->getType();
-      $object['title']             = $this->getValue('title');
-      $object['caption']           = $this->getValue('caption');
-      $object['credit']            = $this->getValue('credit');
     }
     else
     {
@@ -87,6 +82,37 @@ abstract class PluginsfImagePoolImageForm extends BasesfImagePoolImageForm
     
     return $object;
   }    
+  
+  /**
+   * Deal with returning the 'image' field to contain a string, and not
+   * an sfValidatedFile object, which Doctrine turns its nose up at.
+   * 
+   * @param string $field
+   * @param string $filename
+   * @param sfValidatedFile $file
+   * @return string
+   */
+  public function saveFile($field, $filename = null, sfValidatedFile $file = null)
+  {
+    if (!$this->validatorSchema[$field] instanceof sfValidatorFile)
+    {
+      throw new LogicException(sprintf('You cannot save the current file for field "%s" as the field is not a file.', $field));
+    }
+
+    if (is_null($file))     $file = $this->getValue($field);
+    if (is_null($filename)) $filename = $file->generateFilename();
+    
+    // Process file
+    $cache  = sfImagePoolCache::getInstance($this->getObject(), array(), array());
+      
+    $file->save($cache->getDestination($filename));
+    
+    // don't redirect - but commit file
+    $cache->commitOriginal($filename, false);
+    
+    // Return $filename;
+    return basename($file->getSavedName());
+  }
   
   /**
    * Return path to folder where originals are stored.

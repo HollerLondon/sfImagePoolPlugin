@@ -86,14 +86,38 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
     return $this->container;
   }
 
-  public function getDestination()
+  public function getDestination($filename = null)
   {
+    if (is_null($filename))
+    {
+      $filename = ($this->resizer_options['scale'] ? 'scale' : 'crop') . '_' . 
+                  $this->resizer_options['width']  . '_' . 
+                  $this->resizer_options['height'] . '_' . 
+                  $this->image['filename'];
+    }
+    
     // Store in temp directory
-    return sys_get_temp_dir() . DIRECTORY_SEPARATOR . 
-                                  ($this->resizer_options['scale'] ? 'scale' : 'crop') . '_' . 
-                                  $this->resizer_options['width']  . '_' . 
-                                  $this->resizer_options['height'] . '_' . 
-                                  $this->image['filename'];
+    return sys_get_temp_dir() . DIRECTORY_SEPARATOR . $filename;
+  }
+  
+  public function getPathToOriginalFile()
+  {
+    $object_name = $this->getCloudName($this->image['filename']);
+      
+    $ssl = sfContext::getInstance()->getRequest()->isSecure();
+    $off_site_index = ($ssl ? 'off_site_ssl_uri' : 'off_site_uri');
+    
+    $url = $this->options[$off_site_index] . DIRECTORY_SEPARATOR . $object_name;
+    
+    // Save to tmp dir and return
+    $tmpLocation = $this->getDestination($this->image['filename']);
+    
+    if (file_exists($tmpLocation)) return $tmpLocation;
+    else
+    {
+      // Download file and save in tmp dir??????
+      // If for get_image_size should return $url TODO
+    }
   }
   
   /**
@@ -102,16 +126,20 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
    * @author Jo Carter
    * @param array $resizer_options  Allows overriding of the width, height, scaling options
    */
-  public function getCloudName($resizer_options = array())
+  public function getCloudName($resizer_options = array(), $filename = null)
   {
     $resizer_options = array_merge($this->resizer_options, $resizer_options);
     
-    $object_name = implode('/', array(
-        ($resizer_options['scale'] ? 'scale' : 'crop'),
-        $resizer_options['width'],
-        $resizer_options['height'],
-        $this->image['filename']
-    ));
+    if (is_null($filename))
+    {
+      $object_name = implode('/', array(
+          ($resizer_options['scale'] ? 'scale' : 'crop'),
+          $resizer_options['width'],
+          $resizer_options['height'],
+          $this->image['filename']
+      ));
+    }
+    else $object_name = $filename;
     
     return $object_name;
   }
@@ -163,6 +191,35 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
       if ($e->getPortableCode() != Doctrine_Core::ERR_ALREADY_EXISTS) throw $e;
     }
     
+    if ($redirect)
+    {
+      sfContext::getInstance()->getController()->redirect($url, 0, 301);
+    }
+    else
+    {
+      return $url;
+    }
+  }
+  
+  public function commitOriginal($filename, $redirect = true)
+  {
+    // save to cloud
+    $object_name = $this->getCloudName(array(), $filename);
+    $container   = $this->getContainer();
+    
+    $this->object = $container->create_object($object_name);
+    $this->object->load_from_filename($this->getDestination($filename)); 
+    
+    // clean up temp file
+    unlink($this->getDestination($filename));
+    
+    // controller redirect 301 to cdn
+    // If we are on a secure page we want to use the ssl option to avoid security warnings
+    $ssl = sfContext::getInstance()->getRequest()->isSecure();
+    $off_site_index = ($ssl ? 'off_site_ssl_uri' : 'off_site_uri');
+  
+    $url = $this->options[$off_site_index] . DIRECTORY_SEPARATOR . $object_name;
+
     if ($redirect)
     {
       sfContext::getInstance()->getController()->redirect($url, 0, 301);
