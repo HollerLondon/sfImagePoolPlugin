@@ -228,12 +228,22 @@ class sfImagePoolUtil
     return $object;
   }   
   
-  static public function calculateWidthAndHeight(sfImagePoolImage $image,$w, $h)
+  /**
+   * Calculate the width and height of a scaled image
+   * 
+   * @param sfImagePoolImage $image
+   * @param int $w
+   * @param int $h
+   * @return array
+   */
+  static public function calculateWidthAndHeight(sfImagePoolImage $image, $w, $h)
   {
-    $sfthumb  = new sfThumbnail($w, $h, true, sfConfig::get('app_sf_image_pool_inflate',true));
-    $sfthumb->loadFile($image->getPathToOriginalFile());
-    $response = array($sfthumb->getThumbWidth(),$sfthumb->getThumbHeight());
-    unset($sfthumb);
+    $sfThumb  = new sfThumbnail($w, $h, true, sfConfig::get('app_sf_image_pool_inflate', true));
+    $sfThumb->loadFile($image->getPathToOriginalFile());
+    $response = array($sfThumb->getThumbWidth(), $sfThumb->getThumbHeight());
+    
+    unset($sfThumb);
+    
     return $response;
   }
   
