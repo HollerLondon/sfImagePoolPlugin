@@ -68,12 +68,16 @@ abstract class PluginsfImagePoolImageForm extends BasesfImagePoolImageForm
     // if a new file is uploaded
     if ($file = $this->getValue('filename'))
     {
-      if ($previous_filename = $this->getObject()->getFilename()) $this->deleteCached($previous_filename, $this->getObject());
+      if ($previous_filename = $this->getObject()->getFilename()) 
+      {
+      	$this->deleteCached($previous_filename, $this->getObject());
+      }
       
       $object = parent::updateObject($values);
       
       $object['original_filename'] = $file->getOriginalName();
       $object['mime_type']         = $file->getType();
+      list($object['original_width'], $object['original_height']) = getimagesize($file->getTempName());
     }
     else
     {

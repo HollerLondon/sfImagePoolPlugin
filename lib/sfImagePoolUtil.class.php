@@ -239,7 +239,25 @@ class sfImagePoolUtil
   static public function calculateWidthAndHeight(sfImagePoolImage $image, $w, $h)
   {
     $sfThumb  = new sfThumbnail($w, $h, true, sfConfig::get('app_sf_image_pool_inflate', true));
-    $sfThumb->loadFile($image->getPathToOriginalFile());
+    $loadFile = true;
+    
+    // Because it's not ideal loading the file each time, especially if stored on the cloud
+    // there's a upgrade with width/ height in the image pool table.
+    // But code won't break if not migrated.
+    if ($image->getTable()->hasColumn('original_width'))
+    {
+    	if (!$image->original_width)
+    	{
+    		list($image->original_width, $image->original_height) = getimagesize($image->getPathToOriginalFile());
+    		$image->save();
+    	}
+    	
+    	$sfThumb->initThumb($image->original_width, $image->original_height, $w, $h, true, sfConfig::get('app_sf_image_pool_inflate', true));
+    	$loadFile = false;
+    }
+    
+    if ($loadFile) $sfThumb->loadFile($image->getPathToOriginalFile());
+    
     $response = array($sfThumb->getThumbWidth(), $sfThumb->getThumbHeight());
     
     unset($sfThumb);

@@ -266,7 +266,7 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
   }
   
   /**
-   * Delete image pool crop from cloud
+   * Delete image pool from cloud
    * 
    * @param sfImagePoolCrop $crop
    */
@@ -274,15 +274,27 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
   {
     parent::delete($crop);
     
-    // Then deal with stuff on the edge - delete crop from edge
+    $container   = $this->getContainer();
+    
+    // Delete original from the cloud
+		try 
+		{
+			$object_name = $this->getCloudName(array(), $this->image->filename);
+			$container->delete_object($object_name);
+		}
+		catch (NoSuchObjectException $e)
+		{
+			// Image already deleted from cloud - that's ok
+		}
+    
+    // Then delete thumbnails from cloud
     if ($crop)
     {
-      $resizer_options = array('width'=>$crop->width, 'height'=>$crop->height, 'scale'=>(!$crop->is_crop));
-      $object_name = $this->getCloudName($resizer_options);
-      
       try 
       {
-        $this->container->delete_object($object_name);
+      	$resizer_options = array('width'=>$crop->width, 'height'=>$crop->height, 'scale'=>(!$crop->is_crop));
+      	$object_name = $this->getCloudName($resizer_options);
+        $container->delete_object($object_name);
       }
       catch (NoSuchObjectException $e)
       {
