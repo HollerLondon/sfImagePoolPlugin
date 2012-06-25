@@ -23,11 +23,9 @@ class sfImagePoolFilesystemCache extends sfImagePoolCache implements sfImagePool
     // If crop
     if (is_null($filename))
     {
-      $imagePath += array(
-          ($this->resizer_options['scale'] ? 'scale' : 'crop'),
-          $this->resizer_options['width'],
-          $this->resizer_options['height'],
-      ));
+      $imagePath = array_merge($imagePath, array(($this->resizer_options['scale'] ? 'scale' : 'crop'),
+																			           $this->resizer_options['width'],
+																			           $this->resizer_options['height']));
       
       $filename = $this->image['filename'];
     }
@@ -73,9 +71,12 @@ class sfImagePoolFilesystemCache extends sfImagePoolCache implements sfImagePool
     {
       try
       {
-        // @TODO: NOTE: There may be a better way to do this - but php should use memory mapping here
-        // @TODO - do a redirect to the file on filesystem
-        return file_get_contents($this->getDestination());
+        // Do a redirect to the file on filesystem - don't load contents in - that costs memory
+        $url = str_replace(sfImagePoolPluginConfiguration::getBaseDir(), sfImagePoolPluginConfiguration::getBaseUrl(), $this->getDestination());
+        
+        sfContext::getInstance()->getController()->redirect($url, 0, 301);
+        
+        return $url;
       }
       catch (Exception $e)
       {

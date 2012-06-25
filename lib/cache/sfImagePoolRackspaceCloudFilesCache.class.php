@@ -276,17 +276,6 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
     
     $container   = $this->getContainer();
     
-    // Delete original from the cloud
-		try 
-		{
-			$object_name = $this->getCloudName(array(), $this->image->filename);
-			$container->delete_object($object_name);
-		}
-		catch (NoSuchObjectException $e)
-		{
-			// Image already deleted from cloud - that's ok
-		}
-    
     // Then delete thumbnails from cloud
     if ($crop)
     {
@@ -300,6 +289,19 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
       {
         // Image already deleted from cloud - that's ok
       }
+    }
+    else
+    {
+	    // Delete original from the cloud
+			try 
+			{
+				$object_name = $this->getCloudName(array(), $this->image->filename);
+				$container->delete_object($object_name);
+			}
+			catch (NoSuchObjectException $e)
+			{
+				// Image already deleted from cloud - that's ok
+			}
     }
   }
   

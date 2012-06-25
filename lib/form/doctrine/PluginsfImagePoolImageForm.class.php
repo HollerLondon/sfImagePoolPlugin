@@ -143,6 +143,9 @@ abstract class PluginsfImagePoolImageForm extends BasesfImagePoolImageForm
     
     if ($image)
     {
+    	$cache = sfImagePoolCache::getInstance($image, array(), array());
+    	$cache->delete();
+    	
       $crops = $image->getCrops();
       
       if (0 < $crops->count())
