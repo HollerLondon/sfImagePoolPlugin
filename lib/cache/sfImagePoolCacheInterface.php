@@ -21,10 +21,14 @@ interface sfImagePoolCacheInterface
   /**
    * Returns the destination for the given image
    *
+   * @param string $filename
    * @return string
    * @author Ben Lancaster
+   * @author Jo Carter
    **/
-  public function getDestination();
+  public function getDestination($filename = null);
+  
+  public function getPathToOriginalFile();
   
   /**
    * Defines whether or not to send caching headers in the controller

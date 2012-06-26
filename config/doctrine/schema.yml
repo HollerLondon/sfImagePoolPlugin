@@ -16,6 +16,8 @@ sfImagePoolImage:
       title:             { type: string(255) }
       caption:           { type: string }
       mime_type:         { type: string(40) }
+      original_width:    { type: integer(4) }
+      original_height:   { type: integer(4) }
     indexes:
       pool_image_filename_idx:
         fields:        [filename]

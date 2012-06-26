@@ -161,8 +161,6 @@ class sfImagePoolUtil
    * 
    * This method should be called after the call to isValid() returns true.
    * 
-   * @TODO Investigate this and add in the caching elements
-   * 
    * @return Object Form's saved and updated object. 
    */
   static public function processImageField($form, $field_name = 'image')
@@ -192,15 +190,24 @@ class sfImagePoolUtil
       
       if ($file instanceof sfValidatedFile)
       {
-        $file->save();
+        // Process file
+        $image    = new sfImagePoolImage();
+        $cache    = sfImagePoolCache::getInstance($image, array(), array());
+        $filename = $file->generateFilename();
+        
+        // Save and commit file
+        $file->save($cache->getDestination($filename));
+        $cache->commitOriginal($filename, false);
+        
         unset($form[$field_name]);
       
         $info = getimagesize($file->getSavedName());
-      
-        $image                      = new sfImagePoolImage();
+        
         $image['filename']          = basename($file->getSavedName());
         $image['original_filename'] = $file->getOriginalName();
         $image['mime_type']         = $info['mime'];
+        $image['original_width']    = $info['width'];
+        $image['original_height']   = $info['height'];
         $image['title']             = $form->getValue('title');
         $image['caption']           = $form->getValue('caption');
         
@@ -228,12 +235,40 @@ class sfImagePoolUtil
     return $object;
   }   
   
-  static public function calculateWidthAndHeight(sfImagePoolImage $image,$w, $h)
+  /**
+   * Calculate the width and height of a scaled image
+   * 
+   * @param sfImagePoolImage $image
+   * @param int $w
+   * @param int $h
+   * @return array
+   */
+  static public function calculateWidthAndHeight(sfImagePoolImage $image, $w, $h)
   {
-    $sfthumb  = new sfThumbnail($w, $h, true, sfConfig::get('app_sf_image_pool_inflate',true));
-    $sfthumb->loadFile($image->getPathToOriginalFile());
-    $response = array($sfthumb->getThumbWidth(),$sfthumb->getThumbHeight());
-    unset($sfthumb);
+    $sfThumb  = new sfThumbnail($w, $h, true, sfConfig::get('app_sf_image_pool_inflate', true));
+    $loadFile = true;
+    
+    // Because it's not ideal loading the file each time, especially if stored on the cloud
+    // there's a upgrade with width/ height in the image pool table.
+    // But code won't break if not migrated.
+    if ($image->getTable()->hasColumn('original_width'))
+    {
+      if (!$image->original_width)
+      {
+        list($image->original_width, $image->original_height) = getimagesize($image->getPathToOriginalFile());
+        $image->save();
+      }
+      
+      $sfThumb->initThumb($image->original_width, $image->original_height, $w, $h, true, sfConfig::get('app_sf_image_pool_inflate', true));
+      $loadFile = false;
+    }
+    
+    if ($loadFile) $sfThumb->loadFile($image->getPathToOriginalFile());
+    
+    $response = array($sfThumb->getThumbWidth(), $sfThumb->getThumbHeight());
+    
+    unset($sfThumb);
+    
     return $response;
   }
   
@@ -260,16 +295,25 @@ class sfImagePoolUtil
       sfImagePoolPluginConfiguration::getBaseDir()
     );
     
-    // this will generate the unique filename
-    $new_filename = $file->save();
+    // Process file
+    $image    = new sfImagePoolImage();
+    $cache    = sfImagePoolCache::getInstance($image, array(), array());
+    $filename = $file->generateFilename();
+        
+    // Save and commit file
+    $file->save($cache->getDestination($filename));
+    $cache->commitOriginal($filename, false);
+    
+    $info = getimagesize($file->getSavedName());
     
     $image_data = array(
       'original_filename' => $file->getOriginalName(),
-      'filename'          => $new_filename,
+      'filename'          => basename($file->getSavedName()),
       'mime_type'         => $file->getType(),
+    	'original_width'    => $info['width'],
+      'original_height'   => $info['height']
     );
     
-    $image = new sfImagePoolImage();
     $image->fromArray($image_data);
     
     // now set tags if they've been supplied

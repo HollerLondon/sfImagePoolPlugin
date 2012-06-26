@@ -104,42 +104,60 @@ abstract class PluginsfImagePoolImage extends BasesfImagePoolImage
   
   /**
    * Get the path to the original file
+   * 
    * @return string
    */
   public function getPathToOriginalFile()
   {
-    return implode(DIRECTORY_SEPARATOR, array(
-        sfImagePoolPluginConfiguration::getBaseDir(),
-        $this['filename']
-    ));
+    $cache = sfImagePoolCache::getInstance($this);
+    
+    return $cache->getPathToOriginalFile();
   }
   
   /**
    * Fetch the image width
+   * If doesn't have the migration - gets image size stuff
+   * 
    * @return integer 
    */
   public function getWidth()
   {
+    if ($this->getTable()->hasColumn('original_width'))
+    {
+      return $this->_get('original_width');
+    }
+    else 
+    {
       if (empty($this->imageInfo))
       {
         $this->imageInfo = getimagesize($this->getPathToOriginalFile());
       }
       
       return $this->imageInfo[0];
+    }
   }
 
   /**
    * Fetch the image height
+   * If doesn't have the migration - gets image size stuff
+   * 
    * @return integer
    */
   public function getHeight()
   {
-    if (empty($this->imageInfo))
+    if ($this->getTable()->hasColumn('original_height'))
     {
-      $this->imageInfo = getimagesize($this->getPathToOriginalFile());
+      return $this->_get('original_height');
     }
-    
-    return $this->imageInfo[1];
+    else 
+    {
+      if (empty($this->imageInfo))
+      {
+        $this->imageInfo = getimagesize($this->getPathToOriginalFile());
+      }
+      
+      return $this->imageInfo[1];
+    }
   }
 
   /**
@@ -190,17 +208,20 @@ abstract class PluginsfImagePoolImage extends BasesfImagePoolImage
     return $i;
   }
   
+  /**
+   * Get filesize of original image
+   * 
+   * @return string
+   */
   public function getFilesize()
   {
-    if(!$this->hasMappedValue('size_on_disk'))
+    if (!$this->hasMappedValue('size_on_disk'))
     {
       $sizes  = array('Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
-      $path   = array( sfConfig::get('sf_web_dir'), sfConfig::get('app_sf_image_pool_folder'), $this['filename'] );
-      $path   = implode(DIRECTORY_SEPARATOR, $path);
-      $size   = filesize($path);
+      $size   = filesize($this->getPathToOriginalFile());
       $s      = (round($size/pow(1024, ($i = floor(log($size, 1024)))), 2) . ' ' . $sizes[$i]);
 
-      $this->mapValue('size_on_disk',$s);
+      $this->mapValue('size_on_disk', $s);
     }
 
     return $this['size_on_disk'];

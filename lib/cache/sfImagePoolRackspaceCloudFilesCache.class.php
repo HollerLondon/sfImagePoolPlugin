@@ -23,7 +23,7 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
   );
   
   const CROP_IDENTIFIER = 'rackspace';
-  const IS_REMOTE      = true;
+  const IS_REMOTE				= true;
   
   public function __construct(sfImagePoolImage $image, $options = array(), $resizer_options = array())
   {
@@ -86,14 +86,56 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
     return $this->container;
   }
 
-  public function getDestination()
+  /**
+   * Return the filesystem location for the thumbnail / original
+   * file
+   * 
+   * @param string $filename Send through filename if getting original file
+   * @return string Filesystem location
+   */
+  public function getDestination($filename = null)
   {
+    if (is_null($filename))
+    {
+      $filename = ($this->resizer_options['scale'] ? 'scale' : 'crop') . '_' . 
+                  $this->resizer_options['width']  . '_' . 
+                  $this->resizer_options['height'] . '_' . 
+                  $this->image['filename'];
+    }
+    
     // Store in temp directory
-    return sys_get_temp_dir() . DIRECTORY_SEPARATOR . 
-                                  ($this->resizer_options['scale'] ? 'scale' : 'crop') . '_' . 
-                                  $this->resizer_options['width']  . '_' . 
-                                  $this->resizer_options['height'] . '_' . 
-                                  $this->image['filename'];
+    return sys_get_temp_dir() . DIRECTORY_SEPARATOR . $filename;
+  }
+  
+  /**
+   * Used to create thumbnails, this gets the original file from Rackspace
+   * and stores it in the /tmp directory
+   * 
+   * @return string File location
+   * @throws sfFileException if file can't be downloaded
+   */
+  public function getPathToOriginalFile()
+  {
+    $object_name = $this->getCloudName(array(), $this->image['filename']);
+      
+    $ssl 						= sfContext::getInstance()->getRequest()->isSecure();
+    $off_site_index = ($ssl ? 'off_site_ssl_uri' : 'off_site_uri');
+    
+    $url = $this->options[$off_site_index] . DIRECTORY_SEPARATOR . $object_name;
+    
+    // Save to tmp dir and return
+    $tmpLocation = $this->getDestination($this->image['filename']);
+    
+    if (file_exists($tmpLocation)) return $tmpLocation;
+    else
+    {
+      // Download file and save in tmp dir
+      // @TODO: This may need refactoring
+      $written = file_put_contents($tmpLocation, file_get_contents($url));
+      
+      if (false !== $written && 0 < $written) return $tmpLocation;
+      else throw new sfFileException('Could not download cloud file');
+    }
   }
   
   /**
@@ -102,20 +144,31 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
    * @author Jo Carter
    * @param array $resizer_options  Allows overriding of the width, height, scaling options
    */
-  public function getCloudName($resizer_options = array())
+  public function getCloudName($resizer_options = array(), $filename = null)
   {
     $resizer_options = array_merge($this->resizer_options, $resizer_options);
     
-    $object_name = implode('/', array(
-        ($resizer_options['scale'] ? 'scale' : 'crop'),
-        $resizer_options['width'],
-        $resizer_options['height'],
-        $this->image['filename']
-    ));
+    if (is_null($filename))
+    {
+      $object_name = implode('/', array(
+          ($resizer_options['scale'] ? 'scale' : 'crop'),
+          $resizer_options['width'],
+          $resizer_options['height'],
+          $this->image['filename']
+      ));
+    }
+    else $object_name = $filename;
     
     return $object_name;
   }
   
+  /**
+   * Commit thumbnail/ crop to cloud
+   * 
+   * @param boolean $redirect
+   * @throws Doctrine_Connection_Exception
+   * @return string url of cloud file (unless redirect is true)
+   */
   public function commit($redirect = true)
   {
     // save to cloud
@@ -129,7 +182,11 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
     unlink($this->getDestination());
     
     // check if crop exists
-    $imageCrop = sfImagePoolCropTable::getInstance()->findCrop($this->image, $this->resizer_options['width'], $this->resizer_options['height'], !($this->resizer_options['scale']), self::CROP_IDENTIFIER);
+    $imageCrop = sfImagePoolCropTable::getInstance()->findCrop($this->image, 
+    																													 $this->resizer_options['width'], 
+    																													 $this->resizer_options['height'], 
+    																													 !($this->resizer_options['scale']), 
+    																													 self::CROP_IDENTIFIER);
     
     if (!$imageCrop) 
     {
@@ -146,10 +203,9 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
     
     // controller redirect 301 to cdn
     // If we are on a secure page we want to use the ssl option to avoid security warnings
-    $ssl = sfContext::getInstance()->getRequest()->isSecure();
+    $ssl 						= sfContext::getInstance()->getRequest()->isSecure();
     $off_site_index = ($ssl ? 'off_site_ssl_uri' : 'off_site_uri');
-  
-    $url = $this->options[$off_site_index] . DIRECTORY_SEPARATOR . $object_name;
+    $url 						= $this->options[$off_site_index] . DIRECTORY_SEPARATOR . $object_name;
 
     // There's a chance that save() will fail because the crop already exists
     // in the database (race condition). So, if it does fail, let's try and grab it. If it 
@@ -173,34 +229,94 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
     }
   }
   
+  /**
+   * Commit original file to cloud
+   * 
+   * @param string $filename
+   * @param boolean $redirect
+   * @return string url of cloud file or redirect
+   */
+  public function commitOriginal($filename, $redirect = true)
+  {
+    // save to cloud
+    $object_name = $this->getCloudName(array(), $filename);
+    $container   = $this->getContainer();
+    
+    $this->object = $container->create_object($object_name);
+    $this->object->load_from_filename($this->getDestination($filename)); 
+    
+    // clean up temp file
+    unlink($this->getDestination($filename));
+    
+    // controller redirect 301 to cdn
+    // If we are on a secure page we want to use the ssl option to avoid security warnings
+    $ssl = sfContext::getInstance()->getRequest()->isSecure();
+    $off_site_index = ($ssl ? 'off_site_ssl_uri' : 'off_site_uri');
+  
+    $url = $this->options[$off_site_index] . DIRECTORY_SEPARATOR . $object_name;
+
+    if ($redirect)
+    {
+      sfContext::getInstance()->getController()->redirect($url, 0, 301);
+    }
+    else
+    {
+      return $url;
+    }
+  }
+  
+  /**
+   * Delete image pool from cloud
+   * 
+   * @param sfImagePoolCrop $crop
+   */
   public function delete(sfImagePoolCrop $crop = null)
   {
     parent::delete($crop);
     
-    // Then deal with stuff on the edge - delete crop from edge
+    $container   = $this->getContainer();
+    
+    // Then delete thumbnails from cloud
     if ($crop)
     {
-      $resizer_options = array('width'=>$crop->width, 'height'=>$crop->height, 'scale'=>(!$crop->is_crop));
-      $object_name = $this->getCloudName($resizer_options);
-      
       try 
       {
-        $this->container->delete_object($object_name);
+      	$resizer_options = array('width'=>$crop->width, 'height'=>$crop->height, 'scale'=>(!$crop->is_crop));
+      	$object_name = $this->getCloudName($resizer_options);
+        $container->delete_object($object_name);
       }
       catch (NoSuchObjectException $e)
       {
         // Image already deleted from cloud - that's ok
       }
     }
+    else
+    {
+	    // Delete original from the cloud
+			try 
+			{
+				$object_name = $this->getCloudName(array(), $this->image->filename);
+				$container->delete_object($object_name);
+			}
+			catch (NoSuchObjectException $e)
+			{
+				// Image already deleted from cloud - that's ok
+			}
+    }
   }
   
   /**
-   * Check crop exists
+   * Check if crop exists
+   * 
    * @see cache/sfImagePoolCacheInterface::exists()
    */
   public function exists()
   {
-    $imageCropExists = sfImagePoolCropTable::getInstance()->getCropExistance($this->image, $this->resizer_options['width'], $this->resizer_options['height'], !($this->resizer_options['scale']), self::CROP_IDENTIFIER);
+    $imageCropExists = sfImagePoolCropTable::getInstance()->getCropExistance($this->image, 
+    																																				 $this->resizer_options['width'], 
+    																																				 $this->resizer_options['height'], 
+    																																				 !($this->resizer_options['scale']), 
+    																																				 self::CROP_IDENTIFIER);
     
     if (false === $imageCropExists)
     {
@@ -210,10 +326,9 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
     {
       $object_name = $this->getCloudName();
       
-      $ssl = sfContext::getInstance()->getRequest()->isSecure();
+      $ssl 						= sfContext::getInstance()->getRequest()->isSecure();
       $off_site_index = ($ssl ? 'off_site_ssl_uri' : 'off_site_uri');
-    
-      $url = $this->options[$off_site_index] . DIRECTORY_SEPARATOR . $object_name;
+      $url 						= $this->options[$off_site_index] . DIRECTORY_SEPARATOR . $object_name;
       
       sfContext::getInstance()->getController()->redirect($url, 0, 301);
       
