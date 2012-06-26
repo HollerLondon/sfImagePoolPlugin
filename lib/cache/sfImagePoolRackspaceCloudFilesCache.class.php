@@ -104,7 +104,7 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
     }
     
     // Store in temp directory
-    return sys_get_temp_dir() . $filename;
+    return sys_get_temp_dir() . DIRECTORY_SEPARATOR . $filename;
   }
   
   /**
