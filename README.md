@@ -215,7 +215,7 @@ The following options may be overridden in your `app.yml` files:
     
 #### Rackspace Cloud files
 
-If you want to use the Rackspace cloud to store your image pool thumbnails you will need to add the dependancy specified in _Optional Dependencies_ and follow the instructions.
+If you want to use the Rackspace cloud to store your image pool files you will need to add the dependancy specified in _Optional Dependencies_ and follow the instructions.
 
 Then you can run `./symfony rackspace:initialise` and fill in your settings at the prompt.  This will generate the correct settings in your project's `config/app.yml` file 
 (and create the file if it doesn't exist).  This saves you manually creating the settings as above. 
