@@ -13,16 +13,24 @@ class sfImagePoolFilesystemCache extends sfImagePoolCache implements sfImagePool
   /**
    * Return path to new image on filesystem. Creates folders if they don't exist.
    *
+   * @param string $filename Filename to save to if original file
    * @return string
    */
-  public function getDestination()
+  public function getDestination($filename = null)
   {
-    $folder_path = implode(DIRECTORY_SEPARATOR, array(
-        sfImagePoolPluginConfiguration::getBaseDir(),
-        ($this->resizer_options['scale'] ? 'scale' : 'crop'),
-        $this->resizer_options['width'],
-        $this->resizer_options['height'],
-    ));
+    $imagePath = array(sfImagePoolPluginConfiguration::getBaseDir());
+    
+    // If crop
+    if (is_null($filename))
+    {
+      $imagePath = array_merge($imagePath, array(($this->resizer_options['scale'] ? 'scale' : 'crop'),
+																			           $this->resizer_options['width'],
+																			           $this->resizer_options['height']));
+      
+      $filename = $this->image['filename'];
+    }
+    
+    $folder_path = implode(DIRECTORY_SEPARATOR, $imagePath);
     
     // if folder not found for this resize, then attempt to create it.
     if (!file_exists($folder_path))
@@ -33,12 +41,22 @@ class sfImagePoolFilesystemCache extends sfImagePoolCache implements sfImagePool
       }
     }
     
-    return $folder_path . DIRECTORY_SEPARATOR . $this->image['filename'];
+    return $folder_path . DIRECTORY_SEPARATOR . $filename;
+  }
+  
+  public function getPathToOriginalFile()
+  {
+    return $this->getDestination($this->image['filename']);
   }
   
   public function commit($redirect = true)
   {
     if (!$redirect) return $this->getDestination(); 
+  }
+  
+  public function commitOriginal($filename, $redirect = true)
+  {
+    if (!$redirect) return $this->getDestination($filename); 
   }
   
   /**
@@ -53,8 +71,12 @@ class sfImagePoolFilesystemCache extends sfImagePoolCache implements sfImagePool
     {
       try
       {
-        // @TODO: NOTE: There may be a better way to do this - but php should use memory mapping here
-        return file_get_contents($this->getDestination());
+        // Do a redirect to the file on filesystem - don't load contents in - that costs memory
+        $url = str_replace(sfImagePoolPluginConfiguration::getBaseDir(), sfImagePoolPluginConfiguration::getBaseUrl(), $this->getDestination());
+        
+        sfContext::getInstance()->getController()->redirect($url, 0, 301);
+        
+        return $url;
       }
       catch (Exception $e)
       {
