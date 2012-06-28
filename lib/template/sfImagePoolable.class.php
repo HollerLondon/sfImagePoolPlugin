@@ -131,6 +131,7 @@ class sfImagePoolable extends Doctrine_Template
         }
         
         $images = $query->execute();
+        $images = $this->matchOrder($images, $image_ids);
 
         $object->_images->merge($images);
         $object->_images->takeSnapshot();
@@ -138,6 +139,36 @@ class sfImagePoolable extends Doctrine_Template
     }
 
     return $object->_images;
+  }
+
+  /**
+   * When multiple images have been associated with an object via the image chooser widget,
+   * the user may well have chosen a specific order. When pulling the associated images back
+   * from the DB, Doctrine returns in primary key order, which is incorrect. This method
+   * is a dirty way of matching the order of a collection to an order of image ids, which means
+   * images are returned in the same order they were associated in.
+   *
+   * @param $images Doctrine_Collection of images
+   * @param $image_ids Array of image ids in a specific order
+   *
+   * @return Doctrine_Collection
+   */
+  public function matchOrder(Doctrine_Collection $images, $image_ids)
+  {
+    $ordered = new Doctrine_Collection('sfImagePoolImage', 'id');
+
+    foreach($image_ids as $index => $id)
+    {
+      foreach($images as $i)
+      {
+        if($i['id'] == $id)
+        {
+          $ordered->set($i['id'], $i);
+        }
+      }
+    }
+
+    return $ordered;
   }
   
   /**
@@ -319,7 +350,8 @@ class sfImagePoolable extends Doctrine_Template
     }
     
     $images = sfImagePoolImageTable::getInstance()->getByIds($image_ids);
-    
+
+    $this->matchOrder($images, $image_ids);
     $this->setImages($images, $object);
   }
   
