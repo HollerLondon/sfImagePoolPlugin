@@ -93,11 +93,14 @@ class PluginsfImagePoolImageTable extends Doctrine_Table
   public function getByIdsQuery($image_ids)
   {
     // Fix for empty image id
-    foreach ($image_ids as $idx => $image_id) {
+    foreach ($image_ids as $idx => $image_id) 
+    {
       if (empty($image_id)) unset($image_ids[$idx]);
     }
     
+    // Returns them in the order they were added by using order by
     return $this->createQuery('i')
-                ->whereIn('i.id', $image_ids);
+                ->whereIn('i.id', $image_ids)
+                ->orderBy(sprintf('(i.id IN (%s))', implode(',', $image_ids)));
   }
 }
