@@ -131,7 +131,7 @@ class sfImagePoolable extends Doctrine_Template
         }
         
         $images = $query->execute();
-        $images = $this->matchOrder($images, $image_ids);
+        //$images = $this->matchOrder($images, $image_ids);
 
         $object->_images->merge($images);
         $object->_images->takeSnapshot();
@@ -351,7 +351,7 @@ class sfImagePoolable extends Doctrine_Template
     
     $images = sfImagePoolImageTable::getInstance()->getByIds($image_ids);
 
-    $this->matchOrder($images, $image_ids);
+    //$this->matchOrder($images, $image_ids);
     $this->setImages($images, $object);
   }
   
