@@ -131,7 +131,7 @@ class sfImagePoolable extends Doctrine_Template
         }
         
         $images = $query->execute();
-        //$images = $this->matchOrder($images, $image_ids);
+        $images = $this->matchOrder($images, $image_ids);
 
         $object->_images->merge($images);
         $object->_images->takeSnapshot();
@@ -155,6 +155,8 @@ class sfImagePoolable extends Doctrine_Template
    */
   public function matchOrder(Doctrine_Collection $images, $image_ids)
   {
+    if (!is_array($image_ids)) return $images;
+    
     $ordered = new Doctrine_Collection('sfImagePoolImage', 'id');
 
     foreach($image_ids as $index => $id)
@@ -350,8 +352,8 @@ class sfImagePoolable extends Doctrine_Template
     }
     
     $images = sfImagePoolImageTable::getInstance()->getByIds($image_ids);
-
-    //$this->matchOrder($images, $image_ids);
+    $images = $this->matchOrder($images, $image_ids);
+    
     $this->setImages($images, $object);
   }
   
