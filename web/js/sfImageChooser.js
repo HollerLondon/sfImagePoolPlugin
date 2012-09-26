@@ -7,15 +7,15 @@ var ImageChooser = new Class(
   
   options: 
   {
-    toggleClass:        'toggleThumbnails',
-    containerClass:     'thumbnailsContainer',
-    paginationClass:    'pagination',
-    selectedImageClass: 'selectedImage',
-    selectedImageInputClass: 'sf-image-id',
-    uploadImageClass:   'upload_new_image',
-    uploadBackClass:    'image_upload_back',
-    imageOnClickEvent:  null, // for custom behaviour on image click
-    onSuccessEvent:     null  // any additional events that should be called on success (function)
+    toggleClass:              'toggleThumbnails',
+    containerClass:           'thumbnailsContainer',
+    paginationClass:          'pagination',
+    selectedImageClass:       'selectedImage',
+    selectedImageInputClass:  'sf-image-id',
+    uploadImageClass:         'upload_new_image',
+    uploadBackClass:          'image_upload_back',
+    imageOnClickEvent:        null, // for custom behaviour on image click
+    onSuccessEvent:           null  // any additional events that should be called on success (function)
   },
   
   imageChooser:         null,
@@ -37,7 +37,6 @@ var ImageChooser = new Class(
     this.multiple             = this.imageChooser.hasClass('multiple');
     
     this.selectedImage        = this.imageChooser.getElement('.'+this.options.selectedImageClass);
-    this.selectedImageInput   = this.imageChooser.getElement('.'+this.options.selectedImageInputClass);
     this.thumbnailsContainer  = this.imageChooser.getElement('.'+this.options.containerClass);
     this.toggle               = this.imageChooser.getElement('.'+this.options.toggleClass);
     
@@ -155,7 +154,7 @@ var ImageChooser = new Class(
     {
       'type':         'hidden',
       'value':        selectedId,
-      'name':         self.selectedImageInput.get('name')
+      'name':         self.imageChooser.get('data-chooser-name') + '[]'
     });
     
     if (!self.multiple)

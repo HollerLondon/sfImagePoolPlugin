@@ -1,14 +1,14 @@
 <?php use_helper('ImagePool'); ?>
 
-<div id="<?php echo $id; ?>" class="imageChooser<?php if ($multiple) echo ' multiple'; ?>">
+<div id="<?php echo $id; ?>" class="imageChooser<?php if ($multiple) echo ' multiple'; ?>"
+  data-chooser-name="<?php echo $name ?>"
+  >
   <div class="selectedImage">
     <?php foreach ($images as $i): ?>
       <?php echo pool_image_tag($i, '100', 'crop', array('id'=>'sf_image_pool_image_'+$i->getPrimaryKey())); ?>
       <input type="hidden" name="<?php echo $name; ?>[]" value="<?php echo $i->getPrimaryKey(); ?>" />
     <?php endforeach; ?>
   </div>
-  
-  <input type="hidden" name="<?php echo $name; ?>[]" value="" class="sf-image-id" />
   
   <div class="thumbnailsContainer">
     <?php include_partial('sfImagePoolAdmin/chooser_pagination', array(

@@ -82,6 +82,7 @@ class PluginsfImagePoolImageTable extends Doctrine_Table
    */
   public function getByIds($image_ids)
   {
+    if(empty($image_ids)) return new Doctrine_Collection('sfImagePoolImage');
     return $this->getByIdsQuery($image_ids)->execute();
   }
   
