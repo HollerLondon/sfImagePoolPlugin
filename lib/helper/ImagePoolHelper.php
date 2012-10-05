@@ -153,7 +153,7 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
 
   $offsite = false;
 
-  if ($dimensions == 'original')
+  if ($dimensions == 'original' || (is_array($dimensions) && 'original' == $dimensions[0]))
   {
     return pool_image_source_uri($image, $absolute);
   }
