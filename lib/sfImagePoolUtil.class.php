@@ -302,9 +302,8 @@ class sfImagePoolUtil
         
     // Save and commit file
     $file->save($cache->getDestination($filename));
+    $info     = getimagesize($cache->getDestination($filename)); // Get image info before commited, in case uploading to external source
     $cache->commitOriginal($filename, false);
-    
-    $info = getimagesize($file->getSavedName());
     
     $image_data = array(
       'original_filename' => $file->getOriginalName(),
@@ -325,7 +324,47 @@ class sfImagePoolUtil
     $image->save();
     
     return $image;
-  }    
+  } 
+
+  /**
+   * Create an image pool object from a validated file
+   * 
+   * @param sfValidatedFile $file
+   * @param array $tags
+   * @return sfImagePoolImage
+   */
+  static public function createImageFromValidatedFile(sfValidatedFile $file, $tags = null)
+  {
+    // Process file
+    $image    = new sfImagePoolImage();
+    $cache    = sfImagePoolCache::getInstance($image, array(), array());
+    $filename = $file->generateFilename();
+    
+    // Save and commit file
+    $file->save($cache->getDestination($filename));
+    $info     = getimagesize($cache->getDestination($filename)); // Get image info before commited, in case uploading to external source
+    $cache->commitOriginal($filename, false);
+    
+    $image_data = array(
+      'filename'          => basename($file->getSavedName()),
+      'original_filename' => $file->getOriginalName(),
+      'mime_type'         => $file->getType(),
+      'original_width'    => $info[0],
+      'original_height'   => $info[1]
+    );
+    
+    $image->fromArray($image_data);
+    
+    // now set tags if they've been supplied (and enabled)
+    if ($tags && true === $image->option('tagging'))
+    {
+      $image->addTag($tags);
+    }
+    
+    $image->save();
+    
+    return $image;
+  }
   
   /**
    * Create an image pool object from a url
