@@ -206,8 +206,8 @@ class sfImagePoolUtil
         $image['filename']          = basename($file->getSavedName());
         $image['original_filename'] = $file->getOriginalName();
         $image['mime_type']         = $info['mime'];
-        $image['original_width']    = $info['width'];
-        $image['original_height']   = $info['height'];
+        $image['original_width']    = $info[0];
+        $image['original_height']   = $info[1];
         $image['title']             = $form->getValue('title');
         $image['caption']           = $form->getValue('caption');
         
@@ -302,22 +302,21 @@ class sfImagePoolUtil
         
     // Save and commit file
     $file->save($cache->getDestination($filename));
+    $info     = getimagesize($cache->getDestination($filename)); // Get image info before commited, in case uploading to external source
     $cache->commitOriginal($filename, false);
-    
-    $info = getimagesize($file->getSavedName());
     
     $image_data = array(
       'original_filename' => $file->getOriginalName(),
       'filename'          => basename($file->getSavedName()),
       'mime_type'         => $file->getType(),
-    	'original_width'    => $info['width'],
-      'original_height'   => $info['height']
+    	'original_width'    => $info[0],
+      'original_height'   => $info[1]
     );
     
     $image->fromArray($image_data);
     
-    // now set tags if they've been supplied
-    if ($tags)
+    // now set tags if they've been supplied (and enabled)
+    if ($tags && true === $image->option('tagging'))
     {
       $image->addTag($tags);
     }
@@ -325,7 +324,89 @@ class sfImagePoolUtil
     $image->save();
     
     return $image;
-  }    
+  } 
+
+  /**
+   * Create an image pool object from a validated file
+   * 
+   * @param sfValidatedFile $file
+   * @param array $tags
+   * @return sfImagePoolImage
+   */
+  static public function createImageFromValidatedFile(sfValidatedFile $file, $tags = null)
+  {
+    // Process file
+    $image    = new sfImagePoolImage();
+    $cache    = sfImagePoolCache::getInstance($image, array(), array());
+    $filename = $file->generateFilename();
+    
+    // Save and commit file
+    $file->save($cache->getDestination($filename));
+    $info     = getimagesize($cache->getDestination($filename)); // Get image info before commited, in case uploading to external source
+    $cache->commitOriginal($filename, false);
+    
+    $image_data = array(
+      'filename'          => basename($file->getSavedName()),
+      'original_filename' => $file->getOriginalName(),
+      'mime_type'         => $file->getType(),
+      'original_width'    => $info[0],
+      'original_height'   => $info[1]
+    );
+    
+    $image->fromArray($image_data);
+    
+    // now set tags if they've been supplied (and enabled)
+    if ($tags && true === $image->option('tagging'))
+    {
+      $image->addTag($tags);
+    }
+    
+    $image->save();
+    
+    return $image;
+  }
+  
+  /**
+   * Create an image pool object from a url
+   * 
+   * @param string $url
+   * @param array $tags
+   * @return sfImagePoolImage
+   */
+  static public function createImageFromUrl($url, $tags = null)
+  {
+    // Process file
+    $info             = pathinfo($url);
+    $image            = new sfImagePoolImage();
+    $cache            = sfImagePoolCache::getInstance($image, array(), array());
+    $filename         = sha1($info['basename'].rand(11111, 99999)).'.'.$info['extension'];
+    
+    // Save and commit file
+    file_put_contents($cache->getDestination($filename), file_get_contents($url));
+    $imageInfo        = getimagesize($cache->getDestination($filename)); // Get image info before commited, in case uploading to external source
+    $cache->commitOriginal($filename, false);
+    
+    // Create image
+    $image_data = array(
+      'original_filename' => $info['basename'],
+      'filename'          => $filename,
+      'mime_type'         => $imageInfo['mime'],
+      'original_width'    => $imageInfo[0],
+      'original_height'   => $imageInfo[1]
+    );
+    
+    $image->fromArray($image_data);
+    
+    // now set tags if they've been supplied (and enabled)
+    if ($tags && true === $image->option('tagging'))
+    {
+      $image->addTag($tags);
+    }
+    
+    $image->save();
+    
+    return $image;
+  }
   
   /**
    * Helper method for checking for upload errors when doing a basic non-Symfony Forms upload

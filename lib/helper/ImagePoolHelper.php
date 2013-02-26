@@ -12,7 +12,7 @@
  */
 function pool_image_tag($invoker, $dimensions = 200, $options = 'crop', $attributes = array(), $absolute = false)
 {
-  if(is_null($invoker)) return;
+  if (is_null($invoker)) return;
 
   // remove Symfony escaping if applied
   if ($invoker instanceof sfOutputEscaper)
@@ -42,7 +42,7 @@ function pool_image_tag($invoker, $dimensions = 200, $options = 'crop', $attribu
     $h = $w = $dimensions;
   }
 
-  if(is_array($options))
+  if (is_array($options))
   {
     $method = array_key_exists('method',$options) ? $options['method'] : 'crop';
   }
@@ -52,7 +52,7 @@ function pool_image_tag($invoker, $dimensions = 200, $options = 'crop', $attribu
     $options  = array();
   }
 
-  $pool_image_uri = pool_image_uri($image,array($w,$h),$method,$absolute);
+  $pool_image_uri = pool_image_uri($image, array($w,$h), $method, $absolute);
 
   $options['require_size'] = array_key_exists('require_size',$options)
     ? $options['require_size']
@@ -131,18 +131,56 @@ function _sf_image_pool_build_attrs($invoker, $dimensions, $method, $attributes 
 
 /**
  * Get the URL for the original uploaded file
- **/
-function pool_image_source_uri($image,$absolute = false)
+ * 
+ * @NOTE: This just links to base file so not got controller in - does do a replace if offsite now
+ * 
+ * @param sfImagePoolImage | string $image
+ * @param boolean $absolute
+ * @return string
+ */
+function pool_image_source_uri($image, $absolute = false)
 {
-  if($image instanceof sfOutputEscaper)
+  if ($image instanceof sfOutputEscaper)
   {
     $image = $image->getRawValue();
   }
 
   $filename = $image instanceof sfImagePoolImage ? $image['filename'] : $image;
-  return _compute_public_path($filename,sfConfig::get('app_sf_image_pool_folder','image-pool'),$absolute,false);
+  
+  if (!$filename) return null;
+  
+  // If we are on a secure page we want to use the ssl option to avoid security warnings
+  $ssl = sfContext::getInstance()->getRequest()->isSecure();
+  $off_site_index = ($ssl ? 'off_site_ssl_uri' : 'off_site_uri');
+  
+  // Check if offsite
+  $cache_options = sfConfig::get('app_sf_image_pool_cache');
+  $class         = $cache_options['class'];
+  
+  if ($class::IS_REMOTE && !empty($cache_options[$off_site_index])) $offsite = true;
+  else $offsite = false;
+
+  if (!$offsite) 
+  {
+    $url = _compute_public_path($filename, sfImagePoolPluginConfiguration::getBaseUrl(), $absolute, false);
+  }
+  else 
+  {
+    $url = sprintf('%s/%s', $cache_options[$off_site_index], $filename);
+  }
+  
+  return $url;
 }
 
+/**
+ * Get URL for the image pool file
+ * 
+ * @param sfImagePoolImage | string $image
+ * @param string $dimensions
+ * @param string $method
+ * @param boolean $absolute
+ * @return string
+ */
 function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute = false)
 {
   // remove Symfony escaping if applied
@@ -153,7 +191,7 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
 
   $offsite = false;
 
-  if ($dimensions == 'original')
+  if ($dimensions == 'original' || (is_array($dimensions) && 'original' == $dimensions[0]))
   {
     return pool_image_source_uri($image, $absolute);
   }
@@ -208,7 +246,7 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
     {
       if (sfConfig::get('app_sf_image_pool_use_placeholdit', false))
       {
-        $url = sprintf('http://placehold.it/%ux%u&text=%s',$width, $height, urlencode(sfConfig::get('app_sf_image_pool_placeholdit_text',$width.'x'.$height)));
+        $url = sprintf('http://placehold.it/%ux%u&text=%s', $width, $height, urlencode(sfConfig::get('app_sf_image_pool_placeholdit_text',$width.'x'.$height)));
       }
       else
       {
@@ -234,19 +272,19 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
     $filename = $image instanceof sfImagePoolImage ? $image['filename'] : $image;
 
     // No image associated with this object, use placehold.it instead?
-    if(!$filename && sfConfig::get('app_sf_image_pool_use_placeholdit', false))
+    if (!$filename && sfConfig::get('app_sf_image_pool_use_placeholdit', false))
     {
       return sprintf('http://placehold.it/%ux%u&text=%s',$width, $height, urlencode(sfConfig::get('app_sf_image_pool_placeholdit_text', $width.'x'.$height)));
     }
 
     // Or, if not placehold.it and placeholders is enabled, let's spit one out.
-    elseif(!$filename && sfConfig::get('app_sf_image_pool_placeholders', true))
+    else if (!$filename && sfConfig::get('app_sf_image_pool_placeholders', true))
     {
       $filename = 'placeholder.jpg';
     }
 
     // but if placeholders isn't switched on then output nothing.
-    elseif(!$filename)
+    else if (!$filename)
     {
       return false;
     }
