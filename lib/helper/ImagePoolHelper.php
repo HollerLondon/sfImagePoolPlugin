@@ -248,6 +248,10 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
       {
         $url = sprintf('http://placehold.it/%ux%u&text=%s', $width, $height, urlencode(sfConfig::get('app_sf_image_pool_placeholdit_text',$width.'x'.$height)));
       }
+      else if (sfConfig::get('app_sf_image_pool_use_placekitten', false))
+      {
+        $url = sprintf('http://placekitten.com/g/%u/%u', $width, $height);
+      }
       else
       {
         // If offsite then should have cached placeholder too - check whether created as crop too
@@ -276,13 +280,15 @@ function pool_image_uri($image, $dimensions = 200, $method = 'crop', $absolute =
     {
       return sprintf('http://placehold.it/%ux%u&text=%s',$width, $height, urlencode(sfConfig::get('app_sf_image_pool_placeholdit_text', $width.'x'.$height)));
     }
-
+  	else if (!$filename && sfConfig::get('app_sf_image_pool_use_placekitten', false))
+    {
+      return sprintf('http://placekitten.com/g/%u/%u', $width, $height);
+    }
     // Or, if not placehold.it and placeholders is enabled, let's spit one out.
     else if (!$filename && sfConfig::get('app_sf_image_pool_placeholders', true))
     {
       $filename = 'placeholder.jpg';
     }
-
     // but if placeholders isn't switched on then output nothing.
     else if (!$filename)
     {

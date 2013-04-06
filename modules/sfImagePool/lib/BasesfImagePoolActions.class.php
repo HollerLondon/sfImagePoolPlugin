@@ -80,9 +80,9 @@ class BasesfImagePoolActions extends sfActions
         {
           if (sfConfig::get('app_sf_image_pool_placeholders', false))
           {
-            $dest = sfConfig::get('app_sf_image_pool_use_placeholdit', false)
-              ? sprintf('http://placehold.it/%ux%u&text=%s', $width, $height, urlencode(sfConfig::get('app_sf_image_pool_placeholdit_text', ' ')))
-              : sprintf('@image?width=%s&height=%s&filename=%s&method=%s', $width, $height, sfImagePoolImage::DEFAULT_FILENAME, $thumb_method);
+          	if (sfConfig::get('app_sf_image_pool_use_placeholdit', false)) $dest = sprintf('http://placehold.it/%ux%u&text=%s', $width, $height, urlencode(sfConfig::get('app_sf_image_pool_placeholdit_text', ' ')));
+          	else if (sfConfig::get('app_sf_image_pool_use_placekitten', false)) $dest = sprintf('http://placekitten.com/g/%u/%u', $width, $height);
+          	else $dest = sprintf('@image?width=%s&height=%s&filename=%s&method=%s', $width, $height, sfImagePoolImage::DEFAULT_FILENAME, $thumb_method);
             
             $this->logMessage($e->getMessage());
             $this->redirect($dest, 302);
