@@ -22,15 +22,8 @@ The plugin is comprised of:
 UPGRADE TO RACKSPACE OPENCLOUD
 -------------------------------
 
-From August 13th 2013 the cloudfiles API won't work.  Up until then you can use the forked version: https://github.com/rackerlabs/php-cloudfiles.git/trunk
-
-New version: https://github.com/rackspace/php-opencloud.git/trunk
-
-Remove from autoload. 
-
-auth_host:          LON
-
-
+From August 2013 the cloudfiles API won't work (update in progress).
+Up until then you can use the forked version: https://github.com/rackerlabs/php-cloudfiles.git/trunk
 
 Dependencies
 ------------
@@ -49,13 +42,13 @@ Optional Dependencies
 
  * [sfDoctrineActAsTaggablePlugin](http://www.symfony-project.org/plugins/sfDoctrineActAsTaggablePlugin) (but only if tagging: true) in the options section of the model definition for sfImagePoolImage in `schema.yml`
  * [sfMooToolsFormExtraPlugin](https://github.com/HollerLondon/sfMooToolsFormExtraPlugin) - sfImagePoolPlugin includes an `sfImaegPoolPlugin` Image Chooser for [MooEditable](http://cheeaun.github.com/mooeditable/), and `sfMooToolsFormExtraPlugin` provides a MooEditable Symfony form widget - see _Optional extensions_.
- * [Rackspace Cloud files](https://github.com/rackspace/php-cloudfiles.git) - if storing image files on a Rackspace cloud this library is required in `lib/vendor/rackspace`
+ * [Rackspace Cloud files](https://github.com/rackerlabs/php-cloudfiles) - if storing image files on a Rackspace cloud this library is required in `lib/vendor/rackspace`
   
 ### Rackspace Cloud files: Note for SVN
 
 If using SVN you will need to add these dependancies as `svn:externals` in the project's `lib/vendor` folder
 
-    rackspace            https://github.com/rackspace/php-cloudfiles.git/trunk
+    rackspace            https://github.com/rackerlabs/php-cloudfiles.git/trunk
 
 You will then need to autoload these files in the application's `config/autoload.yml`
 
