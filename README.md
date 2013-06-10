@@ -19,6 +19,19 @@ The plugin is comprised of:
  * An improved sfThumbnail Adapter for ImageMagick which will optionally sharpen images as they're sized
 
 
+UPGRADE TO RACKSPACE OPENCLOUD
+-------------------------------
+
+From August 13th 2013 the cloudfiles API won't work.  Up until then you can use the forked version: https://github.com/rackerlabs/php-cloudfiles.git/trunk
+
+New version: https://github.com/rackspace/php-opencloud.git/trunk
+
+Remove from autoload. 
+
+auth_host:          LON
+
+
+
 Dependencies
 ------------
 
