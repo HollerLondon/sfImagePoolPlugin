@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Rackspace Cloud Files caching adapter
  * 
@@ -9,17 +10,21 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
   /**
    * Rackspace cloud files container
    * 
-   * @var CF_Container
+   * @var OpenCloud/Container
    */
   private $container = null;
   
   /**
    * Array of Rackspace Cloud Files options
+   * 
+   * Dallas/Fort Worth (identified by DFW)
+   * Chicago (identified by ORD)
+   * London (identified by LON).
    *
    * @var array
    **/
   protected static $adapter_options = array(
-    'auth_host'         => 'UK'
+    'auth_host'         => 'LON'
   );
   
   const CROP_IDENTIFIER = 'rackspace';
@@ -52,19 +57,45 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
     
     $adapter_options = array_merge(self::$adapter_options, $adapter_options);
     
-    $auth = new CF_Authentication($adapter_options['username'], $adapter_options['api_key'], null, ('UK' == $adapter_options['auth_host'] ? UK_AUTHURL : US_AUTHURL));
-    $auth->authenticate();
-    $conn = new CF_Connection($auth);
+    // Backwards compatible
+    if ('UK' == $adapter_options['auth_host'])      $adapter_options['auth_host'] = 'LON';
+    else if ('US' == $adapter_options['auth_host']) $adapter_options['auth_host'] = 'DFW';
+    
+    // https://github.com/rackspace/php-opencloud/blob/master/docs/userguide/collections.md
+    // https://github.com/rackspace/php-opencloud/blob/master/docs/quickref.md#ostore
+    // http://php-opencloud.com
+    // https://github.com/rackspace/php-opencloud/blob/master/samples/objectstore/container.php
+    
+    $conn = new \OpenCloud\Rackspace(
+      ('LON' == $adapter_options['auth_host'] ? RACKSPACE_UK : RACKSPACE_US),
+      array(
+          'username' => $adapter_options['username'],
+          'apiKey'   => $adapter_options['api_key']
+      ));
+      
+    $conn->SetDefaults('ObjectStore', RAXSDK_OBJSTORE_NAME, $adapter_options['auth_host'], RAXSDK_OBJSTORE_URLTYPE);
+    
+    $ostore = $conn->ObjectStore(); // uses default values
     
     try 
     {
-      $container = $conn->get_container($adapter_options['container']);
+      $container = $ostore->Container($adapter_options['container']);
     }
-    catch (NoSuchContainerException $e)
+    catch (\OpenCloud\Base\Exceptions\ContainerNotFoundError $e)
     {
       // Container doesn't already exist so create it
-      $container = $conn->create_container($adapter_options['container']);
-      $container->make_public();
+      try
+      {
+        $container = $ostore->Container();
+        $container->Create(array('name'=>$adapter_options['container']));
+        $container->EnableCDN();
+      }
+      catch (\OpenCloud\Base\Exceptions\CdnHttpError $e) // @TODO: Currently failing when spaces / other characters in URL - see https://github.com/rackspace/php-opencloud/issues/124
+      {
+        var_dump('Container did not publish - please publish manually and re-run the task');
+        var_dump($e->getMessage());
+        die;
+      }
     }
     
     return $container;
@@ -175,8 +206,8 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
     $object_name = $this->getCloudName();
     $container   = $this->getContainer();
     
-    $this->object = $container->create_object($object_name);
-    $this->object->load_from_filename($this->getDestination()); 
+    $this->object = $container->DataObject();
+    $this->object->Create(array('name'=>$object_name, 'content_type'=>$this->image->mime_type), $this->getDestination());
     
     // clean up temp file
     unlink($this->getDestination());
@@ -242,8 +273,8 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
     $object_name = $this->getCloudName(array(), $filename);
     $container   = $this->getContainer();
     
-    $this->object = $container->create_object($object_name);
-    $this->object->load_from_filename($this->getDestination($filename)); 
+    $this->object = $container->DataObject();
+    $this->object->Create(array('name'=>$object_name, 'content_type'=>$this->image->mime_type), $this->getDestination($filename));
     
     // clean up temp file
     unlink($this->getDestination($filename));
@@ -283,9 +314,10 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
       {
       	$resizer_options = array('width'=>$crop->width, 'height'=>$crop->height, 'scale'=>(!$crop->is_crop));
       	$object_name = $this->getCloudName($resizer_options);
-        $container->delete_object($object_name);
+        $object = $container->DataObject($object_name);
+				$object->Delete();
       }
-      catch (NoSuchObjectException $e)
+      catch (\OpenCloud\Base\Exceptions\DeleteError $e)
       {
         // Image already deleted from cloud - that's ok
       }
@@ -296,9 +328,10 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
 			try 
 			{
 				$object_name = $this->getCloudName(array(), $this->image->filename);
-				$container->delete_object($object_name);
+				$object = $container->DataObject($object_name);
+				$object->Delete();
 			}
-			catch (NoSuchObjectException $e)
+			catch (\OpenCloud\Base\Exceptions\DeleteError $e)
 			{
 				// Image already deleted from cloud - that's ok
 			}

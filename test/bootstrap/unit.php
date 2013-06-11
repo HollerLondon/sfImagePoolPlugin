@@ -11,7 +11,7 @@
 $_test_dir = realpath(dirname(__FILE__).'/..');
 
 // configuration
-require_once dirname(__FILE__).'/../../config/ProjectConfiguration.class.php';
+require_once dirname(__FILE__).'/../../../../config/ProjectConfiguration.class.php';
 $configuration = ProjectConfiguration::hasActive() ? ProjectConfiguration::getActive() : new ProjectConfiguration(realpath($_test_dir.'/..'));
 
 // autoloader

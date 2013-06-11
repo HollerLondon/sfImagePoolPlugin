@@ -19,12 +19,6 @@ The plugin is comprised of:
  * An improved sfThumbnail Adapter for ImageMagick which will optionally sharpen images as they're sized
 
 
-UPGRADE TO RACKSPACE OPENCLOUD
--------------------------------
-
-From August 2013 the cloudfiles API won't work (update in progress).
-Up until then you can use the forked version: https://github.com/rackerlabs/php-cloudfiles.git/trunk
-
 Dependencies
 ------------
 
@@ -42,21 +36,13 @@ Optional Dependencies
 
  * [sfDoctrineActAsTaggablePlugin](http://www.symfony-project.org/plugins/sfDoctrineActAsTaggablePlugin) (but only if tagging: true) in the options section of the model definition for sfImagePoolImage in `schema.yml`
  * [sfMooToolsFormExtraPlugin](https://github.com/HollerLondon/sfMooToolsFormExtraPlugin) - sfImagePoolPlugin includes an `sfImaegPoolPlugin` Image Chooser for [MooEditable](http://cheeaun.github.com/mooeditable/), and `sfMooToolsFormExtraPlugin` provides a MooEditable Symfony form widget - see _Optional extensions_.
- * [Rackspace Cloud files](https://github.com/rackerlabs/php-cloudfiles) - if storing image files on a Rackspace cloud this library is required in `lib/vendor/rackspace`
+ * [Rackspace Cloud files](https://github.com/rackspace/php-opencloud) - if storing image files on a Rackspace cloud this library is required in `lib/vendor/rackspace`
   
 ### Rackspace Cloud files: Note for SVN
 
 If using SVN you will need to add these dependancies as `svn:externals` in the project's `lib/vendor` folder
 
-    rackspace            https://github.com/rackerlabs/php-cloudfiles.git/trunk
-
-You will then need to autoload these files in the application's `config/autoload.yml`
-
-	autoload:
-	  vendor_rackspace:
-	    path:      %SF_LIB_DIR%/vendor/rackspace
-        recursive: on
-
+    rackspace  https://github.com/rackspace/php-opencloud.git/trunk
 
 ### Rackspace Cloud files: Note for Git
 
@@ -64,8 +50,26 @@ The plugin's `lib/vendor` folder contains submodules for the Rackspace Cloud fil
 
     [submodule "lib/vendor/rackspace"]
       path = lib/vendor/rackspace
-      url = https://github.com/rackspace/php-cloudfiles.git
+      url = https://github.com/rackspace/php-opencloud.git
   
+
+UPGRADE TO RACKSPACE OPENCLOUD FROM CLOUDFILES
+----------------------------------------------
+
+From August 2013 the php-cloudfiles API won't work. Up until then you can use the forked version: https://github.com/rackerlabs/php-cloudfiles.git/trunk and the php-cloudfiles branch of this project.
+
+Updating your project to use php-opencloud:
+
+Step 1: Update `lib/vendor/rackspace` location to https://github.com/rackspace/php-opencloud.git/trunk
+Step 2: Remove `autoload.yml` entry for rackspace
+Step 3: Update `auth_host` in config - see _Customise plugin options_
+Step 4: Clear cache, and you're good to go
+
+CURRENT ISSUES:
+--------------
+
+Cannot publish newly created containers via the API that have non-alphanumeric characters in them, including spaces - see https://github.com/rackspace/php-opencloud/issues/124. SOLUTION FOR NOW: either specify a name without spaces, or publish manually and re-run the initialise task.  Existing containers have no issues.
+
 
 Setup
 -----
@@ -185,6 +189,7 @@ The following options may be overridden in your `app.yml` files:
         placeholders:       false # If true, use file placeholder.jpg if an image can't be found
         use_placeholdit:    false # if true, returns handy placeholder images from http://placehold.it
         placeholdit_text:   ' '   # Text to display on placehold.it image - space ' ' leaves a blank image, '' shows the size.
+        use_placekitten:    false # if true placeholder images are kittens!
     
         inflate:            true # allow images to be scaled above their original dimensions
         jpeg_quality:       90   # JPEG quality
@@ -215,9 +220,10 @@ The following options may be overridden in your `app.yml` files:
           #   username:     ~ # Your Username
           #   container:    ~ # Name for the container
           #   api_key:      ~
-          #   auth_host:    UK # UK or US, depending on where your account is based
+          #   auth_host:    LON # LON, DFW or ORD, depending on where your account is based
           # off_site_uri:   ~ # The Base URI for the container
           # off_site_ssl_uri: ~ # The Base SSL URI for the container
+    
     
 #### Rackspace Cloud files
 
@@ -269,8 +275,7 @@ method fits the image to the specified dimensions and will not necessarily match
 
 ### 7. Placeholder
 
-If the configuration is set to enable placeholders then when there is no image for a model or the image can't be found the placeholder will be used.  This requires it to be in the 
-database.  Use the sample fixtures file, and create `placeholder.jpg` in the `image-pool` folder for this purpose.
+If the configuration is set to enable placeholders then when there is no image for a model or the image can't be found the placeholder will be used.  This requires it to be in the database.  Use the sample fixtures file, and create `placeholder.jpg` in the `image-pool` folder for this purpose.
 
 
 ### 8 .htaccess tweaks

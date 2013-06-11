@@ -10,9 +10,11 @@ $adapter_options = sfConfig::get('app_sf_image_pool_cache');
 if (isset($adapter_options['options']) && !empty($adapter_options['options']))
 {
   // Create an image
+  $filename = time().'test.png';
+  
   $image = new sfImagePoolImage();
   $image->original_filename = 'test.png';
-  $image->filename = 'test.png';
+  $image->filename = $filename;
   $image->mime_type = 'image/png';
   $image->save();
   
@@ -26,6 +28,12 @@ if (isset($adapter_options['options']) && !empty($adapter_options['options']))
   
   $container = $cache->getContainer();
   $t->is($container->name, $adapter_options['options']['container'], 'Container created or already exists');
+
+  // commit original
+  copy($_test_dir.DIRECTORY_SEPARATOR.'data'.DIRECTORY_SEPARATOR.'images'.DIRECTORY_SEPARATOR.'test.png', $cache->getDestination($filename));
+    
+  // don't redirect - but commit file
+  $cache->commitOriginal($filename, false);
   
   // copy test file in place
   copy($_test_dir.DIRECTORY_SEPARATOR.'data'.DIRECTORY_SEPARATOR.'images'.DIRECTORY_SEPARATOR.'test.png', $cache->getDestination());
@@ -37,22 +45,22 @@ if (isset($adapter_options['options']) && !empty($adapter_options['options']))
   $t->isa_ok($imageCrop, 'sfImagePoolCrop', 'Crop created');
   
   $objectName = $cache->getCloudName();
-  $object = $container->get_object($objectName);
+  $object = $container->DataObject($objectName);
   
-  $t->isa_ok($object, 'CF_Object', 'Image created on Rackspace cloud');
-  
+  $t->isa_ok($object, 'OpenCloud\ObjectStore\DataObject', 'Image created on Rackspace cloud');
+
   $image->delete();
   
-  $image = sfImagePoolImageTable::getInstance()->findOneByFilename('test.png');
+  $image = sfImagePoolImageTable::getInstance()->findOneByFilename($filename);
   
   $t->is($image, false, 'Image deleted from database');
   
   try 
   {
-    $object2 = $container->get_object($objectName);
+    $object2 = $container->DataObject($objectName);
     $t->fail('Object not deleted from cloud');
   }
-  catch (NoSuchObjectException $e)
+  catch (\OpenCloud\Base\Exceptions\ObjFetchError $e)
   {
     $t->pass('Object deleted from cloud');
   }

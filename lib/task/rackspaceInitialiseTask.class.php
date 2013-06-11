@@ -27,11 +27,18 @@ EOF;
     $databaseManager = new sfDatabaseManager($this->configuration);
     $connection = $databaseManager->getDatabase($options['connection'])->getConnection();
 
-    // add your code here
+    // Get config
     $cache_options = sfConfig::get('app_sf_image_pool_cache', array());
     
-    $this->logSection('setup', 'Starting setup...');
+    // If not loaded
+    if (!isset($cache_options['class']) || 'sfImagePoolRackspaceCloudFilesCache' != $cache_options['class']) // check for rackspace cache
+    {
+      require_once sfConfig::get('sf_lib_dir') . '/vendor/rackspace/lib/Autoload.php';
+      $classLoader = new SplClassLoader('OpenCloud', sfConfig::get('sf_lib_dir') . '/vendor/rackspace/lib');
+      $classLoader->register();
+    }
     
+    $this->logSection('setup', 'Starting setup...');
     $cache_options['class'] = 'sfImagePoolRackspaceCloudFilesCache';
     
     // set up caching class
@@ -52,8 +59,7 @@ EOF;
     
     if (!isset($cache_options['options']['auth_host']) || empty($cache_options['options']['auth_host']))
     {
-      $host_uk = $this->askConfirmation('Are you a UK Rackspace Cloud customer? (y/N)','QUESTION',false);
-      $cache_options['options']['auth_host'] = ($host_uk ? 'UK' : 'US');
+      $cache_options['options']['api_key'] = strtoupper($this->ask('What is your Rackspace Cloud region? Enter the 3 digit code:  Dallas/Fort Worth (DFW), Chicago (ORD), or London (LON)?'));
     }
     
     if (!isset($cache_options['options']['container']) || empty($cache_options['options']['container']))
@@ -64,8 +70,9 @@ EOF;
     if (!isset($cache_options['options']['container_uri']) || empty($cache_options['options']['container_uri']))
     {
       $container = sfImagePoolRackspaceCloudFilesCache::setup($cache_options);
-      $cache_options['off_site_uri'] = $container->cdn_uri;
-      $cache_options['off_site_ssl_uri'] = $container->cdn_ssl_uri;
+      
+      $cache_options['off_site_uri']     = $container->CDNURI();
+      $cache_options['off_site_ssl_uri'] = $container->SSLURI();
     }
     
     $file = sfConfig::get('sf_config_dir').'/app.yml';
@@ -73,8 +80,15 @@ EOF;
 
     $config['all']['sf_image_pool']['cache'] = $cache_options;
 
-    file_put_contents($file, sfYaml::dump($config, 5));
+    $this->logSection('setup', 'Your configuration is as follows:');
     
-    $this->logSection('setup', 'Your global app.yml file is now fully configured');
+    echo sfYaml::dump($config, 5);
+    
+    if ($this->askConfirmation('Do you want to write that to your app.yml?'))
+    {
+      file_put_contents($file, sfYaml::dump($config, 5));
+      $this->logSection('setup', 'Your global app.yml file is now fully configured');
+    }
+    else $this->logSection('setup', 'Thank you');
   }
 }

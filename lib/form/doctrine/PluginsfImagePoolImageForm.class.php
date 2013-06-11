@@ -107,6 +107,8 @@ abstract class PluginsfImagePoolImageForm extends BasesfImagePoolImageForm
     if (is_null($filename)) $filename = $file->generateFilename();
     
     // Process file
+    $this->getObject()->setMimeType($file->getType()); // For Rackspace
+    
     $cache  = sfImagePoolCache::getInstance($this->getObject(), array(), array());
       
     $file->save($cache->getDestination($filename));
