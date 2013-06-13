@@ -65,11 +65,6 @@ Step 2: Remove `autoload.yml` entry for rackspace
 Step 3: Update `auth_host` in config - see _Customise plugin options_
 Step 4: Clear cache, and you're good to go
 
-CURRENT ISSUES:
---------------
-
-Cannot publish newly created containers via the API that have non-alphanumeric characters in them, including spaces - see https://github.com/rackspace/php-opencloud/issues/124. SOLUTION FOR NOW: either specify a name without spaces, or publish manually and re-run the initialise task.  Existing containers have no issues.
-
 
 Setup
 -----
