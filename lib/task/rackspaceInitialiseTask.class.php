@@ -67,8 +67,6 @@ EOF;
       $cache_options['options']['container'] = $this->ask('What is the name of the cloud file container you want to store images in? (Will be created if doesn\'t exist)');
     }
     
-    echo sfYaml::dump($cache_options, 5);
-    
     if (!isset($cache_options['options']['container_uri']) || empty($cache_options['options']['container_uri']))
     {
       $container = sfImagePoolRackspaceCloudFilesCache::setup($cache_options);
