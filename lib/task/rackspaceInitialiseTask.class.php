@@ -59,13 +59,15 @@ EOF;
     
     if (!isset($cache_options['options']['auth_host']) || empty($cache_options['options']['auth_host']))
     {
-      $cache_options['options']['api_key'] = strtoupper($this->ask('What is your Rackspace Cloud region? Enter the 3 digit code:  Dallas/Fort Worth (DFW), Chicago (ORD), or London (LON)?'));
+      $cache_options['options']['auth_host'] = strtoupper($this->ask('What is your Rackspace Cloud region? Enter the 3 digit code:  Dallas/Fort Worth (DFW), Chicago (ORD), or London (LON)?'));
     }
     
     if (!isset($cache_options['options']['container']) || empty($cache_options['options']['container']))
     {
       $cache_options['options']['container'] = $this->ask('What is the name of the cloud file container you want to store images in? (Will be created if doesn\'t exist)');
     }
+    
+    echo sfYaml::dump($cache_options, 5);
     
     if (!isset($cache_options['options']['container_uri']) || empty($cache_options['options']['container_uri']))
     {
