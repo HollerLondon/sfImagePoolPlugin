@@ -33,7 +33,10 @@ if ($sf_request->offsetExists('tag'))
           <div class="sf_admin_form_row sf_admin_text">
             <?php echo $form['image_tags']->renderLabel(); ?>
             <div class="content"><?php echo $form['image_tags']->render(); ?><?php echo $form['image_tags']->renderError(); ?></div>
-            <?php if (isset($extra['tag'])) : ?><div class="help">This has been pre-populated with the tag restrictions; choose the ones you need and add as appropriate.</div><?php endif; ?>
+            <div class="help">
+              <?php echo $form['image_tags']->renderHelp(); ?>
+              <?php if (isset($extra['tag'])) : ?><br />This has been pre-populated with the tag restrictions; <br />choose the ones you need and add as appropriate.<?php endif; ?>
+            </div>
           </div>
         <?php endif; ?>
       
