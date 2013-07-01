@@ -34,7 +34,7 @@ EOF;
     if (!isset($cache_options['class']) || 'sfImagePoolRackspaceCloudFilesCache' != $cache_options['class']) // check for rackspace cache
     {
       require_once sfConfig::get('sf_lib_dir') . '/vendor/rackspace/lib/Autoload.php';
-      $classLoader = new ClassLoader('OpenCloud', sfConfig::get('sf_lib_dir') . '/vendor/rackspace/lib');
+      $classLoader = new SplClassLoader('OpenCloud', sfConfig::get('sf_lib_dir') . '/vendor/rackspace/lib');
       $classLoader->register();
     }
     
