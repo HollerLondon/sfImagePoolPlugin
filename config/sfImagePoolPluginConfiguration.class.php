@@ -26,9 +26,9 @@ class sfImagePoolPluginConfiguration extends sfPluginConfiguration
     
     if (isset($options['class']) && 'sfImagePoolRackspaceCloudFilesCache' == $options['class']) // check for rackspace cache
     {
-      require_once sfConfig::get('sf_lib_dir') . '/vendor/rackspace/lib/Autoload.php';
-      $classLoader = new SplClassLoader('OpenCloud', sfConfig::get('sf_lib_dir') . '/vendor/rackspace/lib');
-      $classLoader->register();
+      require_once sfConfig::get('sf_lib_dir') . '/vendor/rackspace/lib/php-opencloud.php';
+      //$classLoader = new SplClassLoader('OpenCloud', sfConfig::get('sf_lib_dir') . '/vendor/rackspace/lib');
+      //$classLoader->register();
     }
   }
 
