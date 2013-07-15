@@ -175,7 +175,18 @@ abstract class PluginsfImagePoolImageForm extends BasesfImagePoolImageForm
     
     $name = $this->getTagInputName($namespace, $key);
     
-    $this->setWidget($name, new sfDoctrineTaggableInput());
+    // If using MooToolsFormExtrasPlugin - https://github.com/HollerLondon/sfMooToolsFormExtraPlugin - requires lib/vendor setup + task
+    if (class_exists('sfWidgetFormInputAutocomplete'))
+    {
+      if (!function_exists('url_for')) sfApplicationConfiguration::getActive()->loadHelpers(array('Url'));
+      
+      $this->setWidget($name, new sfWidgetFormInputAutocomplete(array(
+        'url' => url_for('@sf_image_pool_tags')
+      )));
+      $this->widgetSchema->setHelp($name, "Start typing a tag to see a list, tags will be separated by a comma (,).");
+    }
+    else $this->setWidget($name, new sfDoctrineTaggableInput());
+    
     $this->setValidator($name, new sfValidatorPass());
     $this->getWidgetSchema()->setLabel($name, $label);
     

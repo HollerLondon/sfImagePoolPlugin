@@ -3,35 +3,42 @@
 # generic upload action for uploading an image and setting
 # tags, but not associating with any object.
 sf_image_pool_upload:
-  url:                              /sfImagePoolAdmin/upload
-  class:                            sfRequestRoute
-  param:                            { module: sfImagePoolAdmin, action: upload }
-  requirements:                     { sf_method: [post] }
+  url:                  /sfImagePoolAdmin/upload
+  class:                sfRequestRoute
+  param:                { module: sfImagePoolAdmin, action: upload }
+  requirements:         { sf_method: [post] }
   extra_parameters_as_query_string: true
-  
+
 # for uploading a custom crop
 sf_image_pool_upload_crop:
   url:                  /sfImagePoolAdmin/:id/upload-crop
   class:                sfDoctrineRoute
   options:              { model: sfImagePoolImage, type: object }
   param:                { module: sfImagePoolAdmin, action: uploadCrop }
-  requirements:         { sf_method: [get, put, post] }
+  requirements:         { sf_method: [get, put, post], id: "\d+" }
 
 sf_image_pool_deleteused:
   url:                  /sfImagePoolAdmin/:id/delete-used
   class:                sfDoctrineRoute
   options:              { model: sfImagePoolImage, type: object }
   param:                { module: sfImagePoolAdmin, action: deleteUsed }
-  requirements:         { sf_method: [delete] }
+  requirements:         { sf_method: [delete], id: "\d+" }
 
 sf_image_pool_image:
-  class:                  sfDoctrineRouteCollection
+  class:                sfDoctrineRouteCollection
   options:
-    model:                sfImagePoolImage
-    module:               sfImagePoolAdmin
-    prefix_path:          /sfImagePoolAdmin
-    column:               id
+    model:              sfImagePoolImage
+    module:             sfImagePoolAdmin
+    prefix_path:        /sfImagePoolAdmin
+    column:             id
     with_wildcard_routes: true
+
+# json tags for Taggable objects
+sf_image_pool_tags:
+  url:                  /sfImagePoolAdmin/tags
+  param:                { module: sfImagePoolAdmin, action: tags, sf_format: json }
+  requirements:         { sf_method: [post] }
+  extra_parameters_as_query_string: true
 
 sf_image_pool_chooser_upload:
   url:                  /sfImagePool/chooser/upload
@@ -46,6 +53,8 @@ sf_image_pool_chooser:
 sf_image_pool_browse:
   url:                  /sfImagePool/browse/:page
   param:                { module: sfImagePoolAdmin, action: chooser, page: 1 }
+  requirements:
+    page:               "\d+"
     
 # for performing an image operation and then storing the file
 image:
@@ -54,9 +63,8 @@ image:
   options:              { model: sfImagePoolImage, type: object }
   param:                { module: sfImagePool, action: image, method: scale, no_session: true }
   requirements:
-      sf_method:        [get]
-      width:            "\d{1,4}"
-      height:           "\d{1,4}"
-      filename:         "[\w\-\.]+\.(jpe?g|gif|png)"
-      method:           "crop|scale"
-      
+    sf_method:          [get]
+    width:              "\d{1,4}"
+    height:             "\d{1,4}"
+    filename:           "[\w\-\.]+\.(jpe?g|gif|png)"
+    method:             "crop|scale"
