@@ -35,7 +35,7 @@ Optional Dependencies
 ---------------------
 
  * [sfDoctrineActAsTaggablePlugin](http://www.symfony-project.org/plugins/sfDoctrineActAsTaggablePlugin) (but only if tagging: true) in the options section of the model definition for sfImagePoolImage in `schema.yml`
- * [sfMooToolsFormExtraPlugin](https://github.com/HollerLondon/sfMooToolsFormExtraPlugin) - sfImagePoolPlugin includes an `sfImaegPoolPlugin` Image Chooser for [MooEditable](http://cheeaun.github.com/mooeditable/), and `sfMooToolsFormExtraPlugin` provides a MooEditable Symfony form widget - see _Optional extensions_.
+ * [sfMooToolsFormExtraPlugin](https://github.com/HollerLondon/sfMooToolsFormExtraPlugin) - sfImagePoolPlugin includes an `sfImaegPoolPlugin` Image Chooser for [MooEditable](http://cheeaun.github.com/mooeditable/), and `sfMooToolsFormExtraPlugin` provides a MooEditable Symfony form widget - see _Optional extensions_.  `sfMooToolsFormExtraPlugin` also provides a type-ahead input for image pool tags, if tagging is enabled (See plugin for vendors).
  * [Rackspace Cloud files](https://github.com/rackspace/php-opencloud) - if storing image files on a Rackspace cloud this library is required in `lib/vendor/rackspace`
   
 ### Rackspace Cloud files: Note for SVN
@@ -331,6 +331,9 @@ To add a HTML editor (see _Requirements_) with image pool for image insertion
       }
     }
 
+#### 2. Enable type-ahead for image pool tags
+
+This requires `sfMooToolsFormExtraPlugin` and the `Autocompleter` vendor files to be installed.  Everything else is automatic.
 
 ### Overriding Automatic Crops
 
