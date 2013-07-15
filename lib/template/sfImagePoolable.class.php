@@ -316,18 +316,8 @@ class sfImagePoolable extends Doctrine_Template
    */
   public function setSfImagePoolIds($values)
   {
-    if(!is_array($values))
-    {
-      $values = array();
-    }
+    if (!is_array($values)) $values = array();
 
-    // Fix for empty image ids
-    //  - BL: May not be necessary since 9df5ac46b6d811c544d19d9760a071feea8c9dfa
-    foreach ($values as $idx => $image_id) 
-    { 
-      if (empty($image_id)) unset($values[$idx]); 
-    }
-    
     if (!empty($values)) 
     {
       // if there is a featured image specified

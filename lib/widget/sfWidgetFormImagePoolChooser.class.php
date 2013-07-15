@@ -33,6 +33,8 @@ class sfWidgetFormImagePoolChooser extends sfWidgetForm
     $object   = $this->getOption('object');
     $per_page = sfConfig::get('app_sf_image_pool_chooser_per_page', 24);
     
+    if ($value) $object->setImageIds($value); // to bind on error
+    
     $tag = $object->getTagRestriction();
     if ($tag) $tag = implode(',', $tag); // Because we use this for image upload
 
@@ -61,9 +63,7 @@ class sfWidgetFormImagePoolChooser extends sfWidgetForm
    */
   public function getJavaScripts()
   {
-    return array(
-        '/sfImagePoolPlugin/js/sfImageChooser.js',
-    );
+    return array('/sfImagePoolPlugin/js/sfImageChooser.js');
   }
   
   /**
