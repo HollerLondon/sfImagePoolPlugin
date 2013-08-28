@@ -28,7 +28,7 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
   );
   
   const CROP_IDENTIFIER = 'rackspace';
-  const IS_REMOTE				= true;
+  const IS_REMOTE        = true;
   
   public function __construct(sfImagePoolImage $image, $options = array(), $resizer_options = array())
   {
@@ -147,7 +147,7 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
   {
     $object_name = $this->getCloudName(array(), $this->image['filename']);
       
-    $ssl 						= sfContext::getInstance()->getRequest()->isSecure();
+    $ssl             = sfContext::getInstance()->getRequest()->isSecure();
     $off_site_index = ($ssl ? 'off_site_ssl_uri' : 'off_site_uri');
     
     $url = $this->options[$off_site_index] . DIRECTORY_SEPARATOR . $object_name;
@@ -180,10 +180,10 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
     if (is_null($filename))
     {
       $object_name = implode('/', array(
-          ($resizer_options['scale'] ? 'scale' : 'crop'),
-          $resizer_options['width'],
-          $resizer_options['height'],
-          $this->image['filename']
+                                    ($resizer_options['scale'] ? 'scale' : 'crop'),
+                                    $resizer_options['width'],
+                                    $resizer_options['height'],
+                                    $this->image['filename']
       ));
     }
     else $object_name = $filename;
@@ -212,10 +212,10 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
     
     // check if crop exists
     $imageCrop = sfImagePoolCropTable::getInstance()->findCrop($this->image, 
-    																													 $this->resizer_options['width'], 
-    																													 $this->resizer_options['height'], 
-    																													 !($this->resizer_options['scale']), 
-    																													 self::CROP_IDENTIFIER);
+                                                               $this->resizer_options['width'], 
+                                                               $this->resizer_options['height'], 
+                                                               !($this->resizer_options['scale']), 
+                                                               self::CROP_IDENTIFIER);
     
     if (!$imageCrop) 
     {
@@ -232,9 +232,9 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
     
     // controller redirect 301 to cdn
     // If we are on a secure page we want to use the ssl option to avoid security warnings
-    $ssl 						= sfContext::getInstance()->getRequest()->isSecure();
+    $ssl            = sfContext::getInstance()->getRequest()->isSecure();
     $off_site_index = ($ssl ? 'off_site_ssl_uri' : 'off_site_uri');
-    $url 						= $this->options[$off_site_index] . DIRECTORY_SEPARATOR . $object_name;
+    $url            = $this->options[$off_site_index] . DIRECTORY_SEPARATOR . $object_name;
 
     // There's a chance that save() will fail because the crop already exists
     // in the database (race condition). So, if it does fail, let's try and grab it. If it 
@@ -248,14 +248,8 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
       if ($e->getPortableCode() != Doctrine_Core::ERR_ALREADY_EXISTS) throw $e;
     }
     
-    if ($redirect)
-    {
-      sfContext::getInstance()->getController()->redirect($url, 0, 301);
-    }
-    else
-    {
-      return $url;
-    }
+    if ($redirect) sfContext::getInstance()->getController()->redirect($url, 0, 301);
+    else return $url;
   }
   
   /**
@@ -284,14 +278,8 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
   
     $url = $this->options[$off_site_index] . DIRECTORY_SEPARATOR . $object_name;
 
-    if ($redirect)
-    {
-      sfContext::getInstance()->getController()->redirect($url, 0, 301);
-    }
-    else
-    {
-      return $url;
-    }
+    if ($redirect) sfContext::getInstance()->getController()->redirect($url, 0, 301);
+    else return $url;
   }
   
   /**
@@ -310,10 +298,10 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
     {
       try 
       {
-      	$resizer_options = array('width'=>$crop->width, 'height'=>$crop->height, 'scale'=>(!$crop->is_crop));
-      	$object_name = $this->getCloudName($resizer_options);
+        $resizer_options = array('width'=>$crop->width, 'height'=>$crop->height, 'scale'=>(!$crop->is_crop));
+        $object_name = $this->getCloudName($resizer_options);
         $object = $container->DataObject($object_name);
-				$object->Delete();
+        $object->Delete();
       }
       catch (\OpenCloud\Base\Exceptions\DeleteError $e)
       {
@@ -322,17 +310,17 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
     }
     else
     {
-	    // Delete original from the cloud
-			try 
-			{
-				$object_name = $this->getCloudName(array(), $this->image->filename);
-				$object = $container->DataObject($object_name);
-				$object->Delete();
-			}
-			catch (\OpenCloud\Base\Exceptions\DeleteError $e)
-			{
-				// Image already deleted from cloud - that's ok
-			}
+      // Delete original from the cloud
+      try 
+      {
+        $object_name = $this->getCloudName(array(), $this->image->filename);
+        $object = $container->DataObject($object_name);
+        $object->Delete();
+      }
+      catch (\OpenCloud\Base\Exceptions\DeleteError $e)
+      {
+        // Image already deleted from cloud - that's ok
+      }
     }
   }
   
@@ -344,22 +332,19 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
   public function exists()
   {
     $imageCropExists = sfImagePoolCropTable::getInstance()->getCropExistance($this->image, 
-    																																				 $this->resizer_options['width'], 
-    																																				 $this->resizer_options['height'], 
-    																																				 !($this->resizer_options['scale']), 
-    																																				 self::CROP_IDENTIFIER);
+                                                                             $this->resizer_options['width'], 
+                                                                             $this->resizer_options['height'], 
+                                                                             !($this->resizer_options['scale']), 
+                                                                             self::CROP_IDENTIFIER);
     
-    if (false === $imageCropExists)
-    {
-      return false;
-    }
+    if (false === $imageCropExists) return false;
     else 
     {
       $object_name = $this->getCloudName();
       
-      $ssl 						= sfContext::getInstance()->getRequest()->isSecure();
+      $ssl            = sfContext::getInstance()->getRequest()->isSecure();
       $off_site_index = ($ssl ? 'off_site_ssl_uri' : 'off_site_uri');
-      $url 						= $this->options[$off_site_index] . DIRECTORY_SEPARATOR . $object_name;
+      $url             = $this->options[$off_site_index] . DIRECTORY_SEPARATOR . $object_name;
       
       sfContext::getInstance()->getController()->redirect($url, 0, 301);
       
