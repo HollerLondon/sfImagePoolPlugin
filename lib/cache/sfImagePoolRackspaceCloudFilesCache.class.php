@@ -90,11 +90,9 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
         $container->Create(array('name'=>$adapter_options['container']));
         $container->EnableCDN();
       }
-      catch (\OpenCloud\Base\Exceptions\CdnHttpError $e) // @TODO: Currently failing when spaces / other characters in URL - see https://github.com/rackspace/php-opencloud/issues/124
+      catch (\OpenCloud\Base\Exceptions\CdnHttpError $e) 
       {
-        var_dump('Container did not publish - please publish manually and re-run the task');
-        var_dump($e->getMessage());
-        die;
+        throw new Exception'Container did not publish - please publish manually');
       }
     }
     
