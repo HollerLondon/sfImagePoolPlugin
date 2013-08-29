@@ -92,7 +92,7 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
       }
       catch (\OpenCloud\Base\Exceptions\CdnHttpError $e) 
       {
-        throw new Exception'Container did not publish - please publish manually');
+        throw new Exception('Container did not publish - please publish manually');
       }
     }
     
