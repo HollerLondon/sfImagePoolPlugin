@@ -162,7 +162,7 @@ function pool_image_source_uri($image, $absolute = false)
 
   if (!$offsite) 
   {
-    $url = _compute_public_path($filename, sfImagePoolPluginConfiguration::getBaseUrl(), $absolute, false);
+    $url = _compute_public_path($filename, sfImagePoolPluginConfiguration::getBaseDirName(), null, $absolute);
   }
   else 
   {

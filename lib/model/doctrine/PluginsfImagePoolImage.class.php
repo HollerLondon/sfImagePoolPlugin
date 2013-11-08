@@ -130,7 +130,7 @@ abstract class PluginsfImagePoolImage extends BasesfImagePoolImage
     {
       if (empty($this->imageInfo))
       {
-        $this->imageInfo = getimagesize($this->getPathToOriginalFile());
+        $this->imageInfo = is_file($this->getPathToOriginalFile()) ? getimagesize($this->getPathToOriginalFile()) : null;
       }
       
       return $this->imageInfo[0];
@@ -153,7 +153,7 @@ abstract class PluginsfImagePoolImage extends BasesfImagePoolImage
     {
       if (empty($this->imageInfo))
       {
-        $this->imageInfo = getimagesize($this->getPathToOriginalFile());
+        $this->imageInfo = is_file($this->getPathToOriginalFile()) ? getimagesize($this->getPathToOriginalFile()) : null;
       }
       
       return $this->imageInfo[1];
@@ -218,9 +218,10 @@ abstract class PluginsfImagePoolImage extends BasesfImagePoolImage
     if (!$this->hasMappedValue('size_on_disk'))
     {
       $sizes  = array('Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
-      $size   = filesize($this->getPathToOriginalFile());
-      $s      = (round($size/pow(1024, ($i = floor(log($size, 1024)))), 2) . ' ' . $sizes[$i]);
-
+      $size   = is_file($this->getPathToOriginalFile()) ? filesize($this->getPathToOriginalFile()) : 0;
+      if ($size > 0) $s = (round($size/pow(1024, ($i = floor(log($size, 1024)))), 2) . ' ' . $sizes[$i]);
+      else $s = null;
+      
       $this->mapValue('size_on_disk', $s);
     }
 

@@ -39,6 +39,16 @@ class sfImagePoolPluginConfiguration extends sfPluginConfiguration
   {
     return sfConfig::get('sf_web_dir') . DIRECTORY_SEPARATOR . self::$base_dir_name;
   }
+  
+  /**
+   * Return purely the folder name
+   * 
+   * @return string
+   */
+  static public function getBaseDirName()
+  {
+  	return self::$base_dir_name;
+  }
 
   /**
    * @return string url to base folder
