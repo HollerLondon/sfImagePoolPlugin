@@ -118,6 +118,26 @@ Decide whether tagging should be enabled (requires `sfDoctrineActAsTaggablePlugi
     sfImagePoolImage:
       options:
         tagging:  true
+        
+NOTE: If Tagging is enabled - you'll need this in your TagTable.class.php
+
+        /**
+         * Get tags LIKE - for autocomplete
+         * 
+         * @param string $model
+         * @param string $value
+         * @return array
+         */
+        public function getTagsLike($model, $value)
+        {
+          $q = $this->createQuery('t')
+                   ->select('t.name')
+                   ->where('id IN(SELECT tag_id FROM tagging WHERE taggable_model = ?)', array($model))
+                   ->andWhere('t.name LIKE ?', array('%'.$value.'%'))
+                   ->orderBy('t.name');
+           
+          return $q->execute(array(), Doctrine_Core::HYDRATE_SINGLE_SCALAR);
+        }
 
 #### Add behaviour
 
