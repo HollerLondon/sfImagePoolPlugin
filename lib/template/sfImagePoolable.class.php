@@ -189,7 +189,7 @@ class sfImagePoolable extends Doctrine_Template
       // If already have getPoolImages _images mapped then get count
       if ($object->hasMappedValue('_images'))
       {
-        $object->mapValue('_nb_pool_images', count($object->_images->count()));
+        $object->mapValue('_nb_pool_images', $object->_images->count());
       }
       else 
       {
