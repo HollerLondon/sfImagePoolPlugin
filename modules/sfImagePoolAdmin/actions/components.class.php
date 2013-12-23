@@ -10,8 +10,11 @@ class sfImagePoolAdminComponents extends sfComponents
     
     foreach ($rawCrops as $crop)
     {
-      $idx = $crop->width . 'x' . $crop->height;
-      $this->crops[$idx] = $crop;
+      if ($crop->is_crop) 
+      {
+        $idx = $crop->width . 'x' . $crop->height;
+        $this->crops[$idx] = $crop;
+      }
     }
     
     if (empty($this->crops)) return sfView::NONE;
