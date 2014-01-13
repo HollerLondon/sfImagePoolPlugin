@@ -40,13 +40,13 @@ Optional Dependencies
   
 ### Rackspace Cloud files: Note for SVN
 
-If using SVN you will need to add these dependancies as `svn:externals` in the project's `lib/vendor` folder
+If using SVN you will need to add these dependancies as `svn:externals` in the project's `lib/vendor` folder - NOTE: you need the V1.6.0 tag to work with Symfony1.4 as 1.7 onwards uses composer
 
-    rackspace  https://github.com/rackspace/php-opencloud.git/trunk
+    rackspace  https://github.com/rackspace/php-opencloud.git/tags/V1.6.0
 
 ### Rackspace Cloud files: Note for Git
 
-The plugin's `lib/vendor` folder contains submodules for the Rackspace Cloud files API library, if exporting this repository then these files will also need to be exported
+The plugin's `lib/vendor` folder contains submodules for the Rackspace Cloud files API library, if exporting this repository then these files will also need to be exported - NOTE: you need the V1.6.0 tag to work with Symfony1.4 as 1.7 onwards uses composer
 
     [submodule "lib/vendor/rackspace"]
       path = lib/vendor/rackspace
@@ -60,7 +60,7 @@ From August 2013 the php-cloudfiles API won't work. Up until then you can use th
 
 Updating your project to use php-opencloud:
 
-*Step 1*: Update `lib/vendor/rackspace` location to https://github.com/rackspace/php-opencloud.git/trunk
+*Step 1*: Update `lib/vendor/rackspace` location to https://github.com/rackspace/php-opencloud.git/tags/V1.6.0
 
 *Step 2*: Remove `autoload.yml` entry for rackspace
 
