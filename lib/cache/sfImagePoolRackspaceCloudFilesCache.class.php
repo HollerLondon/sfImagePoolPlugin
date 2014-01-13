@@ -81,7 +81,7 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
     {
       $container = $ostore->Container($adapter_options['container']);
     }
-    catch (\OpenCloud\Base\Exceptions\ContainerNotFoundError $e)
+    catch (\OpenCloud\Common\Exceptions\ContainerNotFoundError $e)
     {
       // Container doesn't already exist so create it
       try
@@ -90,7 +90,7 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
         $container->Create(array('name'=>$adapter_options['container']));
         $container->EnableCDN();
       }
-      catch (\OpenCloud\Base\Exceptions\CdnHttpError $e) 
+      catch (\OpenCloud\Common\Exceptions\CdnHttpError $e) 
       {
         throw new Exception('Container did not publish - please publish manually');
       }
@@ -155,7 +155,7 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
     // Save to tmp dir and return
     $tmpLocation = $this->getDestination($this->image['filename']);
     
-    if (file_exists($tmpLocation)) return $tmpLocation;
+    if (file_exists($tmpLocation) && 0 < filesize($tmpLocation)) return $tmpLocation;
     else
     {
       // Download file and save in tmp dir
@@ -198,7 +198,7 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
    * @throws Doctrine_Connection_Exception
    * @return string url of cloud file (unless redirect is true)
    */
-  public function commit($redirect = true)
+  public function commit($redirect = true, $save = true)
   {
     // save to cloud
     $object_name = $this->getCloudName();
@@ -239,13 +239,16 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
     // There's a chance that save() will fail because the crop already exists
     // in the database (race condition). So, if it does fail, let's try and grab it. If it 
     // failed and it doesn't exist, then re-throw the exception
-    try
+    if ($save) // don't save twice if uploading via image pool crop in backend
     {
-      $imageCrop->save();
-    }
-    catch (Doctrine_Connection_Exception $e)
-    {
-      if ($e->getPortableCode() != Doctrine_Core::ERR_ALREADY_EXISTS) throw $e;
+      try
+      {
+        $imageCrop->save();
+      }
+      catch (Doctrine_Connection_Exception $e)
+      {
+        if ($e->getPortableCode() != Doctrine_Core::ERR_ALREADY_EXISTS) throw $e;
+      }
     }
     
     if ($redirect) sfContext::getInstance()->getController()->redirect($url, 0, 301);
@@ -303,7 +306,7 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
         $object = $container->DataObject($object_name);
         $object->Delete();
       }
-      catch (\OpenCloud\Base\Exceptions\DeleteError $e)
+      catch (\OpenCloud\Common\Exceptions\DeleteError $e)
       {
         // Image already deleted from cloud - that's ok
       }
@@ -317,7 +320,7 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
         $object = $container->DataObject($object_name);
         $object->Delete();
       }
-      catch (\OpenCloud\Base\Exceptions\DeleteError $e)
+      catch (\OpenCloud\Common\Exceptions\DeleteError $e)
       {
         // Image already deleted from cloud - that's ok
       }
@@ -336,7 +339,7 @@ class sfImagePoolRackspaceCloudFilesCache extends sfImagePoolCache implements sf
                                                                              $this->resizer_options['height'], 
                                                                              !($this->resizer_options['scale']), 
                                                                              self::CROP_IDENTIFIER);
-    
+                                                                             
     if (false === $imageCropExists) return false;
     else 
     {

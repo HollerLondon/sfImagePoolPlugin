@@ -52,7 +52,11 @@ class BasesfImagePoolActions extends sfActions
           
           // if thumbnail doesn't already exist
           // if it does - we get the file contents here or redirect
-          if (!($image_data = $cache->exists()))
+          if ($url = $cache->exists())
+          {
+            $this->redirect($url, 0, 301);
+          }
+          else
           {
             // create thumbnail
             $thumb = $resizer->save($cache->getDestination());

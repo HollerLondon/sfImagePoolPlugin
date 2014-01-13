@@ -60,7 +60,7 @@ abstract class PluginsfImagePoolCropForm extends BasesfImagePoolCropForm
       $object['is_crop']    = true;
       $object['location']   = $cache::CROP_IDENTIFIER;
       
-      $this->new_file = $cache->commit(false);
+      $this->new_file = $cache->commit(false, false); // don't save twice
     }
     else
     {
@@ -68,7 +68,7 @@ abstract class PluginsfImagePoolCropForm extends BasesfImagePoolCropForm
     }
     
     return $object;
-  }     
+  }  
   
   /**
    * @return string Path to the newly uploaded file

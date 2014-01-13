@@ -60,7 +60,7 @@ if (isset($adapter_options['options']) && !empty($adapter_options['options']))
     $object2 = $container->DataObject($objectName);
     $t->fail('Object not deleted from cloud');
   }
-  catch (\OpenCloud\Base\Exceptions\ObjFetchError $e)
+  catch (\OpenCloud\Common\Exceptions\ObjFetchError $e)
   {
     $t->pass('Object deleted from cloud');
   }
