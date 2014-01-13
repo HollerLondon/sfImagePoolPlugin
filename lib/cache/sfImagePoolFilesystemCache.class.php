@@ -49,7 +49,7 @@ class sfImagePoolFilesystemCache extends sfImagePoolCache implements sfImagePool
     return $this->getDestination($this->image['filename']);
   }
   
-  public function commit($redirect = true)
+  public function commit($redirect = true, $save = true)
   {
     if (!$redirect) return $this->getDestination(); 
   }

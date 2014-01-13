@@ -43,9 +43,10 @@ interface sfImagePoolCacheInterface
    * e.g: sending to cloud
    * 
    * @var boolean $redirect Whether to redirect or not after the file has been committed (if false then return URL instead)
+   * @var boolean $save Whether to save in the method, or if its being saved separately (e.g: the form)
    * @author Jo Carter
    */
-  public function commit($redirect = true);
+  public function commit($redirect = true, $save = true);
   
   /**
    * Defines actions to be done when handling deletion of an sfImagePoolImage
