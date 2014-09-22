@@ -384,6 +384,27 @@ class sfImagePoolUtil
     // Save and commit file
     file_put_contents($cache->getDestination($filename), file_get_contents($url));
     $imageInfo        = getimagesize($cache->getDestination($filename)); // Get image info before commited, in case uploading to external source
+
+	// if no extension divine it!
+	if (empty($info['extension'])) {
+      switch ($imageInfo['mime']) {
+        case 'image/png' :
+          $info['extension'] = 'png';
+          break;
+        case 'image/gif':
+          $info['extension'] = 'gif';
+          break;
+        case 'image/jpeg':
+        default:
+          $info['extension'] = 'jpg';
+      }
+
+      $oldFilename = $filename;
+      $filename    .= $info['extension'];
+      copy($cache->getDestination($oldFilename), $cache->getDestination($filename)); // copy file
+	}
+
+
     $cache->commitOriginal($filename, false);
     
     // Create image
